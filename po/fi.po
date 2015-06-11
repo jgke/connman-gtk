@@ -1,0 +1,27 @@
+# Finnish translations for connman-gtk package
+# Suomenkielinen käännös connman-gtk-paketille.
+# Copyright (C) 2015 THE connman-gtk'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the connman-gtk package.
+# Jaakko Hannikainen <jaakko.hannikainen@intel.com>, 2015.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-06-11 15:14+0300\n"
+"PO-Revision-Date: 2015-06-11 15:15+0300\n"
+"Last-Translator: Jaakko Hannikainen <jaakko.hannikainen@intel.com>\n"
+"Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
+"Language: fi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/main.c:8
+msgid "Settings"
+msgstr "Asetukset"
+
+#: src/main.c:10
+msgid "Network Settings"
+msgstr "Verkkoasetukset"
