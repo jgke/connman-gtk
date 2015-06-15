@@ -20,14 +20,17 @@
 
 #include <locale.h>
 
+#include <gio/gio.h>
 #include <glib.h>
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
 #include "connection_item.h"
+#include "interfaces.h"
 #include "style.h"
 
 GtkCssProvider *css_provider;
+GtkWidget *window, *box, *list;
 
 static GtkWidget *create_connection_item_list(GtkWidget *box) {
 	GtkWidget *frame, *list, *inner_box;
@@ -50,13 +53,8 @@ static GtkWidget *create_connection_item_list(GtkWidget *box) {
 	return list;
 }
 
-static void activate(GtkApplication *app, gpointer user_data) {
-	GtkWidget *window, *box, *list;
+static void create_content() {
 	struct connection_item item;
-
-	window = gtk_application_window_new(app);
-	gtk_window_set_title(GTK_WINDOW(window), _("Network Settings"));
-	gtk_window_set_default_size(GTK_WINDOW(window), 524, 324);
 
 	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 15);
 	gtk_widget_set_margin_start(box, 15);
@@ -69,9 +67,53 @@ static void activate(GtkApplication *app, gpointer user_data) {
 	list = create_connection_item_list(box);
 	gtk_list_box_insert(GTK_LIST_BOX(list), item.list_item->item, 0);
 	gtk_container_add(GTK_CONTAINER(box), item.settings->box);
+}
+
+static void activate(GtkApplication *app, gpointer user_data) {
+	create_content();
+	window = gtk_application_window_new(app);
+	gtk_window_set_title(GTK_WINDOW(window), _("Network Settings"));
+	gtk_window_set_default_size(GTK_WINDOW(window), 524, 324);
+
 	gtk_container_add(GTK_CONTAINER(window), box);
 
 	gtk_widget_show_all(window);
+}
+
+void manager_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
+	(void)source;
+	(void)res;
+	(void)user_data;
+	printf("Manager connected!");
+}
+
+void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
+	(void)source;
+	(void)user_data;
+	GDBusConnection *connection;
+	GDBusNodeInfo *info;
+	GError *error = NULL;
+	connection = g_bus_get_finish(res, &error);
+	if(error) {
+		g_error("failed to connect to system dbus: %s",
+				error->message);
+		g_error_free(error);
+		return;
+	}
+	info = g_dbus_node_info_new_for_xml(
+			manager_interface, &error);
+	if(error) {
+		g_error("Failed to load manager interface: %s",
+				error->message);
+		g_error_free(error);
+		return;
+	}
+
+	g_dbus_proxy_new(connection, G_DBUS_PROXY_FLAGS_NONE,
+			g_dbus_node_info_lookup_interface(info,
+				"net.connman.Manager"),
+			"net.connman", "/", "net.connman.Manager", NULL,
+			manager_connected, NULL);
 }
 
 int main(int argc, char *argv[])
@@ -94,6 +136,8 @@ int main(int argc, char *argv[])
 				error->message);
 		g_error_free(error);
 	}
+
+	g_bus_get(G_BUS_TYPE_SYSTEM, NULL, dbus_connected, NULL);
 
 	app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
