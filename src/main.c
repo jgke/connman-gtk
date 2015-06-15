@@ -42,21 +42,9 @@ static GtkWidget *create_connection_item_list(GtkWidget *box) {
 	gtk_style_context_add_class(gtk_widget_get_style_context(inner_box),
 			"cm-list-box");
 
-	GtkWidget *buttons = gtk_toolbar_new();
-	gtk_style_context_add_class(gtk_widget_get_style_context(buttons),
-			"inline-toolbar");
-	GtkToolItem *add_button = gtk_tool_button_new(NULL, NULL);
-	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(add_button),
-			"list-add-symbolic");
-	GtkToolItem *remove_button = gtk_tool_button_new(NULL, NULL);
-	gtk_tool_button_set_icon_name(GTK_TOOL_BUTTON(remove_button),
-			"list-remove-symbolic");
-	gtk_toolbar_insert(GTK_TOOLBAR(buttons), add_button, -1);
-	gtk_toolbar_insert(GTK_TOOLBAR(buttons), remove_button, -1);
 	gtk_container_add(GTK_CONTAINER(frame), list);
 	gtk_container_add_with_properties(GTK_CONTAINER(inner_box), frame,
 			"expand", TRUE, "fill", TRUE, NULL);
-	gtk_container_add(GTK_CONTAINER(inner_box), buttons);
 	gtk_container_add(GTK_CONTAINER(box), inner_box);
 
 	return list;
