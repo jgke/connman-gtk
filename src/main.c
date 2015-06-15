@@ -26,11 +26,10 @@
 
 #include "connection_item.h"
 
-GtkWidget *list;
+static GtkWidget *create_connection_item_list(GtkWidget *box) {
+	GtkWidget *list, *inner_box;
 
-static void add_connection_item_list(GtkWidget *box) {
-	GtkWidget *inner_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
-
+	inner_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
 	list = gtk_list_box_new();
 	gtk_widget_set_size_request(list, 200, -1);
 	gtk_container_add_with_properties(GTK_CONTAINER(inner_box), list,
@@ -49,10 +48,12 @@ static void add_connection_item_list(GtkWidget *box) {
 	gtk_toolbar_insert(GTK_TOOLBAR(buttons), remove_button, -1);
 	gtk_container_add(GTK_CONTAINER(inner_box), buttons);
 	gtk_container_add(GTK_CONTAINER(box), inner_box);
+
+	return list;
 }
 
 static void activate(GtkApplication *app, gpointer user_data) {
-	GtkWidget *window, *box;
+	GtkWidget *window, *box, *list;
 	struct connection_item item;
 
 	window = gtk_application_window_new(app);
@@ -62,7 +63,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
 	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
 	item = create_connection_item();
 
-	add_connection_item_list(box);
+	list = create_connection_item_list(box);
 	gtk_list_box_insert(GTK_LIST_BOX(list), item.list_item->item, 0);
 	gtk_container_add(GTK_CONTAINER(box), item.settings->box);
 	gtk_container_add(GTK_CONTAINER(window), box);

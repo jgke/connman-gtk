@@ -43,7 +43,6 @@ GtkWidget *create_connection_item_title(const char *title) {
 
 	label = gtk_label_new(NULL);
 	markup = g_markup_printf_escaped(format, title);
-	printf("%s\n", markup);
 	gtk_label_set_markup(GTK_LABEL(label), markup);
 	g_free(markup);
 	return label;
