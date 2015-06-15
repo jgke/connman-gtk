@@ -25,6 +25,9 @@
 #include <gtk/gtk.h>
 
 #include "connection_item.h"
+#include "style.h"
+
+GtkCssProvider *css_provider;
 
 static GtkWidget *create_connection_item_list(GtkWidget *box) {
 	GtkWidget *list, *inner_box;
@@ -74,12 +77,23 @@ static void activate(GtkApplication *app, gpointer user_data) {
 int main(int argc, char *argv[])
 {
 	GtkApplication *app;
+	GError *error = NULL;
 	int status;
 
 	setlocale(LC_ALL, "");
 	bindtextdomain(GETTEXT_PACKAGE, CONNMAN_GTK_LOCALEDIR);
 	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
 	textdomain(GETTEXT_PACKAGE);
+
+	css_provider = gtk_css_provider_new();
+	gtk_css_provider_load_from_path(css_provider,
+				CONNMAN_GTK_UIDIR "stylesheet.css", &error);
+	if(error != NULL) {
+		g_warning("couldn't load stylesheet %s: %s",
+				CONNMAN_GTK_UIDIR "stylesheet.css",
+				error->message);
+		g_error_free(error);
+	}
 
 	app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
