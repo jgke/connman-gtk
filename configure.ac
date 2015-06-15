@@ -4,6 +4,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config])
 
 AM_INIT_AUTOMAKE([1.10 dist-bzip2 no-dist-gzip foreign tar-ustar])
+AM_SILENT_RULES([yes])
 
 IT_PROG_INTLTOOL([0.35.0])
 
@@ -17,6 +18,8 @@ CONNMAN_GTK_LOCALEDIR=[${datadir}/locale]
 AC_SUBST(CONNMAN_GTK_LOCALEDIR)
 
 AC_PROG_CC
+
+AX_CFLAGS_WARN_ALL
 
 PKG_PROG_PKG_CONFIG([0.22])
 PKG_CHECK_MODULES([DEPS], [gtk+-3.0 >= 3.0], [], [AC_MSG_ERROR(gtk+ >= 3.0 is required)])
