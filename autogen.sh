@@ -10,5 +10,3 @@ aclocal && \
 if [ -f config.status ]; then
     make clean
 fi
-
-./configure
