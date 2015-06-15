@@ -30,13 +30,17 @@
 GtkCssProvider *css_provider;
 
 static GtkWidget *create_connection_item_list(GtkWidget *box) {
-	GtkWidget *list, *inner_box;
+	GtkWidget *frame, *list, *inner_box;
 
-	inner_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
+	frame = gtk_frame_new(NULL);
+	inner_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	list = gtk_list_box_new();
 	gtk_widget_set_size_request(list, 200, -1);
-	gtk_container_add_with_properties(GTK_CONTAINER(inner_box), list,
-			"expand", TRUE, "fill", TRUE, NULL);
+	gtk_style_context_add_provider(gtk_widget_get_style_context(inner_box),
+			GTK_STYLE_PROVIDER(css_provider),
+			GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	gtk_style_context_add_class(gtk_widget_get_style_context(inner_box),
+			"cm-list-box");
 
 	GtkWidget *buttons = gtk_toolbar_new();
 	gtk_style_context_add_class(gtk_widget_get_style_context(buttons),
@@ -49,6 +53,9 @@ static GtkWidget *create_connection_item_list(GtkWidget *box) {
 			"list-remove-symbolic");
 	gtk_toolbar_insert(GTK_TOOLBAR(buttons), add_button, -1);
 	gtk_toolbar_insert(GTK_TOOLBAR(buttons), remove_button, -1);
+	gtk_container_add(GTK_CONTAINER(frame), list);
+	gtk_container_add_with_properties(GTK_CONTAINER(inner_box), frame,
+			"expand", TRUE, "fill", TRUE, NULL);
 	gtk_container_add(GTK_CONTAINER(inner_box), buttons);
 	gtk_container_add(GTK_CONTAINER(box), inner_box);
 
@@ -63,7 +70,12 @@ static void activate(GtkApplication *app, gpointer user_data) {
 	gtk_window_set_title(GTK_WINDOW(window), _("Network Settings"));
 	gtk_window_set_default_size(GTK_WINDOW(window), 524, 324);
 
-	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 15);
+	gtk_widget_set_margin_start(box, 15);
+	gtk_widget_set_margin_end(box, 15);
+	gtk_widget_set_margin_top(box, 15);
+	gtk_widget_set_margin_bottom(box, 15);
+
 	item = create_connection_item();
 
 	list = create_connection_item_list(box);
