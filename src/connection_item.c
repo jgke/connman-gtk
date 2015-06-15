@@ -24,6 +24,7 @@
 #include <gtk/gtk.h>
 
 #include "connection_item.h"
+#include "style.h"
 
 struct connection_list_item *create_base_connection_list_item() {
 	struct connection_list_item *item = g_malloc(sizeof(*item));
@@ -37,14 +38,12 @@ struct connection_list_item *create_base_connection_list_item() {
 }
 
 GtkWidget *create_connection_item_title(const char *title) {
-	GtkWidget *label;
-	const char *format = "<b>%s</b>";
-	char *markup;
-
-	label = gtk_label_new(NULL);
-	markup = g_markup_printf_escaped(format, title);
-	gtk_label_set_markup(GTK_LABEL(label), markup);
-	g_free(markup);
+	GtkWidget *label = gtk_label_new(title);
+	gtk_style_context_add_provider(gtk_widget_get_style_context(label),
+			GTK_STYLE_PROVIDER(css_provider),
+			GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	gtk_style_context_add_class(gtk_widget_get_style_context(label),
+			"cm-header-title");
 	return label;
 }
 
@@ -56,7 +55,9 @@ struct connection_settings_item *create_base_connection_settings_item() {
 			GTK_ICON_SIZE_DIALOG);
 	item->label = gtk_box_new(GTK_ORIENTATION_VERTICAL, 3);
 	item->title = create_connection_item_title("Connection item");
+	gtk_widget_set_halign(item->title, GTK_ALIGN_START);
 	item->status = gtk_label_new("Status");
+	gtk_widget_set_halign(item->status, GTK_ALIGN_START);
 	item->contents = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 
 	gtk_container_add(GTK_CONTAINER(item->label), item->title);
