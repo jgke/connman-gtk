@@ -31,6 +31,7 @@
 
 GtkCssProvider *css_provider;
 GtkWidget *window, *box, *list;
+struct connection_item item;
 
 static GtkWidget *create_connection_item_list(GtkWidget *box) {
 	GtkWidget *frame, *list, *inner_box;
@@ -54,8 +55,6 @@ static GtkWidget *create_connection_item_list(GtkWidget *box) {
 }
 
 static void create_content() {
-	struct connection_item item;
-
 	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 15);
 	gtk_widget_set_margin_start(box, 15);
 	gtk_widget_set_margin_end(box, 15);
@@ -78,6 +77,10 @@ static void activate(GtkApplication *app, gpointer user_data) {
 	gtk_container_add(GTK_CONTAINER(window), box);
 
 	gtk_widget_show_all(window);
+}
+
+void destroy(GtkWidget *window, gpointer user_data) {
+	free_connection_item(&item);
 }
 
 void manager_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
@@ -114,6 +117,7 @@ void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
 				"net.connman.Manager"),
 			"net.connman", "/", "net.connman.Manager", NULL,
 			manager_connected, NULL);
+	g_dbus_node_info_unref(info);
 }
 
 int main(int argc, char *argv[])
@@ -143,6 +147,8 @@ int main(int argc, char *argv[])
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
 	status = g_application_run(G_APPLICATION(app), argc, argv);
 	g_object_unref(app);
+
+	g_object_unref(css_provider);
 
 	return status;
 }

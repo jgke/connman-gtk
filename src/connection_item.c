@@ -29,12 +29,24 @@
 struct connection_list_item *create_base_connection_list_item() {
 	struct connection_list_item *item = g_malloc(sizeof(*item));
 	item->item = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+	g_object_ref(item->item);
 	item->icon = gtk_image_new_from_icon_name("network-wired-symbolic",
 			GTK_ICON_SIZE_LARGE_TOOLBAR);
+	g_object_ref(item->icon);
 	item->label = gtk_label_new("Connection item");
+	g_object_ref(item->label);
 	gtk_container_add(GTK_CONTAINER(item->item), item->icon);
 	gtk_container_add(GTK_CONTAINER(item->item), item->label);
 	return item;
+}
+
+void free_base_connection_list_item(struct connection_list_item *item) {
+	if(!item)
+		return;
+	g_object_unref(item->item);
+	g_object_unref(item->icon);
+	g_object_unref(item->label);
+	g_free(item);
 }
 
 GtkWidget *create_connection_item_title(const char *title) {
@@ -50,15 +62,22 @@ GtkWidget *create_connection_item_title(const char *title) {
 struct connection_settings_item *create_base_connection_settings_item() {
 	struct connection_settings_item *item = g_malloc(sizeof(*item));
 	item->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+	g_object_ref(item->box);
 	item->header = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+	g_object_ref(item->header);
 	item->icon = gtk_image_new_from_icon_name("network-wired",
 			GTK_ICON_SIZE_DIALOG);
+	g_object_ref(item->icon);
 	item->label = gtk_box_new(GTK_ORIENTATION_VERTICAL, 3);
+	g_object_ref(item->label);
 	item->title = create_connection_item_title("Connection item");
+	g_object_ref(item->title);
 	gtk_widget_set_halign(item->title, GTK_ALIGN_START);
 	item->status = gtk_label_new("Status");
+	g_object_ref(item->status);
 	gtk_widget_set_halign(item->status, GTK_ALIGN_START);
 	item->contents = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+	g_object_ref(item->contents);
 
 	gtk_container_add(GTK_CONTAINER(item->label), item->title);
 	gtk_container_add(GTK_CONTAINER(item->label), item->status);
@@ -66,7 +85,21 @@ struct connection_settings_item *create_base_connection_settings_item() {
 	gtk_container_add(GTK_CONTAINER(item->header), item->label);
 	gtk_container_add(GTK_CONTAINER(item->box), item->header);
 	gtk_container_add(GTK_CONTAINER(item->box), item->contents);
+
 	return item;
+}
+
+void free_base_connection_settings_item(struct connection_settings_item *item) {
+	if(!item)
+		return;
+	g_object_unref(item->box);
+	g_object_unref(item->header);
+	g_object_unref(item->icon);
+	g_object_unref(item->label);
+	g_object_unref(item->title);
+	g_object_unref(item->status);
+	g_object_unref(item->contents);
+	g_free(item);
 }
 
 struct connection_item create_connection_item() {
@@ -74,4 +107,11 @@ struct connection_item create_connection_item() {
 	item.list_item = create_base_connection_list_item();
 	item.settings = create_base_connection_settings_item();
 	return item;
+}
+
+void free_connection_item(struct connection_item *item) {
+	if(!item)
+		return;
+	free_base_connection_list_item(item->list_item);
+	free_base_connection_settings_item(item->settings);
 }
