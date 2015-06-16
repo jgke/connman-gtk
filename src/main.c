@@ -31,7 +31,7 @@
 
 GtkCssProvider *css_provider;
 GtkWidget *window, *box, *list;
-struct connection_item item;
+struct connection_item *item;
 
 static GtkWidget *create_connection_item_list(GtkWidget *box) {
 	GtkWidget *frame, *list, *inner_box;
@@ -61,11 +61,7 @@ static void create_content() {
 	gtk_widget_set_margin_top(box, 15);
 	gtk_widget_set_margin_bottom(box, 15);
 
-	item = create_connection_item();
-
 	list = create_connection_item_list(box);
-	gtk_list_box_insert(GTK_LIST_BOX(list), item.list_item->item, 0);
-	gtk_container_add(GTK_CONTAINER(box), item.settings->box);
 }
 
 static void activate(GtkApplication *app, gpointer user_data) {
@@ -80,14 +76,58 @@ static void activate(GtkApplication *app, gpointer user_data) {
 }
 
 void destroy(GtkWidget *window, gpointer user_data) {
-	free_connection_item(&item);
+	free_connection_item(item);
+}
+
+void add_technology(GVariant *technology) {
+	GVariant *path_v;
+	gchar *path;
+	path_v = g_variant_get_child_value(technology, 0);
+	path = g_variant_dup_string(path_v, NULL);
+	item = create_connection_item(path);
+	gtk_widget_show(item->list_item->item);
+	gtk_container_add(GTK_CONTAINER(list), item->list_item->item);
+	gtk_container_add(GTK_CONTAINER(box), item->settings->box);
+	gtk_widget_show(item->settings->box);
+	g_variant_unref(path_v);
+	g_free(path);
+}
+
+void add_all_technologies(GVariant *technologies) {
+	int i;
+	int size = g_variant_n_children(technologies);
+	for(i = 0; i < size; i++) {
+		GVariant *child = g_variant_get_child_value(technologies, i);
+		add_technology(child);
+		g_variant_unref(child);
+	}
 }
 
 void manager_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
 	(void)source;
 	(void)res;
 	(void)user_data;
-	printf("Manager connected!");
+	GError *error = NULL;
+	GVariant *data, *child;
+	GDBusProxy *proxy;
+	proxy = g_dbus_proxy_new_finish(res, &error);
+	if(error) {
+		g_error("failed to connect to ConnMan: %s", error->message);
+		g_error_free(error);
+		return;
+	}
+	data = g_dbus_proxy_call_sync(proxy, "GetTechnologies", NULL,
+			G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+	if(error) {
+		g_error("failed to get technologies: %s", error->message);
+		g_error_free(error);
+		g_object_unref(proxy);
+		return;
+	}
+	child = g_variant_get_child_value(data, 0);
+	add_all_technologies(child);
+	g_variant_unref(data);
+	g_variant_unref(child);
 }
 
 void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {

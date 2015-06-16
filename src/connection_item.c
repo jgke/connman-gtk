@@ -26,17 +26,18 @@
 #include "connection_item.h"
 #include "style.h"
 
-struct connection_list_item *create_base_connection_list_item() {
+struct connection_list_item *create_base_connection_list_item(gchar *name) {
 	struct connection_list_item *item = g_malloc(sizeof(*item));
 	item->item = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	g_object_ref(item->item);
 	item->icon = gtk_image_new_from_icon_name("network-wired-symbolic",
 			GTK_ICON_SIZE_LARGE_TOOLBAR);
 	g_object_ref(item->icon);
-	item->label = gtk_label_new("Connection item");
+	item->label = gtk_label_new(name);
 	g_object_ref(item->label);
 	gtk_container_add(GTK_CONTAINER(item->item), item->icon);
 	gtk_container_add(GTK_CONTAINER(item->item), item->label);
+	gtk_widget_show_all(item->item);
 	return item;
 }
 
@@ -59,7 +60,7 @@ GtkWidget *create_connection_item_title(const char *title) {
 	return label;
 }
 
-struct connection_settings_item *create_base_connection_settings_item() {
+struct connection_settings_item *create_base_connection_settings_item(gchar *name) {
 	struct connection_settings_item *item = g_malloc(sizeof(*item));
 	item->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 	g_object_ref(item->box);
@@ -70,7 +71,7 @@ struct connection_settings_item *create_base_connection_settings_item() {
 	g_object_ref(item->icon);
 	item->label = gtk_box_new(GTK_ORIENTATION_VERTICAL, 3);
 	g_object_ref(item->label);
-	item->title = create_connection_item_title("Connection item");
+	item->title = create_connection_item_title(name);
 	g_object_ref(item->title);
 	gtk_widget_set_halign(item->title, GTK_ALIGN_START);
 	item->status = gtk_label_new("Status");
@@ -86,6 +87,7 @@ struct connection_settings_item *create_base_connection_settings_item() {
 	gtk_container_add(GTK_CONTAINER(item->box), item->header);
 	gtk_container_add(GTK_CONTAINER(item->box), item->contents);
 
+	gtk_widget_show_all(item->box);
 	return item;
 }
 
@@ -102,10 +104,11 @@ void free_base_connection_settings_item(struct connection_settings_item *item) {
 	g_free(item);
 }
 
-struct connection_item create_connection_item() {
-	struct connection_item item;
-	item.list_item = create_base_connection_list_item();
-	item.settings = create_base_connection_settings_item();
+struct connection_item *create_connection_item(gchar *name) {
+	struct connection_item *item;
+	item = g_malloc(sizeof(*item));
+	item->list_item = create_base_connection_list_item(name);
+	item->settings = create_base_connection_settings_item(name);
 	return item;
 }
 

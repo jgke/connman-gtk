@@ -48,6 +48,7 @@ struct connection_item {
 	struct connection_settings_item *settings;
 };
 
-struct connection_item create_connection_item();
+struct connection_item *create_connection_item();
+void free_connection_item(struct connection_item *item);
 
 #endif /* _CONNMAN_GTK_CONNECTION_ITEM_H */
