@@ -23,6 +23,17 @@
 
 #include <gtk/gtk.h>
 
+enum technology_type {
+	TECHNOLOGY_TYPE_UNKNOWN,
+	TECHNOLOGY_TYPE_ETHERNET,
+	TECHNOLOGY_TYPE_WIRELESS,
+	TECHNOLOGY_TYPE_BLUETOOTH,
+	TECHNOLOGY_TYPE_CELLULAR,
+	TECHNOLOGY_TYPE_P2P,
+	TECHNOLOGY_TYPE_VPN,
+	TECHNOLOGY_TYPE_COUNT
+};
+
 struct technology_list_item {
 	GtkWidget *item;
 
@@ -46,9 +57,11 @@ struct technology_settings {
 struct technology {
 	struct technology_list_item *list_item;
 	struct technology_settings *settings;
+	enum technology_type type;
 };
 
-struct technology *create_technology();
+struct technology *create_technology(GVariant *path, GVariant *properties);
 void free_technology(struct technology *item);
+
 
 #endif /* _CONNMAN_GTK_TECHNOLOGY_H */

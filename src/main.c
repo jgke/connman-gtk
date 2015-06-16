@@ -31,7 +31,7 @@
 
 GtkCssProvider *css_provider;
 GtkWidget *window, *box, *list;
-struct technology *item;
+struct technology *technologies[TECHNOLOGY_TYPE_COUNT];
 
 static GtkWidget *create_technology_list(GtkWidget *box) {
 	GtkWidget *frame, *list, *inner_box;
@@ -64,33 +64,26 @@ static void create_content() {
 	list = create_technology_list(box);
 }
 
-static void activate(GtkApplication *app, gpointer user_data) {
-	create_content();
-	window = gtk_application_window_new(app);
-	gtk_window_set_title(GTK_WINDOW(window), _("Network Settings"));
-	gtk_window_set_default_size(GTK_WINDOW(window), 524, 324);
-
-	gtk_container_add(GTK_CONTAINER(window), box);
-
-	gtk_widget_show_all(window);
-}
-
 void destroy(GtkWidget *window, gpointer user_data) {
-	free_technology(item);
+	int i;
+	for(i = 0; i < TECHNOLOGY_TYPE_COUNT; i++)
+		if(technologies[i])
+			free_technology(technologies[i]);
 }
 
 void add_technology(GVariant *technology) {
-	GVariant *path_v;
-	gchar *path;
-	path_v = g_variant_get_child_value(technology, 0);
-	path = g_variant_dup_string(path_v, NULL);
-	item = create_technology(path);
-	gtk_widget_show(item->list_item->item);
+	GVariant *path;
+	GVariant *properties;
+	struct technology *item;
+
+	path = g_variant_get_child_value(technology, 0);
+	properties = g_variant_get_child_value(technology, 1);
+	item = create_technology(path, properties);
+	technologies[item->type] = item;
 	gtk_container_add(GTK_CONTAINER(list), item->list_item->item);
 	gtk_container_add(GTK_CONTAINER(box), item->settings->box);
-	gtk_widget_show(item->settings->box);
-	g_variant_unref(path_v);
-	g_free(path);
+	g_variant_unref(path);
+	g_variant_unref(properties);
 }
 
 void add_all_technologies(GVariant *technologies) {
@@ -160,6 +153,19 @@ void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
 	g_dbus_node_info_unref(info);
 }
 
+static void activate(GtkApplication *app, gpointer user_data) {
+	create_content();
+	g_bus_get(G_BUS_TYPE_SYSTEM, NULL, dbus_connected, NULL);
+
+	window = gtk_application_window_new(app);
+	gtk_window_set_title(GTK_WINDOW(window), _("Network Settings"));
+	gtk_window_set_default_size(GTK_WINDOW(window), 524, 324);
+
+	gtk_container_add(GTK_CONTAINER(window), box);
+
+	gtk_widget_show_all(window);
+}
+
 int main(int argc, char *argv[])
 {
 	GtkApplication *app;
@@ -180,8 +186,6 @@ int main(int argc, char *argv[])
 				error->message);
 		g_error_free(error);
 	}
-
-	g_bus_get(G_BUS_TYPE_SYSTEM, NULL, dbus_connected, NULL);
 
 	app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);

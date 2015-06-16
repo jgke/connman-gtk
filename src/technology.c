@@ -26,7 +26,7 @@
 #include "technology.h"
 #include "style.h"
 
-struct technology_list_item *create_base_technology_list_item(gchar *name) {
+struct technology_list_item *create_base_technology_list_item(const gchar *name) {
 	struct technology_list_item *item = g_malloc(sizeof(*item));
 	item->item = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	g_object_ref(item->item);
@@ -60,7 +60,7 @@ GtkWidget *create_technology_settings_title(const char *title) {
 	return label;
 }
 
-struct technology_settings *create_base_technology_settings(gchar *name) {
+struct technology_settings *create_base_technology_settings(const gchar *name) {
 	struct technology_settings *item = g_malloc(sizeof(*item));
 	item->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 	g_object_ref(item->box);
@@ -104,11 +104,23 @@ void free_base_technology_settings(struct technology_settings *item) {
 	g_free(item);
 }
 
-struct technology *create_technology(gchar *name) {
+struct technology *create_technology(GVariant *path, GVariant *properties_v) {
 	struct technology *item;
+	GVariantDict *properties;
+	GVariant *name_v;
+	const gchar *name;
+
+	properties = g_variant_dict_new(properties_v);
+	name_v = g_variant_dict_lookup_value(properties, "Name", NULL);
+	name = g_variant_get_string(name_v, NULL);
+
 	item = g_malloc(sizeof(*item));
 	item->list_item = create_base_technology_list_item(name);
 	item->settings = create_base_technology_settings(name);
+	item->type = TECHNOLOGY_TYPE_UNKNOWN;
+
+	g_variant_unref(name_v);
+	g_variant_dict_unref(properties);
 	return item;
 }
 
