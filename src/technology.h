@@ -18,19 +18,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CONNMAN_GTK_CONNECTION_ITEM_H
-#define _CONNMAN_GTK_CONNECTION_ITEM_H
+#ifndef _CONNMAN_GTK_TECHNOLOGY_H
+#define _CONNMAN_GTK_TECHNOLOGY_H
 
 #include <gtk/gtk.h>
 
-struct connection_list_item {
+struct technology_list_item {
 	GtkWidget *item;
 
 	GtkWidget *icon;
 	GtkWidget *label;
 };
 
-struct connection_settings_item {
+struct technology_settings {
 	GtkWidget *box;
 
 	GtkWidget *header;
@@ -43,12 +43,12 @@ struct connection_settings_item {
 	GtkWidget *contents;
 };
 
-struct connection_item {
-	struct connection_list_item *list_item;
-	struct connection_settings_item *settings;
+struct technology {
+	struct technology_list_item *list_item;
+	struct technology_settings *settings;
 };
 
-struct connection_item *create_connection_item();
-void free_connection_item(struct connection_item *item);
+struct technology *create_technology();
+void free_technology(struct technology *item);
 
-#endif /* _CONNMAN_GTK_CONNECTION_ITEM_H */
+#endif /* _CONNMAN_GTK_TECHNOLOGY_H */

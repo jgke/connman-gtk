@@ -23,11 +23,11 @@
 
 #include <gtk/gtk.h>
 
-#include "connection_item.h"
+#include "technology.h"
 #include "style.h"
 
-struct connection_list_item *create_base_connection_list_item(gchar *name) {
-	struct connection_list_item *item = g_malloc(sizeof(*item));
+struct technology_list_item *create_base_technology_list_item(gchar *name) {
+	struct technology_list_item *item = g_malloc(sizeof(*item));
 	item->item = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	g_object_ref(item->item);
 	item->icon = gtk_image_new_from_icon_name("network-wired-symbolic",
@@ -41,7 +41,7 @@ struct connection_list_item *create_base_connection_list_item(gchar *name) {
 	return item;
 }
 
-void free_base_connection_list_item(struct connection_list_item *item) {
+void free_base_technology_list_item(struct technology_list_item *item) {
 	if(!item)
 		return;
 	g_object_unref(item->item);
@@ -50,7 +50,7 @@ void free_base_connection_list_item(struct connection_list_item *item) {
 	g_free(item);
 }
 
-GtkWidget *create_connection_item_title(const char *title) {
+GtkWidget *create_technology_settings_title(const char *title) {
 	GtkWidget *label = gtk_label_new(title);
 	gtk_style_context_add_provider(gtk_widget_get_style_context(label),
 			GTK_STYLE_PROVIDER(css_provider),
@@ -60,8 +60,8 @@ GtkWidget *create_connection_item_title(const char *title) {
 	return label;
 }
 
-struct connection_settings_item *create_base_connection_settings_item(gchar *name) {
-	struct connection_settings_item *item = g_malloc(sizeof(*item));
+struct technology_settings *create_base_technology_settings(gchar *name) {
+	struct technology_settings *item = g_malloc(sizeof(*item));
 	item->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 	g_object_ref(item->box);
 	item->header = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
@@ -71,7 +71,7 @@ struct connection_settings_item *create_base_connection_settings_item(gchar *nam
 	g_object_ref(item->icon);
 	item->label = gtk_box_new(GTK_ORIENTATION_VERTICAL, 3);
 	g_object_ref(item->label);
-	item->title = create_connection_item_title(name);
+	item->title = create_technology_settings_title(name);
 	g_object_ref(item->title);
 	gtk_widget_set_halign(item->title, GTK_ALIGN_START);
 	item->status = gtk_label_new("Status");
@@ -91,7 +91,7 @@ struct connection_settings_item *create_base_connection_settings_item(gchar *nam
 	return item;
 }
 
-void free_base_connection_settings_item(struct connection_settings_item *item) {
+void free_base_technology_settings(struct technology_settings *item) {
 	if(!item)
 		return;
 	g_object_unref(item->box);
@@ -104,17 +104,17 @@ void free_base_connection_settings_item(struct connection_settings_item *item) {
 	g_free(item);
 }
 
-struct connection_item *create_connection_item(gchar *name) {
-	struct connection_item *item;
+struct technology *create_technology(gchar *name) {
+	struct technology *item;
 	item = g_malloc(sizeof(*item));
-	item->list_item = create_base_connection_list_item(name);
-	item->settings = create_base_connection_settings_item(name);
+	item->list_item = create_base_technology_list_item(name);
+	item->settings = create_base_technology_settings(name);
 	return item;
 }
 
-void free_connection_item(struct connection_item *item) {
+void free_technology(struct technology *item) {
 	if(!item)
 		return;
-	free_base_connection_list_item(item->list_item);
-	free_base_connection_settings_item(item->settings);
+	free_base_technology_list_item(item->list_item);
+	free_base_technology_settings(item->settings);
 }

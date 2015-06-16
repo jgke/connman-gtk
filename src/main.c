@@ -25,15 +25,15 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
-#include "connection_item.h"
+#include "technology.h"
 #include "interfaces.h"
 #include "style.h"
 
 GtkCssProvider *css_provider;
 GtkWidget *window, *box, *list;
-struct connection_item *item;
+struct technology *item;
 
-static GtkWidget *create_connection_item_list(GtkWidget *box) {
+static GtkWidget *create_technology_list(GtkWidget *box) {
 	GtkWidget *frame, *list, *inner_box;
 
 	frame = gtk_frame_new(NULL);
@@ -61,7 +61,7 @@ static void create_content() {
 	gtk_widget_set_margin_top(box, 15);
 	gtk_widget_set_margin_bottom(box, 15);
 
-	list = create_connection_item_list(box);
+	list = create_technology_list(box);
 }
 
 static void activate(GtkApplication *app, gpointer user_data) {
@@ -76,7 +76,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
 }
 
 void destroy(GtkWidget *window, gpointer user_data) {
-	free_connection_item(item);
+	free_technology(item);
 }
 
 void add_technology(GVariant *technology) {
@@ -84,7 +84,7 @@ void add_technology(GVariant *technology) {
 	gchar *path;
 	path_v = g_variant_get_child_value(technology, 0);
 	path = g_variant_dup_string(path_v, NULL);
-	item = create_connection_item(path);
+	item = create_technology(path);
 	gtk_widget_show(item->list_item->item);
 	gtk_container_add(GTK_CONTAINER(list), item->list_item->item);
 	gtk_container_add(GTK_CONTAINER(box), item->settings->box);
