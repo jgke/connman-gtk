@@ -3,7 +3,7 @@ AC_INIT([connman-gtk],[0.1],[https://github.com/jgke/connman-gtk])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config])
 
-AM_INIT_AUTOMAKE([1.10 dist-bzip2 no-dist-gzip foreign tar-ustar])
+AM_INIT_AUTOMAKE([1.10 dist-bzip2 no-dist-gzip foreign tar-ustar subdir-objects])
 AM_SILENT_RULES([yes])
 
 IT_PROG_INTLTOOL([0.35.0])

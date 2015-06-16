@@ -20,10 +20,11 @@ po/Makefile.in
 po/Makefile.in.in
 po/POTFILES
 po/stamp-it
-src/Makefile
-src/Makefile.in
-src/.deps
 
+Makefile
+Makefile.in
+.dirstamp
+.deps
 *.gmo
 *.o
 connman-gtk

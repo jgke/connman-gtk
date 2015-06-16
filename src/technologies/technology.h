@@ -62,6 +62,7 @@ struct technology {
 
 struct technology *create_technology(GVariant *path, GVariant *properties);
 void free_technology(struct technology *item);
+enum technology_type technology_type_from_string(const gchar *str);
 
 
 #endif /* _CONNMAN_GTK_TECHNOLOGY_H */

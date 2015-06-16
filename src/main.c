@@ -25,7 +25,7 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
-#include "technology.h"
+#include "technologies/technology.h"
 #include "interfaces.h"
 #include "style.h"
 
