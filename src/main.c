@@ -29,7 +29,6 @@
 #include "interfaces.h"
 #include "style.h"
 
-GtkCssProvider *css_provider;
 GtkWidget *window, *box, *list;
 struct technology *technologies[TECHNOLOGY_TYPE_COUNT];
 
@@ -40,9 +39,7 @@ static GtkWidget *create_technology_list(GtkWidget *box) {
 	inner_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	list = gtk_list_box_new();
 	gtk_widget_set_size_request(list, 200, -1);
-	gtk_style_context_add_provider(gtk_widget_get_style_context(inner_box),
-			GTK_STYLE_PROVIDER(css_provider),
-			GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	STYLE_ADD_CONTEXT(inner_box);
 	gtk_style_context_add_class(gtk_widget_get_style_context(inner_box),
 			"cm-list-box");
 
@@ -166,10 +163,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
 	gtk_widget_show_all(window);
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 	GtkApplication *app;
-	GError *error = NULL;
 	int status;
 
 	setlocale(LC_ALL, "");
@@ -177,15 +172,7 @@ int main(int argc, char *argv[])
 	bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
 	textdomain(GETTEXT_PACKAGE);
 
-	css_provider = gtk_css_provider_new();
-	gtk_css_provider_load_from_path(css_provider,
-				CONNMAN_GTK_UIDIR "stylesheet.css", &error);
-	if(error != NULL) {
-		g_warning("couldn't load stylesheet %s: %s",
-				CONNMAN_GTK_UIDIR "stylesheet.css",
-				error->message);
-		g_error_free(error);
-	}
+	style_init();
 
 	app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
