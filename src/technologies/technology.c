@@ -28,12 +28,16 @@
 #include "style.h"
 
 struct technology_list_item *create_base_technology_list_item(const gchar *name) {
-	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-	struct technology_list_item *item = g_malloc(sizeof(*item));
+	GtkWidget *box;
+	struct technology_list_item *item;
+
+	item = g_malloc(sizeof(*item));
+
+	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+	STYLE_ADD_MARGIN(box, 5);
 
 	item->item = gtk_list_box_row_new();
 	g_object_ref(item->item);
-	STYLE_ADD_MARGIN(item->item, 8);
 
 	item->icon = gtk_image_new_from_icon_name("network-transmit-symbolic",
 			GTK_ICON_SIZE_LARGE_TOOLBAR);
@@ -45,6 +49,7 @@ struct technology_list_item *create_base_technology_list_item(const gchar *name)
 	gtk_container_add(GTK_CONTAINER(box), item->icon);
 	gtk_container_add(GTK_CONTAINER(box), item->label);
 	gtk_container_add(GTK_CONTAINER(item->item), box);
+
 	gtk_widget_show_all(item->item);
 	return item;
 }
@@ -60,9 +65,7 @@ void free_base_technology_list_item(struct technology_list_item *item) {
 
 GtkWidget *create_technology_settings_title(const char *title) {
 	GtkWidget *label = gtk_label_new(title);
-	gtk_style_context_add_provider(gtk_widget_get_style_context(label),
-			GTK_STYLE_PROVIDER(css_provider),
-			GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	STYLE_ADD_CONTEXT(label);
 	gtk_style_context_add_class(gtk_widget_get_style_context(label),
 			"cm-header-title");
 	return label;
