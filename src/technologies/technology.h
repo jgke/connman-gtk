@@ -21,6 +21,7 @@
 #ifndef _CONNMAN_GTK_TECHNOLOGY_H
 #define _CONNMAN_GTK_TECHNOLOGY_H
 
+#include <gio/gio.h>
 #include <gtk/gtk.h>
 
 enum technology_type {
@@ -42,6 +43,8 @@ struct technology_list_item {
 };
 
 struct technology_settings {
+	GDBusProxy *proxy;
+
 	GtkWidget *box;
 
 	GtkWidget *header;
@@ -61,7 +64,8 @@ struct technology {
 	enum technology_type type;
 };
 
-struct technology *create_technology(GVariant *path, GVariant *properties);
+struct technology *create_technology(GDBusProxy *proxy, GVariant *path,
+		GVariant *properties);
 void free_technology(struct technology *item);
 void technology_set_id(struct technology *item, gint id);
 enum technology_type technology_type_from_string(const gchar *str);

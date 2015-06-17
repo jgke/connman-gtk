@@ -21,6 +21,7 @@
 #include <locale.h>
 #include <string.h>
 
+#include <gio/gio.h>
 #include <gtk/gtk.h>
 
 #include "technology.h"
@@ -71,8 +72,11 @@ GtkWidget *create_technology_settings_title(const char *title) {
 	return label;
 }
 
-struct technology_settings *create_base_technology_settings(const gchar *name) {
+struct technology_settings *create_base_technology_settings(const gchar *name,
+		GDBusProxy *proxy) {
 	struct technology_settings *item = g_malloc(sizeof(*item));
+
+	item->proxy = proxy;
 
 	item->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 	g_object_ref(item->box);
@@ -123,7 +127,8 @@ void free_base_technology_settings(struct technology_settings *item) {
 	g_free(item);
 }
 
-void init_technology(struct technology *tech, GVariantDict *properties) {
+void init_technology(struct technology *tech, GVariantDict *properties,
+		GDBusProxy *proxy) {
 	GVariant *name_v;
 	const gchar *name;
 	GVariant *type_v;
@@ -135,7 +140,7 @@ void init_technology(struct technology *tech, GVariantDict *properties) {
 	type = g_variant_get_string(type_v, NULL);
 
 	tech->list_item = create_base_technology_list_item(name);
-	tech->settings = create_base_technology_settings(name);
+	tech->settings = create_base_technology_settings(name, proxy);
 	tech->type = technology_type_from_string(type);
 
 	g_variant_unref(name_v);
@@ -155,14 +160,15 @@ void init_technology(struct technology *tech, GVariantDict *properties) {
 	}
 }
 
-struct technology *create_technology(GVariant *path, GVariant *properties_v) {
+struct technology *create_technology(GDBusProxy *proxy, GVariant *path,
+		GVariant *properties_v) {
 	struct technology *item;
 	GVariantDict *properties;
 
 	properties = g_variant_dict_new(properties_v);
 
 	item = g_malloc(sizeof(*item));
-	init_technology(item, properties);
+	init_technology(item, properties, proxy);
 
 	g_variant_dict_unref(properties);
 	return item;

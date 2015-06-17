@@ -71,59 +71,63 @@ void destroy(GtkWidget *window, gpointer user_data) {
 			free_technology(technologies[i]);
 }
 
-void add_technology(GVariant *technology) {
+void add_technology(GDBusConnection *connection, GVariant *technology) {
 	GVariant *path;
+	const gchar *object_path;
 	GVariant *properties;
+	GDBusProxy *proxy;
+	GDBusNodeInfo *info;
+	GError *error = NULL;
 	struct technology *item;
 	int pos;
 
+	info = g_dbus_node_info_new_for_xml(technology_interface, &error);
+	if(error) {
+		g_error("Failed to load technology interface: %s",
+				error->message);
+		g_error_free(error);
+		return;
+	}
+
 	path = g_variant_get_child_value(technology, 0);
 	properties = g_variant_get_child_value(technology, 1);
-	item = create_technology(path, properties);
+
+	object_path = g_variant_get_string(path, NULL);
+
+	proxy = g_dbus_proxy_new_sync(connection, G_DBUS_PROXY_FLAGS_NONE,
+			g_dbus_node_info_lookup_interface(info,
+				"net.connman.Technology"),
+			"net.connman", object_path, "net.connman.Technology",
+			NULL, &error);
+	if(error) {
+		g_error("failed to connect ConnMan technology proxy: %s",
+				error->message);
+		g_error_free(error);
+		goto out;
+	}
+
+	item = create_technology(proxy, path, properties);
+
 	technologies[item->type] = item;
+
 	gtk_container_add(GTK_CONTAINER(list), item->list_item->item);
 	pos = gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
 			item->settings->box, NULL);
 	technology_set_id(item, pos);
+
+out:
 	g_variant_unref(path);
 	g_variant_unref(properties);
 }
 
-void add_all_technologies(GVariant *technologies) {
+void add_all_technologies(GDBusConnection *connection, GVariant *technologies) {
 	int i;
 	int size = g_variant_n_children(technologies);
 	for(i = 0; i < size; i++) {
 		GVariant *child = g_variant_get_child_value(technologies, i);
-		add_technology(child);
+		add_technology(connection, child);
 		g_variant_unref(child);
 	}
-}
-
-void manager_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
-	(void)source;
-	(void)res;
-	(void)user_data;
-	GError *error = NULL;
-	GVariant *data, *child;
-	GDBusProxy *proxy;
-	proxy = g_dbus_proxy_new_finish(res, &error);
-	if(error) {
-		g_error("failed to connect to ConnMan: %s", error->message);
-		g_error_free(error);
-		return;
-	}
-	data = g_dbus_proxy_call_sync(proxy, "GetTechnologies", NULL,
-			G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
-	if(error) {
-		g_error("failed to get technologies: %s", error->message);
-		g_error_free(error);
-		g_object_unref(proxy);
-		return;
-	}
-	child = g_variant_get_child_value(data, 0);
-	add_all_technologies(child);
-	g_variant_unref(data);
-	g_variant_unref(child);
 }
 
 void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
@@ -132,6 +136,9 @@ void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
 	GDBusConnection *connection;
 	GDBusNodeInfo *info;
 	GError *error = NULL;
+	GVariant *data, *child;
+	GDBusProxy *proxy;
+
 	connection = g_bus_get_finish(res, &error);
 	if(error) {
 		g_error("failed to connect to system dbus: %s",
@@ -139,8 +146,8 @@ void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
 		g_error_free(error);
 		return;
 	}
-	info = g_dbus_node_info_new_for_xml(
-			manager_interface, &error);
+
+	info = g_dbus_node_info_new_for_xml(manager_interface, &error);
 	if(error) {
 		g_error("Failed to load manager interface: %s",
 				error->message);
@@ -148,12 +155,31 @@ void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
 		return;
 	}
 
-	g_dbus_proxy_new(connection, G_DBUS_PROXY_FLAGS_NONE,
+	proxy = g_dbus_proxy_new_sync(connection, G_DBUS_PROXY_FLAGS_NONE,
 			g_dbus_node_info_lookup_interface(info,
 				"net.connman.Manager"),
 			"net.connman", "/", "net.connman.Manager", NULL,
-			manager_connected, NULL);
+			&error);
 	g_dbus_node_info_unref(info);
+	if(error) {
+		g_error("failed to connect to ConnMan: %s", error->message);
+		g_error_free(error);
+		return;
+	}
+
+	data = g_dbus_proxy_call_sync(proxy, "GetTechnologies", NULL,
+			G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+	if(error) {
+		g_error("failed to get technologies: %s", error->message);
+		g_error_free(error);
+		g_object_unref(proxy);
+		return;
+	}
+
+	child = g_variant_get_child_value(data, 0);
+	add_all_technologies(connection, child);
+	g_variant_unref(data);
+	g_variant_unref(child);
 }
 
 static void activate(GtkApplication *app, gpointer user_data) {
