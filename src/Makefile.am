@@ -3,7 +3,7 @@ ui_DATA = stylesheet.css
 bin_PROGRAMS = connman-gtk
 connman_gtk_SOURCES = main.c style.c \
 		      technologies/technology.c technologies/ethernet.c
-connman_gtk_LDADD = @DEPS_LIBS@
-connman_gtk_CPPFLAGS = @DEPS_CFLAGS@ \
+connman_gtk_LDADD = @GTK_LIBS@ @GLIB_LIBS@
+connman_gtk_CPPFLAGS = @GTK_CFLAGS@ @GLIB_CFLAGS@ \
 		       -DCONNMAN_GTK_LOCALEDIR=\"${CONNMAN_GTK_LOCALEDIR}\" \
 		       -DCONNMAN_GTK_UIDIR=\""$(uidir)"\"
