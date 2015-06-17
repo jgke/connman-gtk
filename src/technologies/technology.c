@@ -32,10 +32,7 @@ struct technology_list_item *create_base_technology_list_item(const gchar *name)
 
 	item->item = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	g_object_ref(item->item);
-	gtk_widget_set_margin_start(item->item, 8);
-	gtk_widget_set_margin_end(item->item, 8);
-	gtk_widget_set_margin_top(item->item, 8);
-	gtk_widget_set_margin_bottom(item->item, 8);
+	STYLE_ADD_MARGIN(item->item, 8);
 
 	item->icon = gtk_image_new_from_icon_name("network-transmit-symbolic",
 			GTK_ICON_SIZE_LARGE_TOOLBAR);
@@ -74,6 +71,7 @@ struct technology_settings *create_base_technology_settings(const gchar *name) {
 
 	item->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 	g_object_ref(item->box);
+	STYLE_ADD_MARGIN(item->box, 5);
 
 	item->header = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	g_object_ref(item->header);
