@@ -29,36 +29,29 @@
 #include "interfaces.h"
 #include "style.h"
 
-GtkWidget *window, *box, *list;
+GtkWidget *list, *notebook;
 struct technology *technologies[TECHNOLOGY_TYPE_COUNT];
 
-static GtkWidget *create_technology_list(GtkWidget *box) {
-	GtkWidget *frame, *list, *inner_box;
+static void create_content(GtkWidget *window) {
+	GtkWidget *frame, *box;
+
+	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 15);
+	STYLE_ADD_MARGIN(box, 15);
 
 	frame = gtk_frame_new(NULL);
-	inner_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 	list = gtk_list_box_new();
+	gtk_list_box_set_selection_mode(GTK_LIST_BOX(list),
+			GTK_SELECTION_BROWSE);
 	gtk_widget_set_size_request(list, 200, -1);
-	STYLE_ADD_CONTEXT(inner_box);
-	gtk_style_context_add_class(gtk_widget_get_style_context(inner_box),
-			"cm-list-box");
+
+	notebook = gtk_notebook_new();
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), FALSE);
 
 	gtk_container_add(GTK_CONTAINER(frame), list);
-	gtk_container_add_with_properties(GTK_CONTAINER(inner_box), frame,
+	gtk_container_add(GTK_CONTAINER(box), frame);
+	gtk_container_add_with_properties(GTK_CONTAINER(box), notebook,
 			"expand", TRUE, "fill", TRUE, NULL);
-	gtk_container_add(GTK_CONTAINER(box), inner_box);
-
-	return list;
-}
-
-static void create_content() {
-	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 15);
-	gtk_widget_set_margin_start(box, 15);
-	gtk_widget_set_margin_end(box, 15);
-	gtk_widget_set_margin_top(box, 15);
-	gtk_widget_set_margin_bottom(box, 15);
-
-	list = create_technology_list(box);
+	gtk_container_add(GTK_CONTAINER(window), box);
 }
 
 void destroy(GtkWidget *window, gpointer user_data) {
@@ -78,7 +71,8 @@ void add_technology(GVariant *technology) {
 	item = create_technology(path, properties);
 	technologies[item->type] = item;
 	gtk_container_add(GTK_CONTAINER(list), item->list_item->item);
-	gtk_container_add(GTK_CONTAINER(box), item->settings->box);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), item->settings->box,
+			NULL);
 	g_variant_unref(path);
 	g_variant_unref(properties);
 }
@@ -151,14 +145,15 @@ void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
 }
 
 static void activate(GtkApplication *app, gpointer user_data) {
-	create_content();
+	GtkWidget *window;
+
 	g_bus_get(G_BUS_TYPE_SYSTEM, NULL, dbus_connected, NULL);
 
 	window = gtk_application_window_new(app);
 	gtk_window_set_title(GTK_WINDOW(window), _("Network Settings"));
 	gtk_window_set_default_size(GTK_WINDOW(window), 524, 324);
 
-	gtk_container_add(GTK_CONTAINER(window), box);
+	create_content(window);
 
 	gtk_widget_show_all(window);
 }
