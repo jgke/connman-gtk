@@ -121,6 +121,7 @@ struct technology_settings *create_base_technology_settings(GVariantDict *proper
 	GVariant *variant;
 	const gchar *name;
 	gboolean powered;
+	GtkWidget *powerbox;
 
 	variant = g_variant_dict_lookup_value(properties, "Powered", NULL);
 	powered = g_variant_get_boolean(variant);
@@ -149,6 +150,7 @@ struct technology_settings *create_base_technology_settings(GVariantDict *proper
 	gtk_widget_set_halign(item->power_switch, GTK_ALIGN_END);
 	g_signal_connect(item->power_switch, "state-set",
 			G_CALLBACK(technology_toggle_power), item);
+	powerbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
 	item->label = gtk_box_new(GTK_ORIENTATION_VERTICAL, 3);
 	g_object_ref(item->label);
@@ -173,7 +175,8 @@ struct technology_settings *create_base_technology_settings(GVariantDict *proper
 	gtk_container_add_with_properties(GTK_CONTAINER(item->header),
 			gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0),
 			"expand", TRUE, NULL);
-	gtk_container_add(GTK_CONTAINER(item->header), item->power_switch);
+	gtk_container_add(GTK_CONTAINER(powerbox), item->power_switch);
+	gtk_container_add(GTK_CONTAINER(item->header), powerbox);
 	gtk_container_add(GTK_CONTAINER(item->box), item->header);
 	gtk_container_add_with_properties(GTK_CONTAINER(item->box),
 			item->contents, "expand", TRUE, NULL);
