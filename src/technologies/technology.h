@@ -57,11 +57,13 @@ struct technology_settings {
 struct technology {
 	struct technology_list_item *list_item;
 	struct technology_settings *settings;
+	gint id;
 	enum technology_type type;
 };
 
 struct technology *create_technology(GVariant *path, GVariant *properties);
 void free_technology(struct technology *item);
+void technology_set_id(struct technology *item, gint id);
 enum technology_type technology_type_from_string(const gchar *str);
 
 

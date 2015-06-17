@@ -28,9 +28,10 @@
 #include "style.h"
 
 struct technology_list_item *create_base_technology_list_item(const gchar *name) {
+	GtkWidget *box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	struct technology_list_item *item = g_malloc(sizeof(*item));
 
-	item->item = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+	item->item = gtk_list_box_row_new();
 	g_object_ref(item->item);
 	STYLE_ADD_MARGIN(item->item, 8);
 
@@ -41,8 +42,9 @@ struct technology_list_item *create_base_technology_list_item(const gchar *name)
 	item->label = gtk_label_new(name);
 	g_object_ref(item->label);
 
-	gtk_container_add(GTK_CONTAINER(item->item), item->icon);
-	gtk_container_add(GTK_CONTAINER(item->item), item->label);
+	gtk_container_add(GTK_CONTAINER(box), item->icon);
+	gtk_container_add(GTK_CONTAINER(box), item->label);
+	gtk_container_add(GTK_CONTAINER(item->item), box);
 	gtk_widget_show_all(item->item);
 	return item;
 }
@@ -161,6 +163,12 @@ struct technology *create_technology(GVariant *path, GVariant *properties_v) {
 
 	g_variant_dict_unref(properties);
 	return item;
+}
+
+void technology_set_id(struct technology *item, gint id) {
+	item->id = id;
+	g_object_set_data(G_OBJECT(item->list_item->item), "technology-id",
+			&item->id);
 }
 
 void free_technology(struct technology *item) {

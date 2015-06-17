@@ -32,6 +32,13 @@
 GtkWidget *list, *notebook;
 struct technology *technologies[TECHNOLOGY_TYPE_COUNT];
 
+void technology_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data) {
+	if(!G_IS_OBJECT(row))
+		return;
+	gint *id = g_object_get_data(G_OBJECT(row), "technology-id");
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), *id);
+}
+
 static void create_content(GtkWidget *window) {
 	GtkWidget *frame, *box;
 
@@ -42,6 +49,8 @@ static void create_content(GtkWidget *window) {
 	list = gtk_list_box_new();
 	gtk_list_box_set_selection_mode(GTK_LIST_BOX(list),
 			GTK_SELECTION_BROWSE);
+	g_signal_connect(list, "row-selected", G_CALLBACK(technology_selected),
+			NULL);
 	gtk_widget_set_size_request(list, 200, -1);
 
 	notebook = gtk_notebook_new();
@@ -56,6 +65,7 @@ static void create_content(GtkWidget *window) {
 
 void destroy(GtkWidget *window, gpointer user_data) {
 	int i;
+	notebook = NULL;
 	for(i = 0; i < TECHNOLOGY_TYPE_COUNT; i++)
 		if(technologies[i])
 			free_technology(technologies[i]);
@@ -65,14 +75,16 @@ void add_technology(GVariant *technology) {
 	GVariant *path;
 	GVariant *properties;
 	struct technology *item;
+	int pos;
 
 	path = g_variant_get_child_value(technology, 0);
 	properties = g_variant_get_child_value(technology, 1);
 	item = create_technology(path, properties);
 	technologies[item->type] = item;
 	gtk_container_add(GTK_CONTAINER(list), item->list_item->item);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), item->settings->box,
-			NULL);
+	pos = gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
+			item->settings->box, NULL);
+	technology_set_id(item, pos);
 	g_variant_unref(path);
 	g_variant_unref(properties);
 }
