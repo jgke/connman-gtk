@@ -45,7 +45,7 @@ struct technology_list_item {
 struct technology_settings {
 	GDBusProxy *proxy;
 
-	GtkWidget *box;
+	GtkWidget *grid;
 
 	GtkWidget *header;
 	GtkWidget *icon;

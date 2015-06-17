@@ -29,13 +29,13 @@
 #include "style.h"
 
 struct technology_list_item *create_base_technology_list_item(const gchar *name) {
-	GtkWidget *box;
+	GtkWidget *grid;
 	struct technology_list_item *item;
 
 	item = g_malloc(sizeof(*item));
 
-	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-	STYLE_ADD_MARGIN(box, MARGIN_SMALL);
+	grid = gtk_grid_new();
+	STYLE_ADD_MARGIN(grid, MARGIN_SMALL);
 
 	item->item = gtk_list_box_row_new();
 	g_object_ref(item->item);
@@ -47,9 +47,9 @@ struct technology_list_item *create_base_technology_list_item(const gchar *name)
 	item->label = gtk_label_new(name);
 	g_object_ref(item->label);
 
-	gtk_container_add(GTK_CONTAINER(box), item->icon);
-	gtk_container_add(GTK_CONTAINER(box), item->label);
-	gtk_container_add(GTK_CONTAINER(item->item), box);
+	gtk_container_add(GTK_CONTAINER(grid), item->icon);
+	gtk_container_add(GTK_CONTAINER(grid), item->label);
+	gtk_container_add(GTK_CONTAINER(item->item), grid);
 
 	gtk_widget_show_all(item->item);
 	return item;
@@ -121,7 +121,6 @@ struct technology_settings *create_base_technology_settings(GVariantDict *proper
 	GVariant *variant;
 	const gchar *name;
 	gboolean powered;
-	GtkWidget *powerbox;
 
 	variant = g_variant_dict_lookup_value(properties, "Powered", NULL);
 	powered = g_variant_get_boolean(variant);
@@ -133,62 +132,58 @@ struct technology_settings *create_base_technology_settings(GVariantDict *proper
 	g_signal_connect(proxy, "g-signal", G_CALLBACK(technology_proxy_signal),
 			item);
 
-	item->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-	g_object_ref(item->box);
-	STYLE_ADD_MARGIN(item->box, MARGIN_MEDIUM);
-
-	item->header = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-	g_object_ref(item->header);
+	item->grid = gtk_grid_new();
+	g_object_ref(item->grid);
+	STYLE_ADD_MARGIN(item->grid, MARGIN_MEDIUM);
 
 	item->icon = gtk_image_new_from_icon_name("preferences-system-network",
 			GTK_ICON_SIZE_DIALOG);
 	g_object_ref(item->icon);
+	gtk_widget_set_halign(item->icon, GTK_ALIGN_START);
+
+	item->title = create_technology_settings_title(name);
+	g_object_ref(item->title);
+	gtk_widget_set_margin_start(item->title, MARGIN_MEDIUM);
+	gtk_widget_set_margin_end(item->title, MARGIN_MEDIUM);
+	gtk_widget_set_halign(item->title, GTK_ALIGN_START);
+	gtk_widget_set_hexpand(item->title, TRUE);
+
+	item->status = gtk_label_new("Status");
+	g_object_ref(item->status);
+	gtk_widget_set_margin_start(item->status, MARGIN_MEDIUM);
+	gtk_widget_set_margin_end(item->status, MARGIN_MEDIUM);
+	gtk_widget_set_halign(item->status, GTK_ALIGN_START);
+	gtk_widget_set_hexpand(item->status, TRUE);
 
 	item->power_switch = gtk_switch_new();
 	g_object_ref(item->power_switch);
 	gtk_switch_set_active(GTK_SWITCH(item->power_switch), powered);
+	gtk_widget_set_valign(item->power_switch, GTK_ALIGN_START);
 	gtk_widget_set_halign(item->power_switch, GTK_ALIGN_END);
 	g_signal_connect(item->power_switch, "state-set",
 			G_CALLBACK(technology_toggle_power), item);
-	powerbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
-	item->label = gtk_box_new(GTK_ORIENTATION_VERTICAL, 3);
-	g_object_ref(item->label);
-
-	item->title = create_technology_settings_title(name);
-	g_variant_unref(variant);
-	g_object_ref(item->title);
-	gtk_widget_set_halign(item->title, GTK_ALIGN_START);
-
-	item->status = gtk_label_new("Status");
-	g_object_ref(item->status);
-	gtk_widget_set_halign(item->status, GTK_ALIGN_START);
-
-	item->contents = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+	item->contents = gtk_grid_new();
 	g_object_ref(item->contents);
+	STYLE_ADD_MARGIN(item->contents, MARGIN_LARGE);
+	gtk_widget_set_hexpand(item->contents, TRUE);
+	gtk_widget_set_vexpand(item->contents, TRUE);
 
-	gtk_container_add(GTK_CONTAINER(item->label), item->title);
-	gtk_container_add(GTK_CONTAINER(item->label), item->status);
-	gtk_container_add(GTK_CONTAINER(item->header), item->icon);
-	gtk_container_add(GTK_CONTAINER(item->header), item->label);
-	/* this fixes alignment issues */
-	gtk_container_add_with_properties(GTK_CONTAINER(item->header),
-			gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0),
-			"expand", TRUE, NULL);
-	gtk_container_add(GTK_CONTAINER(powerbox), item->power_switch);
-	gtk_container_add(GTK_CONTAINER(item->header), powerbox);
-	gtk_container_add(GTK_CONTAINER(item->box), item->header);
-	gtk_container_add_with_properties(GTK_CONTAINER(item->box),
-			item->contents, "expand", TRUE, NULL);
+	gtk_grid_attach(GTK_GRID(item->grid), item->icon,	  0, 0, 1, 2);
+	gtk_grid_attach(GTK_GRID(item->grid), item->title,	  1, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(item->grid), item->status,	  1, 1, 1, 1);
+	gtk_grid_attach(GTK_GRID(item->grid), item->power_switch, 2, 0, 1, 2);
+	gtk_grid_attach(GTK_GRID(item->grid), item->contents,	  0, 2, 3, 1);
 
-	gtk_widget_show_all(item->box);
+	gtk_widget_show_all(item->grid);
+	g_variant_unref(variant);
 	return item;
 }
 
 void free_base_technology_settings(struct technology_settings *item) {
 	if(!item)
 		return;
-	g_object_unref(item->box);
+	g_object_unref(item->grid);
 
 	g_object_unref(item->header);
 	g_object_unref(item->icon);

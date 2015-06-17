@@ -40,10 +40,12 @@ void technology_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data) {
 }
 
 static void create_content(GtkWidget *window) {
-	GtkWidget *frame, *box;
+	GtkWidget *frame, *grid;
 
-	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 15);
-	STYLE_ADD_MARGIN(box, MARGIN_LARGE);
+	grid = gtk_grid_new();
+	STYLE_ADD_MARGIN(grid, MARGIN_LARGE);
+	gtk_widget_set_hexpand(grid, TRUE);
+	gtk_widget_set_vexpand(grid, TRUE);
 
 	frame = gtk_frame_new(NULL);
 	list = gtk_list_box_new();
@@ -56,12 +58,13 @@ static void create_content(GtkWidget *window) {
 	notebook = gtk_notebook_new();
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), FALSE);
 	gtk_notebook_set_show_border(GTK_NOTEBOOK(notebook), FALSE);
+	gtk_widget_set_hexpand(notebook, TRUE);
+	gtk_widget_set_vexpand(notebook, TRUE);
 
 	gtk_container_add(GTK_CONTAINER(frame), list);
-	gtk_container_add(GTK_CONTAINER(box), frame);
-	gtk_container_add_with_properties(GTK_CONTAINER(box), notebook,
-			"expand", TRUE, "fill", TRUE, NULL);
-	gtk_container_add(GTK_CONTAINER(window), box);
+	gtk_grid_attach(GTK_GRID(grid), frame, 0, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), notebook, 1, 0, 1, 1);
+	gtk_container_add(GTK_CONTAINER(window), grid);
 }
 
 void destroy(GtkWidget *window, gpointer user_data) {
@@ -113,7 +116,7 @@ void add_technology(GDBusConnection *connection, GVariant *technology) {
 
 	gtk_container_add(GTK_CONTAINER(list), item->list_item->item);
 	pos = gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
-			item->settings->box, NULL);
+			item->settings->grid, NULL);
 	technology_set_id(item, pos);
 
 out:
