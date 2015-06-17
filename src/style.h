@@ -3,6 +3,14 @@
 
 #include <gtk/gtk.h>
 
+#define DEFAULT_WIDTH 785
+#define DEFAULT_HEIGHT 485
+#define LIST_WIDTH 200
+
+#define MARGIN_SMALL 5
+#define MARGIN_MEDIUM 10
+#define MARGIN_LARGE 15
+
 #define STYLE_ADD_CONTEXT(widget) \
 	do { \
 		gtk_style_context_add_provider( \

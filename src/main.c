@@ -43,7 +43,7 @@ static void create_content(GtkWidget *window) {
 	GtkWidget *frame, *box;
 
 	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 15);
-	STYLE_ADD_MARGIN(box, 15);
+	STYLE_ADD_MARGIN(box, MARGIN_LARGE);
 
 	frame = gtk_frame_new(NULL);
 	list = gtk_list_box_new();
@@ -51,10 +51,11 @@ static void create_content(GtkWidget *window) {
 			GTK_SELECTION_BROWSE);
 	g_signal_connect(list, "row-selected", G_CALLBACK(technology_selected),
 			NULL);
-	gtk_widget_set_size_request(list, 200, -1);
+	gtk_widget_set_size_request(list, LIST_WIDTH, -1);
 
 	notebook = gtk_notebook_new();
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), FALSE);
+	gtk_notebook_set_show_border(GTK_NOTEBOOK(notebook), FALSE);
 
 	gtk_container_add(GTK_CONTAINER(frame), list);
 	gtk_container_add(GTK_CONTAINER(box), frame);
@@ -189,7 +190,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
 
 	window = gtk_application_window_new(app);
 	gtk_window_set_title(GTK_WINDOW(window), _("Network Settings"));
-	gtk_window_set_default_size(GTK_WINDOW(window), 524, 324);
+	gtk_window_set_default_size(GTK_WINDOW(window), DEFAULT_WIDTH,
+			DEFAULT_HEIGHT);
 
 	create_content(window);
 

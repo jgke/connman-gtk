@@ -35,7 +35,7 @@ struct technology_list_item *create_base_technology_list_item(const gchar *name)
 	item = g_malloc(sizeof(*item));
 
 	box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
-	STYLE_ADD_MARGIN(box, 5);
+	STYLE_ADD_MARGIN(box, MARGIN_SMALL);
 
 	item->item = gtk_list_box_row_new();
 	g_object_ref(item->item);
@@ -135,7 +135,7 @@ struct technology_settings *create_base_technology_settings(GVariantDict *proper
 
 	item->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 	g_object_ref(item->box);
-	STYLE_ADD_MARGIN(item->box, 10);
+	STYLE_ADD_MARGIN(item->box, MARGIN_MEDIUM);
 
 	item->header = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	g_object_ref(item->header);
