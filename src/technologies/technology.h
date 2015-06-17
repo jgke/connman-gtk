@@ -49,6 +49,7 @@ struct technology_settings {
 
 	GtkWidget *header;
 	GtkWidget *icon;
+	GtkWidget *power_switch;
 
 	GtkWidget *label;
 	GtkWidget *title;

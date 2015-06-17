@@ -72,15 +72,69 @@ GtkWidget *create_technology_settings_title(const char *title) {
 	return label;
 }
 
-struct technology_settings *create_base_technology_settings(const gchar *name,
+gboolean technology_toggle_power(GtkSwitch *widget, gboolean state,
+		gpointer user_data) {
+	struct technology_settings *item = user_data;
+	GVariant *ret;
+	GError *error = NULL;
+
+	ret = g_dbus_proxy_call_sync(item->proxy, "SetProperty",
+			g_variant_new("(sv)", "Powered", g_variant_new("b", state)),
+			G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+	if(error) {
+		g_error("failed to toggle technology state: %s", error->message);
+		g_error_free(error);
+		return TRUE;
+	}
+	g_variant_unref(ret);
+	return FALSE;
+}
+
+void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
+		GVariant *parameters, gpointer user_data) {
+	struct technology_settings *item = user_data;
+	if(!strcmp(signal, "PropertyChanged")) {
+		GVariant *name_v, *value_v;
+		const gchar *name;
+		name_v = g_variant_get_child_value(parameters, 0);
+		value_v = g_variant_get_child_value(parameters, 1);
+		name = g_variant_get_string(name_v, NULL);
+		if(!strcmp(name, "Powered")) {
+			gboolean state;
+			GVariant *state_v = g_variant_get_child_value(value_v, 0);
+			state = g_variant_get_boolean(state_v);
+			g_variant_unref(state_v);
+
+			gtk_switch_set_active(GTK_SWITCH(item->power_switch),
+					state);
+		}
+
+		g_variant_unref(name_v);
+		g_variant_unref(value_v);
+	}
+}
+
+struct technology_settings *create_base_technology_settings(GVariantDict *properties,
 		GDBusProxy *proxy) {
 	struct technology_settings *item = g_malloc(sizeof(*item));
 
+	GVariant *variant;
+	const gchar *name;
+	gboolean powered;
+
+	variant = g_variant_dict_lookup_value(properties, "Powered", NULL);
+	powered = g_variant_get_boolean(variant);
+	g_variant_unref(variant);
+	variant = g_variant_dict_lookup_value(properties, "Name", NULL);
+	name = g_variant_get_string(variant, NULL);
+
 	item->proxy = proxy;
+	g_signal_connect(proxy, "g-signal", G_CALLBACK(technology_proxy_signal),
+			item);
 
 	item->box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 	g_object_ref(item->box);
-	STYLE_ADD_MARGIN(item->box, 5);
+	STYLE_ADD_MARGIN(item->box, 10);
 
 	item->header = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
 	g_object_ref(item->header);
@@ -89,10 +143,18 @@ struct technology_settings *create_base_technology_settings(const gchar *name,
 			GTK_ICON_SIZE_DIALOG);
 	g_object_ref(item->icon);
 
+	item->power_switch = gtk_switch_new();
+	g_object_ref(item->power_switch);
+	gtk_switch_set_active(GTK_SWITCH(item->power_switch), powered);
+	gtk_widget_set_halign(item->power_switch, GTK_ALIGN_END);
+	g_signal_connect(item->power_switch, "state-set",
+			G_CALLBACK(technology_toggle_power), item);
+
 	item->label = gtk_box_new(GTK_ORIENTATION_VERTICAL, 3);
 	g_object_ref(item->label);
 
 	item->title = create_technology_settings_title(name);
+	g_variant_unref(variant);
 	g_object_ref(item->title);
 	gtk_widget_set_halign(item->title, GTK_ALIGN_START);
 
@@ -107,8 +169,14 @@ struct technology_settings *create_base_technology_settings(const gchar *name,
 	gtk_container_add(GTK_CONTAINER(item->label), item->status);
 	gtk_container_add(GTK_CONTAINER(item->header), item->icon);
 	gtk_container_add(GTK_CONTAINER(item->header), item->label);
+	/* this fixes alignment issues */
+	gtk_container_add_with_properties(GTK_CONTAINER(item->header),
+			gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0),
+			"expand", TRUE, NULL);
+	gtk_container_add(GTK_CONTAINER(item->header), item->power_switch);
 	gtk_container_add(GTK_CONTAINER(item->box), item->header);
-	gtk_container_add(GTK_CONTAINER(item->box), item->contents);
+	gtk_container_add_with_properties(GTK_CONTAINER(item->box),
+			item->contents, "expand", TRUE, NULL);
 
 	gtk_widget_show_all(item->box);
 	return item;
@@ -118,12 +186,17 @@ void free_base_technology_settings(struct technology_settings *item) {
 	if(!item)
 		return;
 	g_object_unref(item->box);
+
 	g_object_unref(item->header);
 	g_object_unref(item->icon);
+	g_object_unref(item->power_switch);
+
 	g_object_unref(item->label);
 	g_object_unref(item->title);
 	g_object_unref(item->status);
+
 	g_object_unref(item->contents);
+
 	g_free(item);
 }
 
@@ -140,7 +213,7 @@ void init_technology(struct technology *tech, GVariantDict *properties,
 	type = g_variant_get_string(type_v, NULL);
 
 	tech->list_item = create_base_technology_list_item(name);
-	tech->settings = create_base_technology_settings(name, proxy);
+	tech->settings = create_base_technology_settings(properties, proxy);
 	tech->type = technology_type_from_string(type);
 
 	g_variant_unref(name_v);
