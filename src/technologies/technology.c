@@ -63,9 +63,13 @@ struct technology_list_item *create_base_technology_list_item(const gchar *name)
 void free_base_technology_list_item(struct technology_list_item *item) {
 	if(!item)
 		return;
-	g_object_unref(item->item);
 	g_object_unref(item->icon);
 	g_object_unref(item->label);
+
+	g_object_unref(item->item);
+
+	gtk_widget_destroy(item->item);
+
 	g_free(item);
 }
 
@@ -190,17 +194,18 @@ struct technology_settings *create_base_technology_settings(GVariantDict *proper
 void free_base_technology_settings(struct technology_settings *item) {
 	if(!item)
 		return;
-	g_object_unref(item->grid);
 
-	g_object_unref(item->header);
 	g_object_unref(item->icon);
-	g_object_unref(item->power_switch);
-
-	g_object_unref(item->label);
 	g_object_unref(item->title);
 	g_object_unref(item->status);
+	g_object_unref(item->power_switch);
 
 	g_object_unref(item->contents);
+
+	g_object_unref(item->grid);
+	gtk_widget_destroy(item->grid);
+
+	g_object_unref(item->proxy);
 
 	g_free(item);
 }
@@ -270,11 +275,12 @@ void technology_set_id(struct technology *item, gint id) {
 			&item->id);
 }
 
-void free_technology(struct technology *item) {
+void technology_free(struct technology *item) {
 	if(!item)
 		return;
 	free_base_technology_list_item(item->list_item);
 	free_base_technology_settings(item->settings);
+	g_free(item);
 }
 
 enum technology_type technology_type_from_string(const gchar *str) {

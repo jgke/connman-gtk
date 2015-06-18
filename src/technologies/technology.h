@@ -47,13 +47,10 @@ struct technology_settings {
 
 	GtkWidget *grid;
 
-	GtkWidget *header;
-	GtkWidget *icon;
-	GtkWidget *power_switch;
-
-	GtkWidget *label;
 	GtkWidget *title;
 	GtkWidget *status;
+	GtkWidget *icon;
+	GtkWidget *power_switch;
 
 	GtkWidget *contents;
 };
@@ -67,7 +64,7 @@ struct technology {
 
 struct technology *create_technology(GDBusProxy *proxy, GVariant *path,
 		GVariant *properties);
-void free_technology(struct technology *item);
+void technology_free(struct technology *item);
 void technology_set_id(struct technology *item, gint id);
 enum technology_type technology_type_from_string(const gchar *str);
 
