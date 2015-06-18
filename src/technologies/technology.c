@@ -218,6 +218,8 @@ void init_technology(struct technology *tech, GVariantDict *properties,
 	tech->list_item = create_base_technology_list_item(name);
 	tech->settings = create_base_technology_settings(properties, proxy);
 	tech->type = technology_type_from_string(type);
+	g_object_set_data(G_OBJECT(tech->list_item->item), "technology-type",
+			&tech->type);
 
 	g_variant_unref(name_v);
 	g_variant_unref(type_v);

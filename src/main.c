@@ -32,6 +32,16 @@
 GtkWidget *list, *notebook;
 struct technology *technologies[TECHNOLOGY_TYPE_COUNT];
 
+/* sort smallest enum value first */
+gint technology_list_sort_cb(GtkListBoxRow *row1, GtkListBoxRow *row2,
+		gpointer user_data) {
+	enum technology_type type1 = *(enum technology_type *)g_object_get_data(
+			G_OBJECT(row1), "technology-type");
+	enum technology_type type2 = *(enum technology_type *)g_object_get_data(
+			G_OBJECT(row2), "technology-type");
+	return type1 - type2;
+}
+
 void technology_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data) {
 	if(!G_IS_OBJECT(row))
 		return;
@@ -51,6 +61,8 @@ static void create_content(GtkWidget *window) {
 	list = gtk_list_box_new();
 	gtk_list_box_set_selection_mode(GTK_LIST_BOX(list),
 			GTK_SELECTION_BROWSE);
+	gtk_list_box_set_sort_func(GTK_LIST_BOX(list), technology_list_sort_cb,
+			NULL, NULL);
 	g_signal_connect(list, "row-selected", G_CALLBACK(technology_selected),
 			NULL);
 	gtk_widget_set_size_request(list, LIST_WIDTH, -1);
