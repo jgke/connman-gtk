@@ -120,6 +120,7 @@ void add_technology(GDBusConnection *connection, GVariant *technology) {
 	technology_set_id(item, pos);
 
 out:
+	g_dbus_node_info_unref(info);
 	g_variant_unref(path);
 	g_variant_unref(properties);
 }
