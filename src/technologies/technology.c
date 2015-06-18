@@ -77,17 +77,18 @@ GtkWidget *create_technology_settings_title(const char *title) {
 	return label;
 }
 
-gboolean technology_toggle_power(GtkSwitch *widget, gboolean state,
+gboolean technology_toggle_power(GtkSwitch *widget, GParamSpec *pspec,
 		gpointer user_data) {
 	struct technology_settings *item = user_data;
 	GVariant *ret;
 	GError *error = NULL;
+	gboolean state = gtk_switch_get_active(widget);
 
 	ret = g_dbus_proxy_call_sync(item->proxy, "SetProperty",
 			g_variant_new("(sv)", "Powered", g_variant_new("b", state)),
 			G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
 	if(error) {
-		g_error("failed to toggle technology state: %s", error->message);
+		g_warning("failed to toggle technology state: %s", error->message);
 		g_error_free(error);
 		return TRUE;
 	}
@@ -110,7 +111,7 @@ void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 			state = g_variant_get_boolean(state_v);
 			g_variant_unref(state_v);
 
-			gtk_switch_set_active(GTK_SWITCH(item->power_switch),
+			gtk_switch_set_state(GTK_SWITCH(item->power_switch),
 					state);
 		}
 
@@ -166,7 +167,7 @@ struct technology_settings *create_base_technology_settings(GVariantDict *proper
 	gtk_switch_set_active(GTK_SWITCH(item->power_switch), powered);
 	gtk_widget_set_valign(item->power_switch, GTK_ALIGN_START);
 	gtk_widget_set_halign(item->power_switch, GTK_ALIGN_END);
-	g_signal_connect(item->power_switch, "state-set",
+	g_signal_connect(item->power_switch, "notify::active",
 			G_CALLBACK(technology_toggle_power), item);
 
 	item->contents = gtk_grid_new();
