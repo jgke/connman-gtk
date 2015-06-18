@@ -280,9 +280,9 @@ enum technology_type technology_type_from_string(const gchar *str) {
 		return TECHNOLOGY_TYPE_WIRELESS;
 	if(!strcmp(str, "bluetooth"))
 		return TECHNOLOGY_TYPE_BLUETOOTH;
-	if(!strcmp(str, "p2p"))
-		return TECHNOLOGY_TYPE_CELLULAR;
 	if(!strcmp(str, "cellular"))
+		return TECHNOLOGY_TYPE_CELLULAR;
+	if(!strcmp(str, "p2p"))
 		return TECHNOLOGY_TYPE_P2P;
 	return TECHNOLOGY_TYPE_UNKNOWN;
 }
