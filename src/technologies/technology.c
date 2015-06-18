@@ -115,8 +115,12 @@ void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 			state = g_variant_get_boolean(state_v);
 			g_variant_unref(state_v);
 
-			gtk_switch_set_state(GTK_SWITCH(item->power_switch),
+			g_signal_handler_block(G_OBJECT(item->power_switch),
+					item->powersig);
+			gtk_switch_set_active(GTK_SWITCH(item->power_switch),
 					state);
+			g_signal_handler_unblock(G_OBJECT(item->power_switch),
+					item->powersig);
 		}
 
 		g_variant_unref(name_v);
@@ -171,7 +175,7 @@ struct technology_settings *create_base_technology_settings(GVariantDict *proper
 	gtk_switch_set_active(GTK_SWITCH(item->power_switch), powered);
 	gtk_widget_set_valign(item->power_switch, GTK_ALIGN_START);
 	gtk_widget_set_halign(item->power_switch, GTK_ALIGN_END);
-	g_signal_connect(item->power_switch, "notify::active",
+	item->powersig = g_signal_connect(item->power_switch, "notify::active",
 			G_CALLBACK(technology_toggle_power), item);
 
 	item->contents = gtk_grid_new();

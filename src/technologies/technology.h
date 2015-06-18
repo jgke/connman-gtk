@@ -51,6 +51,7 @@ struct technology_settings {
 	GtkWidget *status;
 	GtkWidget *icon;
 	GtkWidget *power_switch;
+	gint powersig;
 
 	GtkWidget *contents;
 };

@@ -145,8 +145,6 @@ void remove_technology(GVariant *parameters) {
 	enum technology_type *type_p;
 	enum technology_type type;
 
-	printf("Remove tech signal\n");
-
 	path_v = g_variant_get_child_value(parameters, 0);
 	path = g_variant_get_string(path_v, NULL);
 	type_p = g_hash_table_lookup(technology_types, path);
