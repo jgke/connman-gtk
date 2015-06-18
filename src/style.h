@@ -3,8 +3,8 @@
 
 #include <gtk/gtk.h>
 
-#define DEFAULT_WIDTH 785
-#define DEFAULT_HEIGHT 485
+#define DEFAULT_WIDTH 700
+#define DEFAULT_HEIGHT 433
 #define LIST_WIDTH 200
 
 #define MARGIN_SMALL 5

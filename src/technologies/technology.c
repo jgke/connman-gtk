@@ -139,7 +139,8 @@ struct technology_settings *create_base_technology_settings(GVariantDict *proper
 
 	item->grid = gtk_grid_new();
 	g_object_ref(item->grid);
-	STYLE_ADD_MARGIN(item->grid, MARGIN_MEDIUM);
+	STYLE_ADD_MARGIN(item->grid, MARGIN_LARGE);
+	gtk_widget_set_margin_top(item->grid, 0);
 
 	item->icon = gtk_image_new_from_icon_name("preferences-system-network",
 			GTK_ICON_SIZE_DIALOG);
