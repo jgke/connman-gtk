@@ -46,8 +46,10 @@ gint technology_list_sort_cb(GtkListBoxRow *row1, GtkListBoxRow *row2,
 void technology_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data) {
 	if(!G_IS_OBJECT(row))
 		return;
-	gint *id = g_object_get_data(G_OBJECT(row), "technology-id");
-	gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), *id);
+	struct technology *tech = g_object_get_data(G_OBJECT(row), "technology");
+	gint num = gtk_notebook_page_num(GTK_NOTEBOOK(notebook),
+			tech->settings->grid);
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), num);
 }
 
 static void create_content(GtkWidget *window) {
@@ -96,8 +98,6 @@ void add_technology(GDBusConnection *connection, GVariant *technology) {
 	GDBusNodeInfo *info;
 	GError *error = NULL;
 	struct technology *item;
-	int pos;
-
 	info = g_dbus_node_info_new_for_xml(technology_interface, &error);
 	if(error) {
 		g_warning("Failed to load technology interface: %s",
@@ -129,9 +129,8 @@ void add_technology(GDBusConnection *connection, GVariant *technology) {
 	technologies[item->type] = item;
 
 	gtk_container_add(GTK_CONTAINER(list), item->list_item->item);
-	pos = gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
 			item->settings->grid, NULL);
-	technology_set_id(item, pos);
 
 out:
 	g_dbus_node_info_unref(info);

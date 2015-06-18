@@ -35,7 +35,11 @@ enum technology_type {
 	TECHNOLOGY_TYPE_COUNT
 };
 
+struct technology;
+
 struct technology_list_item {
+	struct technology *technology;
+
 	GtkWidget *item;
 
 	GtkWidget *icon;
@@ -43,6 +47,8 @@ struct technology_list_item {
 };
 
 struct technology_settings {
+	struct technology *technology;
+
 	GDBusProxy *proxy;
 
 	GtkWidget *grid;
@@ -59,14 +65,12 @@ struct technology_settings {
 struct technology {
 	struct technology_list_item *list_item;
 	struct technology_settings *settings;
-	gint id;
 	enum technology_type type;
 };
 
 struct technology *create_technology(GDBusProxy *proxy, GVariant *path,
 		GVariant *properties);
 void technology_free(struct technology *item);
-void technology_set_id(struct technology *item, gint id);
 enum technology_type technology_type_from_string(const gchar *str);
 
 

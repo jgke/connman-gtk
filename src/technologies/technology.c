@@ -33,17 +33,21 @@
 #include "technologies/vpn.h"
 #include "technologies/wireless.h"
 
-struct technology_list_item *create_base_technology_list_item(const gchar *name) {
+struct technology_list_item *create_base_technology_list_item(struct technology *tech,
+		const gchar *name) {
 	GtkWidget *grid;
 	struct technology_list_item *item;
 
 	item = g_malloc(sizeof(*item));
+
+	item->technology = tech;
 
 	grid = gtk_grid_new();
 	STYLE_ADD_MARGIN(grid, MARGIN_SMALL);
 
 	item->item = gtk_list_box_row_new();
 	g_object_ref(item->item);
+	g_object_set_data(G_OBJECT(item->item), "technology", tech);
 
 	item->icon = gtk_image_new_from_icon_name("network-transmit-symbolic",
 			GTK_ICON_SIZE_LARGE_TOOLBAR);
@@ -128,13 +132,15 @@ void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 	}
 }
 
-struct technology_settings *create_base_technology_settings(GVariantDict *properties,
-		GDBusProxy *proxy) {
+struct technology_settings *create_base_technology_settings(struct technology *tech,
+		GVariantDict *properties, GDBusProxy *proxy) {
 	struct technology_settings *item = g_malloc(sizeof(*item));
 
 	GVariant *variant;
 	const gchar *name;
 	gboolean powered;
+
+	item->technology = tech;
 
 	variant = g_variant_dict_lookup_value(properties, "Powered", NULL);
 	powered = g_variant_get_boolean(variant);
@@ -150,6 +156,7 @@ struct technology_settings *create_base_technology_settings(GVariantDict *proper
 	g_object_ref(item->grid);
 	STYLE_ADD_MARGIN(item->grid, MARGIN_LARGE);
 	gtk_widget_set_margin_top(item->grid, 0);
+	g_object_set_data(G_OBJECT(item->grid), "technology", tech);
 
 	item->icon = gtk_image_new_from_icon_name("preferences-system-network",
 			GTK_ICON_SIZE_DIALOG);
@@ -226,8 +233,8 @@ void init_technology(struct technology *tech, GVariantDict *properties,
 	type_v = g_variant_dict_lookup_value(properties, "Type", NULL);
 	type = g_variant_get_string(type_v, NULL);
 
-	tech->list_item = create_base_technology_list_item(name);
-	tech->settings = create_base_technology_settings(properties, proxy);
+	tech->list_item = create_base_technology_list_item(tech, name);
+	tech->settings = create_base_technology_settings(tech, properties, proxy);
 	tech->type = technology_type_from_string(type);
 	g_object_set_data(G_OBJECT(tech->list_item->item), "technology-type",
 			&tech->type);
@@ -271,12 +278,6 @@ struct technology *create_technology(GDBusProxy *proxy, GVariant *path,
 
 	g_variant_dict_unref(properties);
 	return item;
-}
-
-void technology_set_id(struct technology *item, gint id) {
-	item->id = id;
-	g_object_set_data(G_OBJECT(item->list_item->item), "technology-id",
-			&item->id);
 }
 
 void technology_free(struct technology *item) {
