@@ -22,6 +22,7 @@
 #define _CONNMAN_GTK_TECHNOLOGY_H
 
 #include <gio/gio.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 
 enum technology_type {
@@ -48,6 +49,7 @@ struct technology_list_item {
 
 struct technology_settings {
 	struct technology *technology;
+	GHashTable *properties;
 
 	GDBusProxy *proxy;
 
@@ -72,6 +74,5 @@ struct technology *create_technology(GDBusProxy *proxy, GVariant *path,
 		GVariant *properties);
 void technology_free(struct technology *item);
 enum technology_type technology_type_from_string(const gchar *str);
-
 
 #endif /* _CONNMAN_GTK_TECHNOLOGY_H */

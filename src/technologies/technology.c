@@ -22,6 +22,8 @@
 #include <string.h>
 
 #include <gio/gio.h>
+#include <glib.h>
+#include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
 #include "style.h"
@@ -104,20 +106,38 @@ gboolean technology_toggle_power(GtkSwitch *widget, GParamSpec *pspec,
 	return FALSE;
 }
 
+void technology_update_status(struct technology_settings *item) {
+	gboolean connected = g_variant_get_boolean(g_hash_table_lookup(
+				item->properties, "Connected"));
+	gboolean powered = g_variant_get_boolean(g_hash_table_lookup(
+				item->properties, "Powered"));
+	if(connected)
+		gtk_label_set_text(GTK_LABEL(item->status),
+				_("Connected"));
+	else {
+		if(powered)
+			gtk_label_set_text(GTK_LABEL(item->status),
+					_("Not connected"));
+		else
+			gtk_label_set_text(GTK_LABEL(item->status),
+					_("Disabled"));
+	}
+}
+
 void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 		GVariant *parameters, gpointer user_data) {
 	struct technology_settings *item = user_data;
 	if(!strcmp(signal, "PropertyChanged")) {
-		GVariant *name_v, *value_v;
-		const gchar *name;
+		GVariant *name_v, *value_v, *value;
+		gchar *name;
 		name_v = g_variant_get_child_value(parameters, 0);
 		value_v = g_variant_get_child_value(parameters, 1);
-		name = g_variant_get_string(name_v, NULL);
+		value = g_variant_get_child_value(value_v, 0);
+		name = g_variant_dup_string(name_v, NULL);
+		g_hash_table_replace(item->properties, name, value);
 		if(!strcmp(name, "Powered")) {
 			gboolean state;
-			GVariant *state_v = g_variant_get_child_value(value_v, 0);
-			state = g_variant_get_boolean(state_v);
-			g_variant_unref(state_v);
+			state = g_variant_get_boolean(value);
 
 			g_signal_handler_block(G_OBJECT(item->power_switch),
 					item->powersig);
@@ -125,6 +145,10 @@ void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 					state);
 			g_signal_handler_unblock(G_OBJECT(item->power_switch),
 					item->powersig);
+			technology_update_status(item);
+		}
+		else if(!strcmp(name, "Connected")) {
+			technology_update_status(item);
 		}
 
 		g_variant_unref(name_v);
@@ -133,20 +157,33 @@ void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 }
 
 struct technology_settings *create_base_technology_settings(struct technology *tech,
-		GVariantDict *properties, GDBusProxy *proxy) {
+		GVariant *properties, GDBusProxy *proxy) {
 	struct technology_settings *item = g_malloc(sizeof(*item));
 
-	GVariant *variant;
+	GVariantIter *iter;
+	gchar *key;
+	GVariant *value;
 	const gchar *name;
 	gboolean powered;
+	gboolean connected;
 
 	item->technology = tech;
+	item->properties = g_hash_table_new_full(g_str_hash, g_str_equal,
+			g_free, (GDestroyNotify)g_variant_unref);
 
-	variant = g_variant_dict_lookup_value(properties, "Powered", NULL);
-	powered = g_variant_get_boolean(variant);
-	g_variant_unref(variant);
-	variant = g_variant_dict_lookup_value(properties, "Name", NULL);
-	name = g_variant_get_string(variant, NULL);
+	iter = g_variant_iter_new(properties);
+	while(g_variant_iter_loop(iter, "{sv}", &key, &value)) {
+		gchar *hkey = g_strdup(key);
+		g_variant_ref(value);
+		g_hash_table_insert(item->properties, hkey, value);
+	}
+
+	powered = g_variant_get_boolean(g_hash_table_lookup(item->properties,
+				"Powered"));
+	connected = g_variant_get_boolean(g_hash_table_lookup(item->properties,
+				"Connected"));
+	name = g_variant_get_string(g_hash_table_lookup(item->properties,
+				"Name"), NULL);
 
 	item->proxy = proxy;
 	g_signal_connect(proxy, "g-signal", G_CALLBACK(technology_proxy_signal),
@@ -170,7 +207,10 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 	gtk_widget_set_halign(item->title, GTK_ALIGN_START);
 	gtk_widget_set_hexpand(item->title, TRUE);
 
-	item->status = gtk_label_new("Status");
+	if(connected)
+		item->status = gtk_label_new(_("Connected"));
+	else
+		item->status = gtk_label_new(_("Not connected"));
 	g_object_ref(item->status);
 	gtk_widget_set_margin_start(item->status, MARGIN_MEDIUM);
 	gtk_widget_set_margin_end(item->status, MARGIN_MEDIUM);
@@ -198,7 +238,6 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 	gtk_grid_attach(GTK_GRID(item->grid), item->contents,	  0, 2, 3, 1);
 
 	gtk_widget_show_all(item->grid);
-	g_variant_unref(variant);
 	return item;
 }
 
@@ -217,24 +256,30 @@ void free_base_technology_settings(struct technology_settings *item) {
 	gtk_widget_destroy(item->grid);
 
 	g_object_unref(item->proxy);
+	g_hash_table_unref(item->properties);
 
 	g_free(item);
 }
 
-void init_technology(struct technology *tech, GVariantDict *properties,
+void init_technology(struct technology *tech, GVariant *properties_v,
 		GDBusProxy *proxy) {
 	GVariant *name_v;
 	const gchar *name;
 	GVariant *type_v;
 	const gchar *type;
+	GVariantDict *properties;
 
+	tech->settings = create_base_technology_settings(tech, properties_v,
+			proxy);
+
+	properties = g_variant_dict_new(properties_v);
 	name_v = g_variant_dict_lookup_value(properties, "Name", NULL);
 	name = g_variant_get_string(name_v, NULL);
 	type_v = g_variant_dict_lookup_value(properties, "Type", NULL);
 	type = g_variant_get_string(type_v, NULL);
+	g_variant_dict_unref(properties);
 
 	tech->list_item = create_base_technology_list_item(tech, name);
-	tech->settings = create_base_technology_settings(tech, properties, proxy);
 	tech->type = technology_type_from_string(type);
 	g_object_set_data(G_OBJECT(tech->list_item->item), "technology-type",
 			&tech->type);
@@ -267,16 +312,11 @@ void init_technology(struct technology *tech, GVariantDict *properties,
 }
 
 struct technology *create_technology(GDBusProxy *proxy, GVariant *path,
-		GVariant *properties_v) {
+		GVariant *properties) {
 	struct technology *item;
-	GVariantDict *properties;
-
-	properties = g_variant_dict_new(properties_v);
 
 	item = g_malloc(sizeof(*item));
 	init_technology(item, properties, proxy);
-
-	g_variant_dict_unref(properties);
 	return item;
 }
 
