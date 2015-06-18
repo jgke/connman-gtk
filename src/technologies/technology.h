@@ -25,6 +25,8 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include "../services/service.h"
+
 enum technology_type {
 	TECHNOLOGY_TYPE_UNKNOWN,
 	TECHNOLOGY_TYPE_ETHERNET,
@@ -68,11 +70,15 @@ struct technology {
 	struct technology_list_item *list_item;
 	struct technology_settings *settings;
 	enum technology_type type;
+	void (*add_service)(struct service *serv);
+	void (*update_service)(struct service *serv, GVariant *properties);
+	void (*remove_service)(const gchar *path);
 };
 
 struct technology *create_technology(GDBusProxy *proxy, GVariant *path,
 		GVariant *properties);
 void technology_free(struct technology *item);
 enum technology_type technology_type_from_string(const gchar *str);
+enum technology_type technology_type_from_path(const gchar *str);
 
 #endif /* _CONNMAN_GTK_TECHNOLOGY_H */

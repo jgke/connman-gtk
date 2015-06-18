@@ -261,6 +261,14 @@ void free_base_technology_settings(struct technology_settings *item) {
 	g_free(item);
 }
 
+void technology_add_service_dummy(struct service *serv) {}
+
+void technology_update_service(struct service *serv, GVariant *properties) {
+	service_update(serv, properties);
+}
+
+void technology_remove_service_dummy(const gchar *path) {}
+
 void init_technology(struct technology *tech, GVariant *properties_v,
 		GDBusProxy *proxy) {
 	GVariant *name_v;
@@ -268,9 +276,6 @@ void init_technology(struct technology *tech, GVariant *properties_v,
 	GVariant *type_v;
 	const gchar *type;
 	GVariantDict *properties;
-
-	tech->settings = create_base_technology_settings(tech, properties_v,
-			proxy);
 
 	properties = g_variant_dict_new(properties_v);
 	name_v = g_variant_dict_lookup_value(properties, "Name", NULL);
@@ -280,9 +285,14 @@ void init_technology(struct technology *tech, GVariant *properties_v,
 	g_variant_dict_unref(properties);
 
 	tech->list_item = create_base_technology_list_item(tech, name);
+	tech->settings = create_base_technology_settings(tech, properties_v,
+			proxy);
 	tech->type = technology_type_from_string(type);
 	g_object_set_data(G_OBJECT(tech->list_item->item), "technology-type",
 			&tech->type);
+	tech->add_service = technology_add_service_dummy;
+	tech->update_service = technology_update_service;
+	tech->remove_service = technology_remove_service_dummy;
 
 	g_variant_unref(name_v);
 	g_variant_unref(type_v);
@@ -340,4 +350,14 @@ enum technology_type technology_type_from_string(const gchar *str) {
 	if(!strcmp(str, "p2p"))
 		return TECHNOLOGY_TYPE_P2P;
 	return TECHNOLOGY_TYPE_UNKNOWN;
+}
+
+enum technology_type technology_type_from_path(const gchar *str) {
+	gchar *path = g_strdup(str);
+	/* find and replace first _ with 0 */
+	*strchr(path, '_') = '\0';
+	str = strrchr(path, '/') + 1;
+	enum technology_type type = technology_type_from_string(str);
+	g_free(path);
+	return type;
 }

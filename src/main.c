@@ -31,6 +31,7 @@
 
 GtkWidget *list, *notebook;
 GHashTable *technology_types;
+GHashTable *services;
 struct technology *technologies[TECHNOLOGY_TYPE_COUNT];
 
 /* sort smallest enum value first */
@@ -88,6 +89,7 @@ void destroy(GtkWidget *window, gpointer user_data) {
 	for(i = 0; i < TECHNOLOGY_TYPE_COUNT; i++)
 		if(technologies[i])
 			technology_free(technologies[i]);
+	g_hash_table_remove_all(services);
 }
 
 void add_technology(GDBusConnection *connection, GVariant *technology) {
@@ -159,6 +161,72 @@ out:
 	g_variant_unref(path_v);
 }
 
+void add_service(GDBusConnection *connection, const gchar *path,
+		GVariant *properties) {
+	struct service *serv;
+	GDBusProxy *proxy;
+	GDBusNodeInfo *info;
+	GError *error = NULL;
+	info = g_dbus_node_info_new_for_xml(service_interface, &error);
+	if(error) {
+		g_warning("Failed to load service interface: %s",
+				error->message);
+		g_error_free(error);
+		return;
+	}
+
+	proxy = g_dbus_proxy_new_sync(connection, G_DBUS_PROXY_FLAGS_NONE,
+			g_dbus_node_info_lookup_interface(info,
+				"net.connman.Service"),
+			"net.connman", path, "net.connman.Service",
+			NULL, &error);
+	if(error) {
+		g_warning("failed to connect ConnMan service proxy: %s",
+				error->message);
+		g_error_free(error);
+		goto out;
+	}
+
+	serv = service_create(proxy, path, properties);
+	g_hash_table_insert(services, g_strdup(path), serv);
+out:
+	g_dbus_node_info_unref(info);
+}
+
+void services_changed(GDBusConnection *connection, GVariant *parameters) {
+	GVariant *modified, *deleted;
+	GVariantIter *iter;
+	gchar *path;
+	GVariant *value;
+
+	modified = g_variant_get_child_value(parameters, 0);
+	deleted = g_variant_get_child_value(parameters, 1);
+
+	iter = g_variant_iter_new(modified);
+	while(g_variant_iter_loop(iter, "(o@*)", &path, &value)) {
+		enum technology_type type = technology_type_from_path(path);
+		if(type != TECHNOLOGY_TYPE_UNKNOWN) {
+			if(!g_hash_table_contains(services, path)) {
+				add_service(connection, path, value);
+				continue;
+			}
+			struct service *serv = g_hash_table_lookup(services, path);
+			technologies[type]->update_service(serv, value);
+		}
+	}
+
+	iter = g_variant_iter_new(deleted);
+	while(g_variant_iter_loop(iter, "o", &path)) {
+		enum technology_type type = technology_type_from_path(path);
+		if(type != TECHNOLOGY_TYPE_UNKNOWN)
+			if(g_hash_table_contains(services, path))
+				technologies[type]->remove_service(path);
+	}
+
+	g_variant_unref(modified);
+	g_variant_unref(deleted);
+}
+
 void manager_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 		GVariant *parameters, gpointer user_data) {
 	GDBusConnection *connection = g_dbus_proxy_get_connection(proxy);
@@ -166,6 +234,8 @@ void manager_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 		add_technology(connection, parameters);
 	} else if(!strcmp(signal, "TechnologyRemoved")) {
 		remove_technology(parameters);
+	} else if(!strcmp(signal, "ServicesChanged")) {
+		services_changed(connection, parameters);
 	}
 }
 
@@ -268,8 +338,10 @@ int main(int argc, char *argv[]) {
 
 	style_init();
 
-	technology_types = g_hash_table_new_full(g_str_hash, g_int_equal,
+	technology_types = g_hash_table_new_full(g_str_hash, g_str_equal,
 			g_free, NULL);
+	services = g_hash_table_new_full(g_str_hash, g_str_equal,
+			g_free, (GDestroyNotify)service_free);
 
 	app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);

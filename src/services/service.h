@@ -18,22 +18,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtk/gtk.h>
+#ifndef _CONNMAN_GTK_SERVICE_H
+#define _CONNMAN_GTK_SERVICE_H
 
-#include "ethernet.h"
-#include "technology.h"
+#include <gio/gio.h>
+#include <glib.h>
 
-void technology_ethernet_service_add(struct service *service) {
-}
+struct service {
+	GDBusProxy *proxy;
+	gchar *path;
+	GHashTable *properties;
+};
 
-void technology_ethernet_service_remove(const gchar *path) {
-}
+struct service *service_create(GDBusProxy *proxy, const gchar *path,
+		GVariant *properties);
+void service_update(struct service *serv, GVariant *properties);
+void service_free(struct service *serv);
 
-void technology_ethernet_init(struct technology *tech, GVariantDict *properties) {
-	gtk_image_set_from_icon_name(GTK_IMAGE(tech->list_item->icon),
-			"network-wired-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR);
-	gtk_image_set_from_icon_name(GTK_IMAGE(tech->settings->icon),
-			"network-wired", GTK_ICON_SIZE_DIALOG);
-	tech->add_service = technology_ethernet_service_add;
-	tech->remove_service = technology_ethernet_service_remove;
-}
+#endif /* _CONNMAN_GTK_SERVICE_H */

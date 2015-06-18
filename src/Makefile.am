@@ -8,7 +8,8 @@ connman_gtk_SOURCES = main.c style.c \
 			technologies/ethernet.c \
 			technologies/p2p.c \
 			technologies/vpn.c \
-			technologies/wireless.c
+			technologies/wireless.c \
+		      services/service.c
 connman_gtk_LDADD = @GTK_LIBS@ @GLIB_LIBS@
 connman_gtk_CPPFLAGS = @GTK_CFLAGS@ @GLIB_CFLAGS@ \
 		       -DCONNMAN_GTK_LOCALEDIR=\"${CONNMAN_GTK_LOCALEDIR}\" \
