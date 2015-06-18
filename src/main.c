@@ -137,13 +137,21 @@ out:
 	g_variant_unref(properties);
 }
 
-void add_all_technologies(GDBusConnection *connection, GVariant *technologies) {
+void add_all_technologies(GDBusConnection *connection, GVariant *technologies_v) {
 	int i;
-	int size = g_variant_n_children(technologies);
+	int size = g_variant_n_children(technologies_v);
 	for(i = 0; i < size; i++) {
-		GVariant *child = g_variant_get_child_value(technologies, i);
+		GVariant *child = g_variant_get_child_value(technologies_v, i);
 		add_technology(connection, child);
 		g_variant_unref(child);
+	}
+	for(i = TECHNOLOGY_TYPE_ETHERNET; i < TECHNOLOGY_TYPE_COUNT; i++) {
+		if(technologies[i]) {
+			GtkWidget *row = technologies[i]->list_item->item;
+			gtk_list_box_select_row(GTK_LIST_BOX(list),
+					GTK_LIST_BOX_ROW(row));
+			break;
+		}
 	}
 }
 
