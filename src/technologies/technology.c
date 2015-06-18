@@ -24,9 +24,14 @@
 #include <gio/gio.h>
 #include <gtk/gtk.h>
 
-#include "technology.h"
-#include "ethernet.h"
 #include "style.h"
+#include "technologies/bluetooth.h"
+#include "technologies/cellular.h"
+#include "technologies/ethernet.h"
+#include "technologies/p2p.h"
+#include "technologies/technology.h"
+#include "technologies/vpn.h"
+#include "technologies/wireless.h"
 
 struct technology_list_item *create_base_technology_list_item(const gchar *name) {
 	GtkWidget *grid;
@@ -222,10 +227,20 @@ void init_technology(struct technology *tech, GVariantDict *properties,
 		technology_ethernet_init(tech, properties);
 		break;
 	case TECHNOLOGY_TYPE_WIRELESS:
+		technology_wireless_init(tech, properties);
+		break;
 	case TECHNOLOGY_TYPE_BLUETOOTH:
+		technology_bluetooth_init(tech, properties);
+		break;
 	case TECHNOLOGY_TYPE_CELLULAR:
+		technology_cellular_init(tech, properties);
+		break;
 	case TECHNOLOGY_TYPE_P2P:
+		technology_p2p_init(tech, properties);
+		break;
 	case TECHNOLOGY_TYPE_VPN:
+		technology_vpn_init(tech, properties);
+		break;
 	default:
 		break;
 	}
