@@ -25,6 +25,7 @@
 
 struct ethernet_technology {
 	struct technology parent;
+	GtkWidget *label;
 };
 
 struct technology *technology_ethernet_create(void) {
@@ -33,6 +34,8 @@ struct technology *technology_ethernet_create(void) {
 }
 
 void technology_ethernet_free(struct technology *tech) {
+	struct ethernet_technology *item = (struct ethernet_technology *)tech;
+	g_object_unref(item->label);
 	technology_free(tech);
 }
 
@@ -43,11 +46,17 @@ void technology_ethernet_service_remove(const gchar *path) {
 }
 
 void technology_ethernet_init(struct technology *tech, GVariantDict *properties) {
-	gtk_image_set_from_icon_name(GTK_IMAGE(tech->list_item->icon),
+	struct ethernet_technology *item = (struct ethernet_technology *)tech;
+	gtk_image_set_from_icon_name(GTK_IMAGE(item->parent.list_item->icon),
 			"network-wired-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR);
-	gtk_image_set_from_icon_name(GTK_IMAGE(tech->settings->icon),
+	gtk_image_set_from_icon_name(GTK_IMAGE(item->parent.settings->icon),
 			"network-wired", GTK_ICON_SIZE_DIALOG);
-	tech->add_service = technology_ethernet_service_add;
-	tech->remove_service = technology_ethernet_service_remove;
-	tech->free = technology_ethernet_free;
+	item->parent.add_service = technology_ethernet_service_add;
+	item->parent.remove_service = technology_ethernet_service_remove;
+	item->parent.free = technology_ethernet_free;
+
+	item->label = gtk_label_new("Ethernet contents");
+	g_object_ref(item->label);
+	gtk_widget_show(item->label);
+	gtk_grid_attach(GTK_GRID(item->parent.settings->contents), item->label, 0, 0, 1, 1);
 }
