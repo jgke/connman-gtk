@@ -237,10 +237,8 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 	gtk_widget_set_hexpand(item->contents, TRUE);
 	gtk_widget_set_vexpand(item->contents, TRUE);
 
-	item->services = gtk_grid_new();
+	item->services = gtk_list_box_new();
 	g_object_ref(item->services);
-	gtk_orientable_set_orientation(GTK_ORIENTABLE(item->services),
-			GTK_ORIENTATION_VERTICAL);
 	gtk_grid_attach(GTK_GRID(item->contents), item->services, 0, 0, 1, 1);
 
 	gtk_grid_attach(GTK_GRID(item->grid), item->icon,	  0, 0, 1, 2);
