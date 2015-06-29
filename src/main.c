@@ -88,7 +88,7 @@ void destroy(GtkWidget *window, gpointer user_data) {
 	notebook = NULL;
 	for(i = 0; i < TECHNOLOGY_TYPE_COUNT; i++)
 		if(technologies[i])
-			technology_free(technologies[i]);
+			technologies[i]->free(technologies[i]);
 	g_hash_table_remove_all(services);
 }
 
@@ -155,7 +155,7 @@ void remove_technology(GVariant *parameters) {
 	}
 	type = *type_p;
 	g_hash_table_remove(technology_types, path);
-	technology_free(technologies[type]);
+	technologies[type]->free(technologies[type]);
 	technologies[type] = NULL;
 out:
 	g_variant_unref(path_v);

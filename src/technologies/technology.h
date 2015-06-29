@@ -74,11 +74,11 @@ struct technology {
 	void (*add_service)(struct service *serv);
 	void (*update_service)(struct service *serv, GVariant *properties);
 	void (*remove_service)(const gchar *path);
+	void (*free)(struct technology *item);
 };
 
 struct technology *create_technology(GDBusProxy *proxy, GVariant *path,
 		GVariant *properties);
-void technology_free(struct technology *item);
 enum technology_type technology_type_from_string(const gchar *str);
 enum technology_type technology_type_from_path(const gchar *str);
 

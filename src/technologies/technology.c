@@ -277,6 +277,14 @@ void technology_update_service(struct service *serv, GVariant *properties) {
 
 void technology_remove_service_dummy(const gchar *path) {}
 
+void technology_free(struct technology *item) {
+	if(!item)
+		return;
+	free_base_technology_list_item(item->list_item);
+	free_base_technology_settings(item->settings);
+	g_free(item);
+}
+
 void init_technology(struct technology *tech, GVariant *properties_v,
 		GDBusProxy *proxy) {
 	GVariant *name_v;
@@ -303,6 +311,7 @@ void init_technology(struct technology *tech, GVariant *properties_v,
 	tech->add_service = technology_add_service_dummy;
 	tech->update_service = technology_update_service;
 	tech->remove_service = technology_remove_service_dummy;
+	tech->free = technology_free;
 
 	g_variant_unref(name_v);
 	g_variant_unref(type_v);
@@ -338,14 +347,6 @@ struct technology *create_technology(GDBusProxy *proxy, GVariant *path,
 	item = g_malloc(sizeof(*item));
 	init_technology(item, properties, proxy);
 	return item;
-}
-
-void technology_free(struct technology *item) {
-	if(!item)
-		return;
-	free_base_technology_list_item(item->list_item);
-	free_base_technology_settings(item->settings);
-	g_free(item);
 }
 
 enum technology_type technology_type_from_string(const gchar *str) {
