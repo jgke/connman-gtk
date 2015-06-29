@@ -211,7 +211,8 @@ void services_changed(GDBusConnection *connection, GVariant *parameters) {
 				continue;
 			}
 			struct service *serv = g_hash_table_lookup(services, path);
-			technologies[type]->update_service(serv, value);
+			technologies[type]->update_service(technologies[type],
+					serv, value);
 		}
 	}
 
@@ -220,7 +221,7 @@ void services_changed(GDBusConnection *connection, GVariant *parameters) {
 		enum technology_type type = technology_type_from_path(path);
 		if(type != TECHNOLOGY_TYPE_UNKNOWN)
 			if(g_hash_table_contains(services, path))
-				technologies[type]->remove_service(path);
+				technologies[type]->remove_service(technologies[type], path);
 	}
 	g_variant_iter_free(iter);
 

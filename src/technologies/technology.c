@@ -154,7 +154,7 @@ void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 		else if(!strcmp(name, "Connected")) {
 			technology_update_status(item);
 		}
-		item->technology->property_changed(name);
+		item->technology->property_changed(item->technology, name);
 
 		g_variant_unref(name_v);
 		g_variant_unref(value_v);
@@ -267,15 +267,16 @@ void free_base_technology_settings(struct technology_settings *item) {
 	g_free(item);
 }
 
-void technology_property_changed_dummy(const gchar *key) {}
+void technology_property_changed_dummy(struct technology *item, const gchar *key) {}
 
-void technology_add_service_dummy(struct service *serv) {}
+void technology_add_service_dummy(struct technology *item, struct service *serv) {}
 
-void technology_update_service(struct service *serv, GVariant *properties) {
+void technology_update_service(struct technology *item, struct service *serv,
+		GVariant *properties) {
 	service_update(serv, properties);
 }
 
-void technology_remove_service_dummy(const gchar *path) {}
+void technology_remove_service_dummy(struct technology *item, const gchar *path) {}
 
 void technology_free(struct technology *item) {
 	if(!item)

@@ -64,16 +64,18 @@ struct technology_settings {
 	gint powersig;
 
 	GtkWidget *contents;
+	GtkWidget *services;
+	GtkWidget *buttons;
 };
 
 struct technology {
 	struct technology_list_item *list_item;
 	struct technology_settings *settings;
 	enum technology_type type;
-	void (*property_changed)(const gchar *key);
-	void (*add_service)(struct service *serv);
-	void (*update_service)(struct service *serv, GVariant *properties);
-	void (*remove_service)(const gchar *path);
+	void (*property_changed)(struct technology *item, const gchar *key);
+	void (*add_service)(struct technology *item, struct service *serv);
+	void (*update_service)(struct technology *item, struct service *serv, GVariant *properties);
+	void (*remove_service)(struct technology *item, const gchar *path);
 	void (*free)(struct technology *item);
 };
 

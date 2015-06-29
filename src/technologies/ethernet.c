@@ -39,10 +39,12 @@ void technology_ethernet_free(struct technology *tech) {
 	technology_free(tech);
 }
 
-void technology_ethernet_service_add(struct service *service) {
+void technology_ethernet_service_add(struct technology *item,
+		struct service *service) {
 }
 
-void technology_ethernet_service_remove(const gchar *path) {
+void technology_ethernet_service_remove(struct technology *item,
+		const gchar *path) {
 }
 
 void technology_ethernet_init(struct technology *tech, GVariantDict *properties) {
