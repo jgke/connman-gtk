@@ -25,6 +25,7 @@
 
 #include "technology.h"
 
+struct technology *technology_ethernet_create(void);
 void technology_ethernet_init(struct technology *tech, GVariantDict *properties);
 
 #endif /* _CONNMAN_GTK_ETHERNET_H */

@@ -23,6 +23,19 @@
 #include "ethernet.h"
 #include "technology.h"
 
+struct ethernet_technology {
+	struct technology parent;
+};
+
+struct technology *technology_ethernet_create(void) {
+	struct ethernet_technology *item = g_malloc(sizeof(*item));
+	return (struct technology *)item;
+}
+
+void technology_ethernet_free(struct technology *tech) {
+	technology_free(tech);
+}
+
 void technology_ethernet_service_add(struct service *service) {
 }
 
@@ -36,4 +49,5 @@ void technology_ethernet_init(struct technology *tech, GVariantDict *properties)
 			"network-wired", GTK_ICON_SIZE_DIALOG);
 	tech->add_service = technology_ethernet_service_add;
 	tech->remove_service = technology_ethernet_service_remove;
+	tech->free = technology_ethernet_free;
 }

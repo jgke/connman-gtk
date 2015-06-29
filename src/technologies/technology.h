@@ -81,5 +81,6 @@ struct technology *create_technology(GDBusProxy *proxy, GVariant *path,
 		GVariant *properties);
 enum technology_type technology_type_from_string(const gchar *str);
 enum technology_type technology_type_from_path(const gchar *str);
+void technology_free(struct technology *tech);
 
 #endif /* _CONNMAN_GTK_TECHNOLOGY_H */

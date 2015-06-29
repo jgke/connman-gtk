@@ -343,8 +343,25 @@ void init_technology(struct technology *tech, GVariant *properties_v,
 struct technology *create_technology(GDBusProxy *proxy, GVariant *path,
 		GVariant *properties) {
 	struct technology *item;
+	GVariantDict *properties_d;
+	GVariant *type_v;
+	enum technology_type type;
 
-	item = g_malloc(sizeof(*item));
+	properties_d = g_variant_dict_new(properties);
+	type_v = g_variant_dict_lookup_value(properties_d, "Type", NULL);
+	type = technology_type_from_string(g_variant_get_string(type_v, NULL));
+	g_variant_dict_unref(properties_d);
+
+	switch(type) {
+	case TECHNOLOGY_TYPE_ETHERNET:
+		item = technology_ethernet_create();
+		break;
+	default:
+		item = g_malloc(sizeof(*item));
+		break;
+	}
+	g_variant_unref(type_v);
+
 	init_technology(item, properties, proxy);
 	return item;
 }
