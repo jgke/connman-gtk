@@ -124,6 +124,19 @@ void technology_update_status(struct technology_settings *item) {
 	}
 }
 
+void technology_update_power(struct technology_settings *item) {
+	gboolean powered = g_variant_get_boolean(g_hash_table_lookup(
+				item->properties, "Powered"));
+
+	g_signal_handler_block(G_OBJECT(item->power_switch),
+			item->powersig);
+	gtk_switch_set_active(GTK_SWITCH(item->power_switch),
+			powered);
+	g_signal_handler_unblock(G_OBJECT(item->power_switch),
+			item->powersig);
+	technology_update_status(item);
+}
+
 void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 		GVariant *parameters, gpointer user_data) {
 	struct technology_settings *item = user_data;
@@ -136,16 +149,7 @@ void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 		name = g_variant_dup_string(name_v, NULL);
 		g_hash_table_replace(item->properties, name, value);
 		if(!strcmp(name, "Powered")) {
-			gboolean state;
-			state = g_variant_get_boolean(value);
-
-			g_signal_handler_block(G_OBJECT(item->power_switch),
-					item->powersig);
-			gtk_switch_set_active(GTK_SWITCH(item->power_switch),
-					state);
-			g_signal_handler_unblock(G_OBJECT(item->power_switch),
-					item->powersig);
-			technology_update_status(item);
+			technology_update_power(item);
 		}
 		else if(!strcmp(name, "Connected")) {
 			technology_update_status(item);
