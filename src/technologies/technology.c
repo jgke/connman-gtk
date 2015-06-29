@@ -177,6 +177,7 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 		g_variant_ref(value);
 		g_hash_table_insert(item->properties, hkey, value);
 	}
+	g_variant_iter_free(iter);
 
 	powered = g_variant_get_boolean(g_hash_table_lookup(item->properties,
 				"Powered"));

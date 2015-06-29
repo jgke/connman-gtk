@@ -222,6 +222,7 @@ void services_changed(GDBusConnection *connection, GVariant *parameters) {
 			if(g_hash_table_contains(services, path))
 				technologies[type]->remove_service(path);
 	}
+	g_variant_iter_free(iter);
 
 	g_variant_unref(modified);
 	g_variant_unref(deleted);
