@@ -301,6 +301,7 @@ void technology_add_service(struct technology *item, struct service *serv) {
 	if(functions[item->type].add_service)
 		functions[item->type].add_service(item, serv);
 	gtk_container_add(GTK_CONTAINER(item->settings->services), serv->item);
+	g_hash_table_insert(item->services, g_strdup(serv->path), serv);
 }
 
 void technology_update_service(struct technology *item, struct service *serv,
@@ -313,6 +314,7 @@ void technology_update_service(struct technology *item, struct service *serv,
 void technology_remove_service(struct technology *item, const gchar *path) {
 	if(functions[item->type].remove_service)
 		functions[item->type].remove_service(item, path);
+	g_hash_table_remove(item->services, path);
 }
 
 void technology_free(struct technology *item) {
@@ -322,6 +324,7 @@ void technology_free(struct technology *item) {
 		functions[item->type].free(item);
 	free_base_technology_list_item(item->list_item);
 	free_base_technology_settings(item->settings);
+	g_hash_table_unref(item->services);
 	g_free(item);
 }
 
@@ -349,6 +352,9 @@ void technology_init(struct technology *tech, GVariant *properties_v,
 
 	g_variant_unref(name_v);
 	g_variant_unref(type_v);
+
+	tech->services = g_hash_table_new_full(g_str_hash, g_str_equal,
+			g_free, NULL);
 }
 
 struct technology *technology_create(GDBusProxy *proxy, GVariant *path,

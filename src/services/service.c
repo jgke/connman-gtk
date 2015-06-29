@@ -67,9 +67,13 @@ struct service *service_create(GDBusProxy *proxy, const gchar *path,
 	}
 	g_variant_iter_free(iter);
 
-	serv->item = gtk_grid_new();
-	gtk_widget_show(serv->item);
+	serv->item = gtk_list_box_row_new();
 	g_object_ref(serv->item);
+
+	serv->contents = gtk_grid_new();
+	gtk_container_add(GTK_CONTAINER(serv->item), serv->contents);
+	gtk_container_add(GTK_CONTAINER(serv->contents), gtk_label_new("service"));
+	gtk_widget_show_all(serv->item);
 
 	g_signal_connect(proxy, "g-signal", G_CALLBACK(service_proxy_signal),
 			serv);

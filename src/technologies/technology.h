@@ -71,6 +71,7 @@ struct technology_settings {
 struct technology {
 	struct technology_list_item *list_item;
 	struct technology_settings *settings;
+	GHashTable *services;
 	enum technology_type type;
 };
 

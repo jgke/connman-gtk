@@ -30,6 +30,7 @@ struct service {
 	gchar *path;
 	GHashTable *properties;
 	GtkWidget *item;
+	GtkWidget *contents;
 };
 
 struct service *service_create(GDBusProxy *proxy, const gchar *path,

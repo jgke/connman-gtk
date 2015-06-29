@@ -225,8 +225,10 @@ void services_changed(GDBusConnection *connection, GVariant *parameters) {
 	while(g_variant_iter_loop(iter, "o", &path)) {
 		enum technology_type type = technology_type_from_path(path);
 		if(type != TECHNOLOGY_TYPE_UNKNOWN)
-			if(g_hash_table_contains(services, path))
+			if(g_hash_table_contains(services, path)) {
 				technology_remove_service(technologies[type], path);
+				g_hash_table_remove(services, path);
+			}
 	}
 	g_variant_iter_free(iter);
 
