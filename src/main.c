@@ -87,8 +87,7 @@ void destroy(GtkWidget *window, gpointer user_data) {
 	int i;
 	notebook = NULL;
 	for(i = 0; i < TECHNOLOGY_TYPE_COUNT; i++)
-		if(technologies[i])
-			technologies[i]->free(technologies[i]);
+		technology_free(technologies[i]);
 	g_hash_table_remove_all(services);
 }
 
@@ -125,7 +124,7 @@ void add_technology(GDBusConnection *connection, GVariant *technology) {
 		goto out;
 	}
 
-	item = create_technology(proxy, path, properties);
+	item = technology_create(proxy, path, properties);
 
 	g_hash_table_insert(technology_types, g_strdup(object_path), &item->type);
 	technologies[item->type] = item;
@@ -155,7 +154,7 @@ void remove_technology(GVariant *parameters) {
 	}
 	type = *type_p;
 	g_hash_table_remove(technology_types, path);
-	technologies[type]->free(technologies[type]);
+	technology_free(technologies[type]);
 	technologies[type] = NULL;
 out:
 	g_variant_unref(path_v);
@@ -194,7 +193,7 @@ void add_service(GDBusConnection *connection, const gchar *path,
 
 	type = technology_type_from_path(path);
 	if(technologies[type])
-		technologies[type]->add_service(technologies[type], serv);
+		technology_add_service(technologies[type], serv);
 out:
 	g_dbus_node_info_unref(info);
 }
@@ -217,8 +216,7 @@ void services_changed(GDBusConnection *connection, GVariant *parameters) {
 				continue;
 			}
 			struct service *serv = g_hash_table_lookup(services, path);
-			technologies[type]->update_service(technologies[type],
-					serv, value);
+			technology_update_service(technologies[type], serv, value);
 		}
 	}
 	g_variant_iter_free(iter);
@@ -228,7 +226,7 @@ void services_changed(GDBusConnection *connection, GVariant *parameters) {
 		enum technology_type type = technology_type_from_path(path);
 		if(type != TECHNOLOGY_TYPE_UNKNOWN)
 			if(g_hash_table_contains(services, path))
-				technologies[type]->remove_service(technologies[type], path);
+				technology_remove_service(technologies[type], path);
 	}
 	g_variant_iter_free(iter);
 

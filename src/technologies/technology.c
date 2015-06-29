@@ -35,6 +35,26 @@
 #include "technologies/vpn.h"
 #include "technologies/wireless.h"
 
+struct technology_functions {
+	struct technology *(*create)(GVariant *properties, GDBusProxy *proxy);
+	void (*free)(struct technology *tech);
+	void (*property_changed)(struct technology *tech, const gchar *name);
+	void (*add_service)(struct technology *tech, struct service *serv);
+	void (*update_service)(struct technology *tech, struct service *serv,
+			GVariant *properties);
+	void (*remove_service)(struct technology *tech, const gchar *path);
+};
+
+static struct technology_functions functions[TECHNOLOGY_TYPE_COUNT] = {
+	{},
+	{technology_ethernet_create, technology_ethernet_free},
+	{technology_wireless_create},
+	{technology_bluetooth_create},
+	{technology_cellular_create},
+	{technology_p2p_create},
+	{technology_vpn_create}
+};
+
 struct technology_list_item *create_base_technology_list_item(struct technology *tech,
 		const gchar *name) {
 	GtkWidget *grid;
@@ -154,7 +174,7 @@ void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 		else if(!strcmp(name, "Connected")) {
 			technology_update_status(item);
 		}
-		item->technology->property_changed(item->technology, name);
+		technology_property_changed(item->technology, name);
 
 		g_variant_unref(name_v);
 		g_variant_unref(value_v);
@@ -272,28 +292,40 @@ void free_base_technology_settings(struct technology_settings *item) {
 	g_free(item);
 }
 
-void technology_property_changed(struct technology *item, const gchar *key) {}
+void technology_property_changed(struct technology *item, const gchar *key) {
+	if(functions[item->type].property_changed)
+		functions[item->type].property_changed(item, key);
+}
 
 void technology_add_service(struct technology *item, struct service *serv) {
+	if(functions[item->type].add_service)
+		functions[item->type].add_service(item, serv);
 	gtk_container_add(GTK_CONTAINER(item->settings->services), serv->item);
 }
 
 void technology_update_service(struct technology *item, struct service *serv,
 		GVariant *properties) {
+	if(functions[item->type].update_service)
+		functions[item->type].update_service(item, serv, properties);
 	service_update(serv, properties);
 }
 
-void technology_remove_service(struct technology *item, const gchar *path) {}
+void technology_remove_service(struct technology *item, const gchar *path) {
+	if(functions[item->type].remove_service)
+		functions[item->type].remove_service(item, path);
+}
 
 void technology_free(struct technology *item) {
 	if(!item)
 		return;
+	if(functions[item->type].free)
+		functions[item->type].free(item);
 	free_base_technology_list_item(item->list_item);
 	free_base_technology_settings(item->settings);
 	g_free(item);
 }
 
-void init_technology(struct technology *tech, GVariant *properties_v,
+void technology_init(struct technology *tech, GVariant *properties_v,
 		GDBusProxy *proxy) {
 	GVariant *name_v;
 	const gchar *name;
@@ -315,40 +347,11 @@ void init_technology(struct technology *tech, GVariant *properties_v,
 	g_object_set_data(G_OBJECT(tech->list_item->item), "technology-type",
 			&tech->type);
 
-	tech->property_changed = technology_property_changed;
-	tech->add_service = technology_add_service;
-	tech->update_service = technology_update_service;
-	tech->remove_service = technology_remove_service;
-	tech->free = technology_free;
-
 	g_variant_unref(name_v);
 	g_variant_unref(type_v);
-
-	switch(tech->type) {
-	case TECHNOLOGY_TYPE_ETHERNET:
-		technology_ethernet_init(tech, properties);
-		break;
-	case TECHNOLOGY_TYPE_WIRELESS:
-		technology_wireless_init(tech, properties);
-		break;
-	case TECHNOLOGY_TYPE_BLUETOOTH:
-		technology_bluetooth_init(tech, properties);
-		break;
-	case TECHNOLOGY_TYPE_CELLULAR:
-		technology_cellular_init(tech, properties);
-		break;
-	case TECHNOLOGY_TYPE_P2P:
-		technology_p2p_init(tech, properties);
-		break;
-	case TECHNOLOGY_TYPE_VPN:
-		technology_vpn_init(tech, properties);
-		break;
-	default:
-		break;
-	}
 }
 
-struct technology *create_technology(GDBusProxy *proxy, GVariant *path,
+struct technology *technology_create(GDBusProxy *proxy, GVariant *path,
 		GVariant *properties) {
 	struct technology *item;
 	GVariantDict *properties_d;
@@ -358,19 +361,14 @@ struct technology *create_technology(GDBusProxy *proxy, GVariant *path,
 	properties_d = g_variant_dict_new(properties);
 	type_v = g_variant_dict_lookup_value(properties_d, "Type", NULL);
 	type = technology_type_from_string(g_variant_get_string(type_v, NULL));
+	g_variant_unref(type_v);
 	g_variant_dict_unref(properties_d);
 
-	switch(type) {
-	case TECHNOLOGY_TYPE_ETHERNET:
-		item = technology_ethernet_create();
-		break;
-	default:
-		item = g_malloc(sizeof(*item));
-		break;
-	}
-	g_variant_unref(type_v);
-
-	init_technology(item, properties, proxy);
+	if(functions[type].create)
+		return functions[type].create(properties, proxy);
+	item = g_malloc(sizeof(*item));
+	item->type = type;
+	technology_init(item, properties, proxy);
 	return item;
 }
 

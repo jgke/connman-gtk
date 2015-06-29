@@ -21,11 +21,13 @@
 #ifndef _CONNMAN_GTK_P2P_H
 #define _CONNMAN_GTK_P2P_H
 
+#include <gio/gio.h>
 #include <gtk/gtk.h>
 
 #include "technology.h"
 
-void technology_p2p_init(struct technology *tech, GVariantDict *properties);
+struct technology *technology_p2p_create(GVariant *properties,
+		GDBusProxy *proxy);
 
 #endif /* _CONNMAN_GTK_P2P_H */
 

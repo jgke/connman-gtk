@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gio/gio.h>
 #include <gtk/gtk.h>
 
 #include "ethernet.h"
@@ -27,8 +28,14 @@ struct ethernet_technology {
 	struct technology parent;
 };
 
-struct technology *technology_ethernet_create(void) {
+struct technology *technology_ethernet_create(GVariant *properties,
+		GDBusProxy *proxy) {
 	struct ethernet_technology *item = g_malloc(sizeof(*item));
+	technology_init((struct technology *)item, properties, proxy);
+	gtk_image_set_from_icon_name(GTK_IMAGE(item->parent.list_item->icon),
+			"network-wired-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR);
+	gtk_image_set_from_icon_name(GTK_IMAGE(item->parent.settings->icon),
+			"network-wired", GTK_ICON_SIZE_DIALOG);
 	return (struct technology *)item;
 }
 
@@ -44,15 +51,4 @@ void technology_ethernet_service_add(struct technology *item,
 void technology_ethernet_service_remove(struct technology *item,
 		const gchar *path) {
 	technology_remove_service(item, path);
-}
-
-void technology_ethernet_init(struct technology *tech, GVariantDict *properties) {
-	struct ethernet_technology *item = (struct ethernet_technology *)tech;
-	gtk_image_set_from_icon_name(GTK_IMAGE(item->parent.list_item->icon),
-			"network-wired-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR);
-	gtk_image_set_from_icon_name(GTK_IMAGE(item->parent.settings->icon),
-			"network-wired", GTK_ICON_SIZE_DIALOG);
-	item->parent.add_service = technology_ethernet_service_add;
-	item->parent.remove_service = technology_ethernet_service_remove;
-	item->parent.free = technology_ethernet_free;
 }

@@ -18,14 +18,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gio/gio.h>
 #include <gtk/gtk.h>
 
 #include "vpn.h"
 #include "technology.h"
 
-void technology_vpn_init(struct technology *tech, GVariantDict *properties) {
+struct technology *technology_vpn_create(GVariant *properties,
+		GDBusProxy *proxy) {
+	struct technology *tech = g_malloc(sizeof(*tech));
+	technology_init(tech, properties, proxy);
 	gtk_image_set_from_icon_name(GTK_IMAGE(tech->list_item->icon),
 			"network-vpn-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR);
 	gtk_image_set_from_icon_name(GTK_IMAGE(tech->settings->icon),
 			"network-vpn", GTK_ICON_SIZE_DIALOG);
+	return tech;
 }

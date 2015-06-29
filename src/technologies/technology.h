@@ -72,18 +72,15 @@ struct technology {
 	struct technology_list_item *list_item;
 	struct technology_settings *settings;
 	enum technology_type type;
-	void (*property_changed)(struct technology *item, const gchar *key);
-	void (*add_service)(struct technology *item, struct service *serv);
-	void (*update_service)(struct technology *item, struct service *serv, GVariant *properties);
-	void (*remove_service)(struct technology *item, const gchar *path);
-	void (*free)(struct technology *item);
 };
 
-struct technology *create_technology(GDBusProxy *proxy, GVariant *path,
-		GVariant *properties);
 enum technology_type technology_type_from_string(const gchar *str);
 enum technology_type technology_type_from_path(const gchar *str);
 
+struct technology *technology_create(GDBusProxy *proxy, GVariant *path,
+		GVariant *properties);
+void technology_init(struct technology *tech, GVariant *properties_v,
+		GDBusProxy *proxy);
 void technology_property_changed(struct technology *item, const gchar *key);
 void technology_add_service(struct technology *item, struct service *serv);
 void technology_update_service(struct technology *item, struct service *serv,

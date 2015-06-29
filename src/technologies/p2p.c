@@ -18,10 +18,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gio/gio.h>
 #include <gtk/gtk.h>
 
 #include "p2p.h"
 #include "technology.h"
 
-void technology_p2p_init(struct technology *tech, GVariantDict *properties) {
+struct technology *technology_p2p_create(GVariant *properties,
+		GDBusProxy *proxy) {
+	struct technology *tech = g_malloc(sizeof(*tech));
+	technology_init(tech, properties, proxy);
+	return tech;
 }

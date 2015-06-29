@@ -21,11 +21,13 @@
 #ifndef _CONNMAN_GTK_BLUETOOTH_H
 #define _CONNMAN_GTK_BLUETOOTH_H
 
+#include <gio/gio.h>
 #include <gtk/gtk.h>
 
 #include "technology.h"
 
-void technology_bluetooth_init(struct technology *tech, GVariantDict *properties);
+struct technology *technology_bluetooth_create(GVariant *properties,
+		GDBusProxy *proxy);
 
 #endif /* _CONNMAN_GTK_BLUETOOTH_H */
 
