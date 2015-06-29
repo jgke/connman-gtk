@@ -21,6 +21,7 @@
 #ifndef _CONNMAN_GTK_SERVICE_H
 #define _CONNMAN_GTK_SERVICE_H
 
+#include <gtk/gtk.h>
 #include <gio/gio.h>
 #include <glib.h>
 
@@ -28,6 +29,7 @@ struct service {
 	GDBusProxy *proxy;
 	gchar *path;
 	GHashTable *properties;
+	GtkWidget *item;
 };
 
 struct service *service_create(GDBusProxy *proxy, const gchar *path,

@@ -167,6 +167,8 @@ void add_service(GDBusConnection *connection, const gchar *path,
 	GDBusProxy *proxy;
 	GDBusNodeInfo *info;
 	GError *error = NULL;
+	enum technology_type type;
+
 	info = g_dbus_node_info_new_for_xml(service_interface, &error);
 	if(error) {
 		g_warning("Failed to load service interface: %s",
@@ -189,6 +191,10 @@ void add_service(GDBusConnection *connection, const gchar *path,
 
 	serv = service_create(proxy, path, properties);
 	g_hash_table_insert(services, g_strdup(path), serv);
+
+	type = technology_type_from_path(path);
+	if(technologies[type])
+		technologies[type]->add_service(technologies[type], serv);
 out:
 	g_dbus_node_info_unref(info);
 }
@@ -215,6 +221,7 @@ void services_changed(GDBusConnection *connection, GVariant *parameters) {
 					serv, value);
 		}
 	}
+	g_variant_iter_free(iter);
 
 	iter = g_variant_iter_new(deleted);
 	while(g_variant_iter_loop(iter, "o", &path)) {
@@ -256,6 +263,25 @@ void add_all_technologies(GDBusConnection *connection, GVariant *technologies_v)
 					GTK_LIST_BOX_ROW(row));
 			break;
 		}
+	}
+}
+
+void add_all_services(GDBusConnection *connection, GVariant *services_v) {
+	int i;
+	int size = g_variant_n_children(services_v);
+	for(i = 0; i < size; i++) {
+		GVariant *path;
+		GVariant *properties;
+		GVariant *child;
+
+		child = g_variant_get_child_value(services_v, i);
+		path = g_variant_get_child_value(child, 0);
+		properties = g_variant_get_child_value(child, 1);
+		add_service(connection, g_variant_get_string(path, NULL), properties);
+
+		g_variant_unref(child);
+		g_variant_unref(path);
+		g_variant_unref(properties);
 	}
 }
 
@@ -310,6 +336,22 @@ void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
 
 	child = g_variant_get_child_value(data, 0);
 	add_all_technologies(connection, child);
+
+	g_variant_unref(data);
+	g_variant_unref(child);
+
+	data = g_dbus_proxy_call_sync(proxy, "GetServices", NULL,
+			G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+	if(error) {
+		g_warning("failed to get services: %s", error->message);
+		g_error_free(error);
+		g_object_unref(proxy);
+		return;
+	}
+
+	child = g_variant_get_child_value(data, 0);
+	add_all_services(connection, child);
+
 	g_variant_unref(data);
 	g_variant_unref(child);
 }

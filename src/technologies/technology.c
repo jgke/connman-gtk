@@ -237,6 +237,12 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 	gtk_widget_set_hexpand(item->contents, TRUE);
 	gtk_widget_set_vexpand(item->contents, TRUE);
 
+	item->services = gtk_grid_new();
+	g_object_ref(item->services);
+	gtk_orientable_set_orientation(GTK_ORIENTABLE(item->services),
+			GTK_ORIENTATION_VERTICAL);
+	gtk_grid_attach(GTK_GRID(item->contents), item->services, 0, 0, 1, 1);
+
 	gtk_grid_attach(GTK_GRID(item->grid), item->icon,	  0, 0, 1, 2);
 	gtk_grid_attach(GTK_GRID(item->grid), item->title,	  1, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(item->grid), item->status,	  1, 1, 1, 1);
@@ -257,6 +263,7 @@ void free_base_technology_settings(struct technology_settings *item) {
 	g_object_unref(item->power_switch);
 
 	g_object_unref(item->contents);
+	g_object_unref(item->services);
 
 	g_object_unref(item->grid);
 	gtk_widget_destroy(item->grid);
@@ -267,16 +274,18 @@ void free_base_technology_settings(struct technology_settings *item) {
 	g_free(item);
 }
 
-void technology_property_changed_dummy(struct technology *item, const gchar *key) {}
+void technology_property_changed(struct technology *item, const gchar *key) {}
 
-void technology_add_service_dummy(struct technology *item, struct service *serv) {}
+void technology_add_service(struct technology *item, struct service *serv) {
+	gtk_container_add(GTK_CONTAINER(item->settings->services), serv->item);
+}
 
 void technology_update_service(struct technology *item, struct service *serv,
 		GVariant *properties) {
 	service_update(serv, properties);
 }
 
-void technology_remove_service_dummy(struct technology *item, const gchar *path) {}
+void technology_remove_service(struct technology *item, const gchar *path) {}
 
 void technology_free(struct technology *item) {
 	if(!item)
@@ -308,10 +317,10 @@ void init_technology(struct technology *tech, GVariant *properties_v,
 	g_object_set_data(G_OBJECT(tech->list_item->item), "technology-type",
 			&tech->type);
 
-	tech->property_changed = technology_property_changed_dummy;
-	tech->add_service = technology_add_service_dummy;
+	tech->property_changed = technology_property_changed;
+	tech->add_service = technology_add_service;
 	tech->update_service = technology_update_service;
-	tech->remove_service = technology_remove_service_dummy;
+	tech->remove_service = technology_remove_service;
 	tech->free = technology_free;
 
 	g_variant_unref(name_v);

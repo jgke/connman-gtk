@@ -65,6 +65,10 @@ struct service *service_create(GDBusProxy *proxy, const gchar *path,
 		g_variant_ref(value);
 		g_hash_table_insert(serv->properties, hkey, value);
 	}
+	g_variant_iter_free(iter);
+
+	serv->item = gtk_label_new("Service");
+	gtk_widget_show(serv->item);
 
 	g_signal_connect(proxy, "g-signal", G_CALLBACK(service_proxy_signal),
 			serv);
@@ -83,13 +87,16 @@ void service_update(struct service *serv, GVariant *properties) {
 		g_variant_ref(value);
 		g_hash_table_replace(serv->properties, hkey, value);
 	}
+	g_variant_iter_free(iter);
 }
 
 void service_free(struct service *serv) {
 	if(!serv)
 		return;
 	g_object_unref(serv->proxy);
+	g_object_unref(serv->item);
 	g_free(serv->path);
 	g_hash_table_unref(serv->properties);
+	gtk_widget_destroy(serv->item);
 	g_free(serv);
 }

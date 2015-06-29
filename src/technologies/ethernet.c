@@ -25,7 +25,6 @@
 
 struct ethernet_technology {
 	struct technology parent;
-	GtkWidget *label;
 };
 
 struct technology *technology_ethernet_create(void) {
@@ -34,17 +33,17 @@ struct technology *technology_ethernet_create(void) {
 }
 
 void technology_ethernet_free(struct technology *tech) {
-	struct ethernet_technology *item = (struct ethernet_technology *)tech;
-	g_object_unref(item->label);
 	technology_free(tech);
 }
 
 void technology_ethernet_service_add(struct technology *item,
 		struct service *service) {
+	technology_add_service(item, service);
 }
 
 void technology_ethernet_service_remove(struct technology *item,
 		const gchar *path) {
+	technology_remove_service(item, path);
 }
 
 void technology_ethernet_init(struct technology *tech, GVariantDict *properties) {
@@ -56,9 +55,4 @@ void technology_ethernet_init(struct technology *tech, GVariantDict *properties)
 	item->parent.add_service = technology_ethernet_service_add;
 	item->parent.remove_service = technology_ethernet_service_remove;
 	item->parent.free = technology_ethernet_free;
-
-	item->label = gtk_label_new("Ethernet contents");
-	g_object_ref(item->label);
-	gtk_widget_show(item->label);
-	gtk_grid_attach(GTK_GRID(item->parent.settings->contents), item->label, 0, 0, 1, 1);
 }
