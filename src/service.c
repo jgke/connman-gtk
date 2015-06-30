@@ -23,6 +23,7 @@
 #include <gio/gio.h>
 #include <glib.h>
 
+#include "style.h"
 #include "service.h"
 #include "connections/ethernet.h"
 #include "connections/wireless.h"
@@ -81,8 +82,8 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 
 	serv->item = gtk_list_box_row_new();
 	g_object_ref(serv->item);
+	STYLE_ADD_MARGIN(serv->item, MARGIN_SMALL);
 	gtk_widget_set_hexpand(serv->item, TRUE);
-	gtk_list_box_row_set_selectable(GTK_LIST_BOX_ROW(serv->item), FALSE);
 
 	serv->contents = gtk_grid_new();
 	gtk_container_add(GTK_CONTAINER(serv->item), serv->contents);

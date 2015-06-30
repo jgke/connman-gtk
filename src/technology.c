@@ -181,6 +181,21 @@ void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 	}
 }
 
+void update_service_separator(GtkListBoxRow *row, GtkListBoxRow *before,
+		gpointer user_data) {
+	GtkWidget *cur;
+	if(!before) {
+		gtk_list_box_row_set_header(row, NULL);
+		return;
+	}
+	cur = gtk_list_box_row_get_header(row);
+	if(!cur) {
+		cur = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+		gtk_widget_show(cur);
+		gtk_list_box_row_set_header(row, cur);
+	}
+}
+
 struct technology_settings *create_base_technology_settings(struct technology *tech,
 		GVariant *properties, GDBusProxy *proxy) {
 	struct technology_settings *item = g_malloc(sizeof(*item));
@@ -268,6 +283,10 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 	gtk_widget_set_vexpand(scrolled_window, TRUE);
 	item->services = gtk_list_box_new();
 	g_object_ref(item->services);
+	gtk_list_box_set_selection_mode(GTK_LIST_BOX(item->services),
+			GTK_SELECTION_NONE);
+	gtk_list_box_set_header_func(GTK_LIST_BOX(item->services),
+			update_service_separator, NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(scrolled_window), item->services);
 	gtk_container_add(GTK_CONTAINER(frame), scrolled_window);
 	gtk_grid_attach(GTK_GRID(item->contents), frame, 0, 0, 1, 1);
