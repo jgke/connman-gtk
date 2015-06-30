@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-18 14:23+0300\n"
+"POT-Creation-Date: 2015-06-30 13:35+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,18 +17,38 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/main.c:251
+#: src/main.c:366
 msgid "Network Settings"
 msgstr ""
 
-#: src/technologies/technology.c:116 src/technologies/technology.c:211
+#: src/technology.c:136 src/technology.c:238
 msgid "Connected"
 msgstr ""
 
-#: src/technologies/technology.c:120 src/technologies/technology.c:213
+#: src/technology.c:140 src/technology.c:240
 msgid "Not connected"
 msgstr ""
 
-#: src/technologies/technology.c:123
+#: src/technology.c:143
 msgid "Disabled"
+msgstr ""
+
+#: src/connections/ethernet.c:85
+msgid "IPv4 address"
+msgstr ""
+
+#: src/connections/ethernet.c:86
+msgid "IPv4 gateway"
+msgstr ""
+
+#: src/connections/ethernet.c:87
+msgid "IPv6 address"
+msgstr ""
+
+#: src/connections/ethernet.c:88
+msgid "IPv6 gateway"
+msgstr ""
+
+#: src/connections/ethernet.c:89
+msgid "MAC address"
 msgstr ""

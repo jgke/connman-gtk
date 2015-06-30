@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-18 14:23+0300\n"
+"POT-Creation-Date: 2015-06-30 13:35+0300\n"
 "PO-Revision-Date: 2015-06-11 15:15+0300\n"
 "Last-Translator: Jaakko Hannikainen <jaakko.hannikainen@intel.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -18,18 +18,38 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/main.c:251
+#: src/main.c:366
 msgid "Network Settings"
 msgstr "Verkkoasetukset"
 
-#: src/technologies/technology.c:116 src/technologies/technology.c:211
+#: src/technology.c:136 src/technology.c:238
 msgid "Connected"
 msgstr "Yhdistetty"
 
-#: src/technologies/technology.c:120 src/technologies/technology.c:213
+#: src/technology.c:140 src/technology.c:240
 msgid "Not connected"
 msgstr "Ei yhteytt‰"
 
-#: src/technologies/technology.c:123
+#: src/technology.c:143
 msgid "Disabled"
 msgstr "Pois p‰‰lt‰"
+
+#: src/connections/ethernet.c:85
+msgid "IPv4 address"
+msgstr "IPv4-osoite"
+
+#: src/connections/ethernet.c:86
+msgid "IPv4 gateway"
+msgstr "IPv4-yhdysk‰yt‰v‰"
+
+#: src/connections/ethernet.c:87
+msgid "IPv6 address"
+msgstr "IPv6-osoite"
+
+#: src/connections/ethernet.c:88
+msgid "IPv6 gateway"
+msgstr "IPv6-yhdysk‰yt‰v‰"
+
+#: src/connections/ethernet.c:89
+msgid "MAC address"
+msgstr "MAC-osoite"
