@@ -28,27 +28,20 @@ struct ethernet_technology {
 	struct technology parent;
 };
 
-struct technology *technology_ethernet_create(GVariant *properties,
-		GDBusProxy *proxy) {
+struct technology *technology_ethernet_create(void) {
 	struct ethernet_technology *item = g_malloc(sizeof(*item));
-	technology_init((struct technology *)item, properties, proxy);
-	gtk_image_set_from_icon_name(GTK_IMAGE(item->parent.list_item->icon),
-			"network-wired-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR);
-	gtk_image_set_from_icon_name(GTK_IMAGE(item->parent.settings->icon),
-			"network-wired", GTK_ICON_SIZE_DIALOG);
 	return (struct technology *)item;
+}
+
+void technology_ethernet_init(struct technology *item, GVariant *properties,
+		GDBusProxy *proxy) {
+	struct ethernet_technology *tech = (struct ethernet_technology *)item;
+	gtk_image_set_from_icon_name(GTK_IMAGE(tech->parent.list_item->icon),
+			"network-wired-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR);
+	gtk_image_set_from_icon_name(GTK_IMAGE(tech->parent.settings->icon),
+			"network-wired", GTK_ICON_SIZE_DIALOG);
 }
 
 void technology_ethernet_free(struct technology *tech) {
 	technology_free(tech);
-}
-
-void technology_ethernet_service_add(struct technology *item,
-		struct service *service) {
-	technology_add_service(item, service);
-}
-
-void technology_ethernet_service_remove(struct technology *item,
-		const gchar *path) {
-	technology_remove_service(item, path);
 }

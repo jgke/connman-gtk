@@ -26,8 +26,5 @@
 
 #include "technology.h"
 
-struct technology *technology_p2p_create(GVariant *properties,
-		GDBusProxy *proxy);
-
 #endif /* _CONNMAN_GTK_P2P_H */
 

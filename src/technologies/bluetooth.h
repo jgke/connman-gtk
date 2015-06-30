@@ -26,7 +26,7 @@
 
 #include "technology.h"
 
-struct technology *technology_bluetooth_create(GVariant *properties,
+void technology_bluetooth_init(struct technology *item, GVariant *properties,
 		GDBusProxy *proxy);
 
 #endif /* _CONNMAN_GTK_BLUETOOTH_H */

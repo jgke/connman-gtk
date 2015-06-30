@@ -38,7 +38,8 @@
 #include "technologies/wireless.h"
 
 struct technology_functions {
-	struct technology *(*create)(GVariant *properties, GDBusProxy *proxy);
+	void (*init)(struct technology *tech, GVariant *properties, GDBusProxy *proxy);
+	struct technology *(*create)(void);
 	void (*free)(struct technology *tech);
 	void (*property_changed)(struct technology *tech, const gchar *name);
 	void (*add_service)(struct technology *tech, struct service *serv);
@@ -49,12 +50,12 @@ struct technology_functions {
 
 static struct technology_functions functions[CONNECTION_TYPE_COUNT] = {
 	{},
-	{technology_ethernet_create, technology_ethernet_free},
-	{technology_wireless_create},
-	{technology_bluetooth_create},
-	{technology_cellular_create},
-	{technology_p2p_create},
-	{technology_vpn_create}
+	{technology_ethernet_init, technology_ethernet_create, technology_ethernet_free},
+	{technology_wireless_init},
+	{technology_bluetooth_init},
+	{technology_cellular_init},
+	{},
+	{technology_vpn_init}
 };
 
 struct technology_list_item *create_base_technology_list_item(struct technology *tech,
@@ -376,9 +377,14 @@ struct technology *technology_create(GDBusProxy *proxy, GVariant *path,
 	g_variant_dict_unref(properties_d);
 
 	if(functions[type].create)
-		return functions[type].create(properties, proxy);
-	item = g_malloc(sizeof(*item));
+		item = functions[type].create();
+	else
+		item = g_malloc(sizeof(*item));
 	item->type = type;
+
 	technology_init(item, properties, proxy);
+	if(functions[type].init)
+		functions[type].init(item, properties, proxy);
+
 	return item;
 }

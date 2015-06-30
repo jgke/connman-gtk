@@ -23,10 +23,3 @@
 
 #include "p2p.h"
 #include "technology.h"
-
-struct technology *technology_p2p_create(GVariant *properties,
-		GDBusProxy *proxy) {
-	struct technology *tech = g_malloc(sizeof(*tech));
-	technology_init(tech, properties, proxy);
-	return tech;
-}

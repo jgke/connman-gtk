@@ -26,7 +26,7 @@
 
 #include "technology.h"
 
-struct technology *technology_wireless_create(GVariant *properties,
+void technology_wireless_init(struct technology *item, GVariant *properties,
 		GDBusProxy *proxy);
 
 #endif /* _CONNMAN_GTK_WIRELESS_H */

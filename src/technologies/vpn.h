@@ -26,7 +26,7 @@
 
 #include "technology.h"
 
-struct technology *technology_vpn_create(GVariant *properties,
+void technology_vpn_init(struct technology *item, GVariant *properties,
 		GDBusProxy *proxy);
 
 #endif /* _CONNMAN_GTK_VPN_H */

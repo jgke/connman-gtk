@@ -24,13 +24,10 @@
 #include "vpn.h"
 #include "technology.h"
 
-struct technology *technology_vpn_create(GVariant *properties,
+void technology_vpn_init(struct technology *item, GVariant *properties,
 		GDBusProxy *proxy) {
-	struct technology *tech = g_malloc(sizeof(*tech));
-	technology_init(tech, properties, proxy);
-	gtk_image_set_from_icon_name(GTK_IMAGE(tech->list_item->icon),
+	gtk_image_set_from_icon_name(GTK_IMAGE(item->list_item->icon),
 			"network-vpn-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR);
-	gtk_image_set_from_icon_name(GTK_IMAGE(tech->settings->icon),
+	gtk_image_set_from_icon_name(GTK_IMAGE(item->settings->icon),
 			"network-vpn", GTK_ICON_SIZE_DIALOG);
-	return tech;
 }

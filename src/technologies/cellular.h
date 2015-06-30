@@ -26,7 +26,7 @@
 
 #include "technology.h"
 
-struct technology *technology_cellular_create(GVariant *properties,
+void technology_cellular_init(struct technology *item, GVariant *properties,
 		GDBusProxy *proxy);
 
 #endif /* _CONNMAN_GTK_CELLULAR_H */
