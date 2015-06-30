@@ -38,15 +38,10 @@ struct ethernet_service {
 	GtkWidget *interface;
 
 	GtkGrid *properties;
-	GtkWidget *ipv4label;
 	GtkWidget *ipv4;
-	GtkWidget *ipv4gatewaylabel;
 	GtkWidget *ipv4gateway;
-	GtkWidget *ipv6label;
 	GtkWidget *ipv6;
-	GtkWidget *ipv6gatewaylabel;
 	GtkWidget *ipv6gateway;
-	GtkWidget *maclabel;
 	GtkWidget *mac;
 };
 
@@ -68,6 +63,25 @@ void technology_ethernet_free(struct technology *tech) {
 	technology_free(tech);
 }
 
+static GtkWidget *add_label(GtkGrid *grid, gint y, const gchar *text) {
+	GtkWidget *label, *value;
+
+	label = gtk_label_new(text);
+	gtk_style_context_add_class(gtk_widget_get_style_context(label), "dim-label");
+	gtk_widget_set_hexpand(label, TRUE);
+	STYLE_ADD_MARGIN(label, MARGIN_SMALL);
+	gtk_widget_set_margin_start(label, MARGIN_LARGE);
+	gtk_widget_set_halign(label, GTK_ALIGN_START);
+	gtk_grid_attach(grid, label, 0, y, 1, 1);
+
+	value = gtk_label_new(NULL);
+	g_object_ref(value);
+	gtk_widget_set_halign(value, GTK_ALIGN_START);
+	gtk_grid_attach(grid, value, 1, y, 1, 1);
+
+	return value;
+}
+
 void service_ethernet_init(struct service *serv, GDBusProxy *proxy,
 		const gchar *path, GVariant *properties) {
 	struct ethernet_service *item = (struct ethernet_service *)serv;
@@ -75,86 +89,22 @@ void service_ethernet_init(struct service *serv, GDBusProxy *proxy,
 	g_object_ref(item->header);
 	item->interface = gtk_label_new(NULL);
 	g_object_ref(item->interface);
-	STYLE_ADD_MARGIN(item->interface, MARGIN_LARGE);
+	STYLE_ADD_MARGIN(item->interface, MARGIN_SMALL);
+	gtk_widget_set_margin_start(item->interface, MARGIN_LARGE);
 	gtk_widget_set_margin_bottom(item->interface, 0);
 	gtk_grid_attach(item->header, item->interface,  0, 0, 1, 1);
 
 	item->properties = GTK_GRID(gtk_grid_new());
 	g_object_ref(item->properties);
 	STYLE_ADD_MARGIN(GTK_WIDGET(item->properties), MARGIN_LARGE);
+	gtk_widget_set_margin_top(GTK_WIDGET(item->properties), 0);
 	gtk_grid_set_column_homogeneous(item->properties, TRUE);
 
-	item->ipv4label = gtk_label_new(_("IPv4 address"));
-	item->ipv4gatewaylabel = gtk_label_new(_("IPv4 gateway"));
-	item->ipv6label = gtk_label_new(_("IPv6 address"));
-	item->ipv6gatewaylabel = gtk_label_new(_("IPv6 gateway"));
-	item->maclabel = gtk_label_new(_("MAC address"));
-	item->ipv4 = gtk_label_new(NULL);
-	item->ipv4gateway = gtk_label_new(NULL);
-	item->ipv6 = gtk_label_new(NULL);
-	item->ipv6gateway = gtk_label_new(NULL);
-	item->mac = gtk_label_new(NULL);
-
-	g_object_ref(item->ipv4label);
-	g_object_ref(item->ipv4gatewaylabel);
-	g_object_ref(item->ipv6label);
-	g_object_ref(item->ipv6gatewaylabel);
-	g_object_ref(item->maclabel);
-	g_object_ref(item->ipv4);
-	g_object_ref(item->ipv4gateway);
-	g_object_ref(item->ipv6);
-	g_object_ref(item->ipv6gateway);
-	g_object_ref(item->mac);
-
-	gtk_style_context_add_class(gtk_widget_get_style_context(item->ipv4label),
-				"dim-label");
-	gtk_style_context_add_class(gtk_widget_get_style_context(item->ipv4gatewaylabel),
-				"dim-label");
-	gtk_style_context_add_class(gtk_widget_get_style_context(item->ipv6label),
-				"dim-label");
-	gtk_style_context_add_class(gtk_widget_get_style_context(item->ipv6gatewaylabel),
-				"dim-label");
-	gtk_style_context_add_class(gtk_widget_get_style_context(item->maclabel),
-				"dim-label");
-
-	gtk_widget_set_hexpand(item->ipv4label, TRUE);
-	gtk_widget_set_hexpand(item->ipv4gatewaylabel, TRUE);
-	gtk_widget_set_hexpand(item->ipv6label, TRUE);
-	gtk_widget_set_hexpand(item->ipv6gatewaylabel, TRUE);
-	gtk_widget_set_hexpand(item->maclabel, TRUE);
-
-	STYLE_ADD_MARGIN(item->ipv4label, MARGIN_SMALL);
-	STYLE_ADD_MARGIN(item->ipv4gatewaylabel, MARGIN_SMALL);
-	STYLE_ADD_MARGIN(item->ipv6label, MARGIN_SMALL);
-	STYLE_ADD_MARGIN(item->ipv6gatewaylabel, MARGIN_SMALL);
-	STYLE_ADD_MARGIN(item->maclabel, MARGIN_SMALL);
-	gtk_widget_set_margin_start(item->ipv4label, MARGIN_LARGE);
-	gtk_widget_set_margin_start(item->ipv4gatewaylabel, MARGIN_LARGE);
-	gtk_widget_set_margin_start(item->ipv6label, MARGIN_LARGE);
-	gtk_widget_set_margin_start(item->ipv6gatewaylabel, MARGIN_LARGE);
-	gtk_widget_set_margin_start(item->maclabel, MARGIN_LARGE);
-
-	gtk_widget_set_halign(item->ipv4label, GTK_ALIGN_START);
-	gtk_widget_set_halign(item->ipv4gatewaylabel, GTK_ALIGN_START);
-	gtk_widget_set_halign(item->ipv6label, GTK_ALIGN_START);
-	gtk_widget_set_halign(item->ipv6gatewaylabel, GTK_ALIGN_START);
-	gtk_widget_set_halign(item->maclabel, GTK_ALIGN_START);
-	gtk_widget_set_halign(item->ipv4, GTK_ALIGN_START);
-	gtk_widget_set_halign(item->ipv4gateway, GTK_ALIGN_START);
-	gtk_widget_set_halign(item->ipv6, GTK_ALIGN_START);
-	gtk_widget_set_halign(item->ipv6gateway, GTK_ALIGN_START);
-	gtk_widget_set_halign(item->mac, GTK_ALIGN_START);
-
-	gtk_grid_attach(item->properties, item->ipv4label,	  0, 0, 1, 1);
-	gtk_grid_attach(item->properties, item->ipv4gatewaylabel, 0, 1, 1, 1);
-	gtk_grid_attach(item->properties, item->ipv6label,	  0, 2, 1, 1);
-	gtk_grid_attach(item->properties, item->ipv6gatewaylabel, 0, 3, 1, 1);
-	gtk_grid_attach(item->properties, item->maclabel,	  0, 4, 1, 1);
-	gtk_grid_attach(item->properties, item->ipv4,		  1, 0, 1, 1);
-	gtk_grid_attach(item->properties, item->ipv4gateway,	  1, 1, 1, 1);
-	gtk_grid_attach(item->properties, item->ipv6,		  1, 2, 1, 1);
-	gtk_grid_attach(item->properties, item->ipv6gateway,	  1, 3, 1, 1);
-	gtk_grid_attach(item->properties, item->mac,		  1, 4, 1, 1);
+	item->ipv4 = add_label(item->properties, 0, _("IPv4 address"));
+	item->ipv4gateway = add_label(item->properties, 1, _("IPv4 gateway"));
+	item->ipv6 = add_label(item->properties, 2, _("IPv6 address"));
+	item->ipv6gateway = add_label(item->properties, 3, _("IPv6 gateway"));
+	item->mac = add_label(item->properties, 4, _("MAC address"));
 
 	gtk_grid_attach(GTK_GRID(serv->contents), GTK_WIDGET(item->header),
 			0, 0, 1, 1);
@@ -176,11 +126,6 @@ void service_ethernet_free(struct service *serv) {
 	g_object_unref(item->interface);
 	g_object_unref(item->header);
 	g_object_unref(item->properties);
-	g_object_unref(item->ipv4label);
-	g_object_unref(item->ipv4gatewaylabel);
-	g_object_unref(item->ipv6label);
-	g_object_unref(item->ipv6gatewaylabel);
-	g_object_unref(item->maclabel);
 	g_object_unref(item->ipv4);
 	g_object_unref(item->ipv4gateway);
 	g_object_unref(item->ipv6);
