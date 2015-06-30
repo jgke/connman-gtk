@@ -47,7 +47,7 @@ static struct {
 	void (*remove_service)(struct technology *tech, const gchar *path);
 } functions[CONNECTION_TYPE_COUNT] = {
 	{},
-	{technology_ethernet_init, technology_ethernet_create, technology_ethernet_free},
+	{technology_ethernet_init},
 	{technology_wireless_init},
 	{technology_bluetooth_init},
 	{technology_cellular_init},

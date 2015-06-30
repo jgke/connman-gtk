@@ -27,10 +27,6 @@
 #include "service.h"
 #include "style.h"
 
-struct ethernet_technology {
-	struct technology parent;
-};
-
 struct ethernet_service {
 	struct service parent;
 
@@ -45,22 +41,12 @@ struct ethernet_service {
 	GtkWidget *mac;
 };
 
-struct technology *technology_ethernet_create(void) {
-	struct ethernet_technology *item = g_malloc(sizeof(*item));
-	return (struct technology *)item;
-}
-
 void technology_ethernet_init(struct technology *item, GVariant *properties,
 		GDBusProxy *proxy) {
-	struct ethernet_technology *tech = (struct ethernet_technology *)item;
-	gtk_image_set_from_icon_name(GTK_IMAGE(tech->parent.list_item->icon),
+	gtk_image_set_from_icon_name(GTK_IMAGE(item->list_item->icon),
 			"network-wired-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR);
-	gtk_image_set_from_icon_name(GTK_IMAGE(tech->parent.settings->icon),
+	gtk_image_set_from_icon_name(GTK_IMAGE(item->settings->icon),
 			"network-wired", GTK_ICON_SIZE_DIALOG);
-}
-
-void technology_ethernet_free(struct technology *tech) {
-	technology_free(tech);
 }
 
 static GtkWidget *add_label(GtkGrid *grid, gint y, const gchar *text) {
