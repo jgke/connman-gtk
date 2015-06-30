@@ -31,3 +31,9 @@ void technology_wireless_init(struct technology *item, GVariant *properties,
 	gtk_image_set_from_icon_name(GTK_IMAGE(item->settings->icon),
 			"network-wireless", GTK_ICON_SIZE_DIALOG);
 }
+
+void service_wireless_init(struct service *serv, GDBusProxy *proxy,
+		const gchar *path, GVariant *properties) {
+	gtk_container_add(GTK_CONTAINER(serv->contents), gtk_label_new("wireless"));
+	gtk_widget_show_all(serv->contents);
+}

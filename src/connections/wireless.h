@@ -29,5 +29,8 @@
 void technology_wireless_init(struct technology *item, GVariant *properties,
 		GDBusProxy *proxy);
 
+void service_wireless_init(struct service *serv, GDBusProxy *proxy, 
+		const gchar *path, GVariant *properties);
+
 #endif /* _CONNMAN_GTK_WIRELESS_H */
 
