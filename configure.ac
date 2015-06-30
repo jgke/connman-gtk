@@ -22,7 +22,7 @@ AC_PROG_CC
 AX_CFLAGS_WARN_ALL
 
 PKG_PROG_PKG_CONFIG([0.22])
-PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.12], [], [AC_MSG_ERROR(gtk+ >= 3.12 is required)])
+PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.14], [], [AC_MSG_ERROR(gtk+ >= 3.14 is required)])
 PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.0], [], [AC_MSG_ERROR(glib >= 2.0 is required)])
 
 AC_CONFIG_FILES([

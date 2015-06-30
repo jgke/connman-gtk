@@ -191,7 +191,7 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 	const gchar *name;
 	gboolean powered;
 	gboolean connected;
-	GtkWidget *frame;
+	GtkWidget *frame, *scrolled_window;
 
 	item->technology = tech;
 	item->properties = g_hash_table_new_full(g_str_hash, g_str_equal,
@@ -218,8 +218,8 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 
 	item->grid = gtk_grid_new();
 	g_object_ref(item->grid);
-	STYLE_ADD_MARGIN(item->grid, MARGIN_LARGE);
-	gtk_widget_set_margin_top(item->grid, 0);
+	gtk_widget_set_margin_start(item->grid, MARGIN_LARGE);
+	gtk_widget_set_margin_end(item->grid, MARGIN_LARGE);
 	g_object_set_data(G_OBJECT(item->grid), "technology", tech);
 
 	item->icon = gtk_image_new_from_icon_name("preferences-system-network",
@@ -254,14 +254,17 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 
 	item->contents = gtk_grid_new();
 	g_object_ref(item->contents);
-	STYLE_ADD_MARGIN(item->contents, MARGIN_LARGE);
+	gtk_widget_set_margin_top(item->contents, MARGIN_LARGE);
 	gtk_widget_set_hexpand(item->contents, TRUE);
 	gtk_widget_set_vexpand(item->contents, TRUE);
 
 	frame = gtk_frame_new(NULL);
+	scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+	gtk_widget_set_vexpand(scrolled_window, TRUE);
 	item->services = gtk_list_box_new();
 	g_object_ref(item->services);
-	gtk_container_add(GTK_CONTAINER(frame), item->services);
+	gtk_container_add(GTK_CONTAINER(scrolled_window), item->services);
+	gtk_container_add(GTK_CONTAINER(frame), scrolled_window);
 	gtk_grid_attach(GTK_GRID(item->contents), frame, 0, 0, 1, 1);
 
 	gtk_grid_attach(GTK_GRID(item->grid), item->icon,	  0, 0, 1, 2);

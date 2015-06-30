@@ -73,8 +73,10 @@ void service_ethernet_init(struct service *serv, GDBusProxy *proxy,
 	struct ethernet_service *item = (struct ethernet_service *)serv;
 	item->header = GTK_GRID(gtk_grid_new());
 	g_object_ref(item->header);
-	item->interface = gtk_label_new("Interface");
+	item->interface = gtk_label_new(NULL);
 	g_object_ref(item->interface);
+	STYLE_ADD_MARGIN(item->interface, MARGIN_LARGE);
+	gtk_widget_set_margin_bottom(item->interface, 0);
 	gtk_grid_attach(item->header, item->interface,  0, 0, 1, 1);
 
 	item->properties = GTK_GRID(gtk_grid_new());
@@ -103,6 +105,34 @@ void service_ethernet_init(struct service *serv, GDBusProxy *proxy,
 	g_object_ref(item->ipv6);
 	g_object_ref(item->ipv6gateway);
 	g_object_ref(item->mac);
+
+	gtk_style_context_add_class(gtk_widget_get_style_context(item->ipv4label),
+				"dim-label");
+	gtk_style_context_add_class(gtk_widget_get_style_context(item->ipv4gatewaylabel),
+				"dim-label");
+	gtk_style_context_add_class(gtk_widget_get_style_context(item->ipv6label),
+				"dim-label");
+	gtk_style_context_add_class(gtk_widget_get_style_context(item->ipv6gatewaylabel),
+				"dim-label");
+	gtk_style_context_add_class(gtk_widget_get_style_context(item->maclabel),
+				"dim-label");
+
+	gtk_widget_set_hexpand(item->ipv4label, TRUE);
+	gtk_widget_set_hexpand(item->ipv4gatewaylabel, TRUE);
+	gtk_widget_set_hexpand(item->ipv6label, TRUE);
+	gtk_widget_set_hexpand(item->ipv6gatewaylabel, TRUE);
+	gtk_widget_set_hexpand(item->maclabel, TRUE);
+
+	STYLE_ADD_MARGIN(item->ipv4label, MARGIN_SMALL);
+	STYLE_ADD_MARGIN(item->ipv4gatewaylabel, MARGIN_SMALL);
+	STYLE_ADD_MARGIN(item->ipv6label, MARGIN_SMALL);
+	STYLE_ADD_MARGIN(item->ipv6gatewaylabel, MARGIN_SMALL);
+	STYLE_ADD_MARGIN(item->maclabel, MARGIN_SMALL);
+	gtk_widget_set_margin_start(item->ipv4label, MARGIN_LARGE);
+	gtk_widget_set_margin_start(item->ipv4gatewaylabel, MARGIN_LARGE);
+	gtk_widget_set_margin_start(item->ipv6label, MARGIN_LARGE);
+	gtk_widget_set_margin_start(item->ipv6gatewaylabel, MARGIN_LARGE);
+	gtk_widget_set_margin_start(item->maclabel, MARGIN_LARGE);
 
 	gtk_widget_set_halign(item->ipv4label, GTK_ALIGN_START);
 	gtk_widget_set_halign(item->ipv4gatewaylabel, GTK_ALIGN_START);

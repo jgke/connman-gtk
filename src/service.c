@@ -82,6 +82,7 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 	serv->item = gtk_list_box_row_new();
 	g_object_ref(serv->item);
 	gtk_widget_set_hexpand(serv->item, TRUE);
+	gtk_list_box_row_set_selectable(GTK_LIST_BOX_ROW(serv->item), FALSE);
 
 	serv->contents = gtk_grid_new();
 	gtk_container_add(GTK_CONTAINER(serv->item), serv->contents);
