@@ -34,6 +34,9 @@ void technology_ethernet_free(struct technology *tech);
 
 void service_ethernet_init(struct service *serv, GDBusProxy *proxy, 
 		const gchar *path, GVariant *properties);
+struct service *service_ethernet_create(void);
+void service_ethernet_free(struct service *serv);
+void service_ethernet_update(struct service *serv);
 
 #endif /* _CONNMAN_GTK_ETHERNET_H */
 

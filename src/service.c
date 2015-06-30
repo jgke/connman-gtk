@@ -30,12 +30,13 @@
 static struct {
 	void (*init)(struct service *serv, GDBusProxy *proxy, const gchar *path,
 			GVariant *properties);
-	struct service *(*create)();
+	struct service *(*create)(void);
 	void (*free)(struct service *serv);
-	void (*update)(struct service *serv, GVariant *properties);
+	void (*update)(struct service *serv);
 } functions[CONNECTION_TYPE_COUNT] = {
 	{},
-	{service_ethernet_init},
+	{service_ethernet_init, service_ethernet_create, service_ethernet_free,
+		service_ethernet_update},
 	{service_wireless_init}
 };
 
@@ -131,18 +132,19 @@ void service_update(struct service *serv, GVariant *properties) {
 	}
 	g_variant_iter_free(iter);
 	if(functions[serv->type].update)
-		functions[serv->type].update(serv, properties);
+		functions[serv->type].update(serv);
 }
 
 void service_free(struct service *serv) {
 	if(!serv)
 		return;
-	if(functions[serv->type].free)
-		functions[serv->type].free(serv);
 	g_object_unref(serv->proxy);
 	g_object_unref(serv->item);
 	g_free(serv->path);
 	g_hash_table_unref(serv->properties);
 	gtk_widget_destroy(serv->item);
-	g_free(serv);
+	if(functions[serv->type].free)
+		functions[serv->type].free(serv);
+	else
+		g_free(serv);
 }
