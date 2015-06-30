@@ -27,15 +27,13 @@
 #include "connections/ethernet.h"
 #include "connections/wireless.h"
 
-struct service_functions {
+static struct {
 	void (*init)(struct service *serv, GDBusProxy *proxy, const gchar *path,
 			GVariant *properties);
 	struct service *(*create)();
 	void (*free)(struct service *serv);
 	void (*update)(struct service *serv, GVariant *properties);
-};
-
-struct service_functions functions[CONNECTION_TYPE_COUNT] = {
+} functions[CONNECTION_TYPE_COUNT] = {
 	{},
 	{service_ethernet_init},
 	{service_wireless_init}

@@ -36,7 +36,7 @@
 #include "connections/vpn.h"
 #include "connections/wireless.h"
 
-struct technology_functions {
+static struct {
 	void (*init)(struct technology *tech, GVariant *properties, GDBusProxy *proxy);
 	struct technology *(*create)(void);
 	void (*free)(struct technology *tech);
@@ -45,9 +45,7 @@ struct technology_functions {
 	void (*update_service)(struct technology *tech, struct service *serv,
 			GVariant *properties);
 	void (*remove_service)(struct technology *tech, const gchar *path);
-};
-
-static struct technology_functions functions[CONNECTION_TYPE_COUNT] = {
+} functions[CONNECTION_TYPE_COUNT] = {
 	{},
 	{technology_ethernet_init, technology_ethernet_create, technology_ethernet_free},
 	{technology_wireless_init},
