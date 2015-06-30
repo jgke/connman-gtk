@@ -191,7 +191,7 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 	const gchar *name;
 	gboolean powered;
 	gboolean connected;
-	GtkWidget *frame, *scrolled_window;
+	GtkWidget *powerbox, *frame, *scrolled_window;
 
 	item->technology = tech;
 	item->properties = g_hash_table_new_full(g_str_hash, g_str_equal,
@@ -245,12 +245,17 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 	gtk_widget_set_hexpand(item->status, TRUE);
 
 	item->power_switch = gtk_switch_new();
+	powerbox = gtk_grid_new();
 	g_object_ref(item->power_switch);
 	gtk_switch_set_active(GTK_SWITCH(item->power_switch), powered);
-	gtk_widget_set_valign(item->power_switch, GTK_ALIGN_START);
 	gtk_widget_set_halign(item->power_switch, GTK_ALIGN_END);
+	gtk_widget_set_valign(item->power_switch, GTK_ALIGN_START);
+	gtk_widget_set_valign(powerbox, GTK_ALIGN_CENTER);
+	gtk_widget_set_halign(powerbox, GTK_ALIGN_END);
+	gtk_widget_set_vexpand(powerbox, FALSE);
 	item->powersig = g_signal_connect(item->power_switch, "notify::active",
 			G_CALLBACK(technology_toggle_power), item);
+	gtk_container_add(GTK_CONTAINER(powerbox), item->power_switch);
 
 	item->contents = gtk_grid_new();
 	g_object_ref(item->contents);
@@ -267,11 +272,11 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 	gtk_container_add(GTK_CONTAINER(frame), scrolled_window);
 	gtk_grid_attach(GTK_GRID(item->contents), frame, 0, 0, 1, 1);
 
-	gtk_grid_attach(GTK_GRID(item->grid), item->icon,	  0, 0, 1, 2);
-	gtk_grid_attach(GTK_GRID(item->grid), item->title,	  1, 0, 1, 1);
-	gtk_grid_attach(GTK_GRID(item->grid), item->status,	  1, 1, 1, 1);
-	gtk_grid_attach(GTK_GRID(item->grid), item->power_switch, 2, 0, 1, 2);
-	gtk_grid_attach(GTK_GRID(item->grid), item->contents,	  0, 2, 3, 1);
+	gtk_grid_attach(GTK_GRID(item->grid), item->icon,	0, 0, 1, 2);
+	gtk_grid_attach(GTK_GRID(item->grid), item->title,	1, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(item->grid), item->status,	1, 1, 1, 1);
+	gtk_grid_attach(GTK_GRID(item->grid), powerbox,		2, 0, 1, 2);
+	gtk_grid_attach(GTK_GRID(item->grid), item->contents,	0, 2, 3, 1);
 
 	gtk_widget_show_all(item->grid);
 	return item;
