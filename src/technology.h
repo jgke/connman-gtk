@@ -25,8 +25,8 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include "../services/service.h"
 #include "connection.h"
+#include "service.h"
 
 struct technology;
 

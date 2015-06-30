@@ -19,10 +19,33 @@
  */
 
 #include <gio/gio.h>
-#include <glib.h>
+#include <gtk/gtk.h>
 
 #include "ethernet.h"
+#include "technology.h"
 #include "service.h"
+
+struct ethernet_technology {
+	struct technology parent;
+};
+
+struct technology *technology_ethernet_create(void) {
+	struct ethernet_technology *item = g_malloc(sizeof(*item));
+	return (struct technology *)item;
+}
+
+void technology_ethernet_init(struct technology *item, GVariant *properties,
+		GDBusProxy *proxy) {
+	struct ethernet_technology *tech = (struct ethernet_technology *)item;
+	gtk_image_set_from_icon_name(GTK_IMAGE(tech->parent.list_item->icon),
+			"network-wired-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR);
+	gtk_image_set_from_icon_name(GTK_IMAGE(tech->parent.settings->icon),
+			"network-wired", GTK_ICON_SIZE_DIALOG);
+}
+
+void technology_ethernet_free(struct technology *tech) {
+	technology_free(tech);
+}
 
 void service_ethernet_init(struct service *serv, GDBusProxy *proxy,
 		const gchar *path, GVariant *properties) {

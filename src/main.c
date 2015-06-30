@@ -26,7 +26,7 @@
 #include <gtk/gtk.h>
 
 #include "connection.h"
-#include "technologies/technology.h"
+#include "technology.h"
 #include "interfaces.h"
 #include "style.h"
 

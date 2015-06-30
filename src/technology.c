@@ -29,13 +29,12 @@
 #include "connection.h"
 #include "style.h"
 #include "technology.h"
-#include "technologies/bluetooth.h"
-#include "technologies/cellular.h"
-#include "technologies/ethernet.h"
-#include "technologies/p2p.h"
-#include "technologies/technology.h"
-#include "technologies/vpn.h"
-#include "technologies/wireless.h"
+#include "connections/bluetooth.h"
+#include "connections/cellular.h"
+#include "connections/ethernet.h"
+#include "connections/p2p.h"
+#include "connections/vpn.h"
+#include "connections/wireless.h"
 
 struct technology_functions {
 	void (*init)(struct technology *tech, GVariant *properties, GDBusProxy *proxy);

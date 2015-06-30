@@ -24,7 +24,7 @@
 #include <glib.h>
 
 #include "service.h"
-#include "services/ethernet.h"
+#include "connections/ethernet.h"
 
 struct service_functions {
 	struct service *(*create)();

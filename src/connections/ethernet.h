@@ -18,15 +18,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CONNMAN_GTK_SERVICE_ETHERNET_H
-#define _CONNMAN_GTK_SERVICE_ETHERNET_H
+#ifndef _CONNMAN_GTK_ETHERNET_H
+#define _CONNMAN_GTK_ETHERNET_H
 
 #include <gio/gio.h>
 #include <glib.h>
+#include <gtk/gtk.h>
 
-#include "service.h"
+#include "technology.h"
+
+struct technology *technology_ethernet_create(void);
+void technology_ethernet_init(struct technology *tech, GVariant *properties,
+		GDBusProxy *proxy);
+void technology_ethernet_free(struct technology *tech);
 
 void service_ethernet_init(struct service *serv, GDBusProxy *proxy, 
 		const gchar *path, GVariant *properties);
 
-#endif /* _CONNMAN_GTK_SERVICE_ETHERNET_H */
+#endif /* _CONNMAN_GTK_ETHERNET_H */
+
