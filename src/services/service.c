@@ -24,6 +24,20 @@
 #include <glib.h>
 
 #include "service.h"
+#include "services/ethernet.h"
+
+struct service_functions {
+	struct service *(*create)();
+	void (*free)(struct service *serv);
+	void (*init)(struct service *serv, GDBusProxy *proxy, const gchar *path,
+			GVariant *properties);
+	void (*update)(struct service *serv, GVariant *properties);
+};
+
+struct service_functions functions[CONNECTION_TYPE_COUNT] = {
+	{},
+	{NULL, NULL, service_ethernet_init}
+};
 
 void service_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 		GVariant *parameters, gpointer user_data) {
@@ -45,14 +59,11 @@ void service_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 	}
 }
 
-struct service *service_create(GDBusProxy *proxy, const gchar *path,
+void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 		GVariant *properties) {
-	struct service *serv;
 	GVariantIter *iter;
 	gchar *key;
 	GVariant *value;
-	
-	serv = g_malloc(sizeof(*serv));
 
 	serv->proxy = proxy;
 	serv->path = g_strdup(path);
@@ -69,14 +80,40 @@ struct service *service_create(GDBusProxy *proxy, const gchar *path,
 
 	serv->item = gtk_list_box_row_new();
 	g_object_ref(serv->item);
+	gtk_widget_set_hexpand(serv->item, TRUE);
 
 	serv->contents = gtk_grid_new();
 	gtk_container_add(GTK_CONTAINER(serv->item), serv->contents);
-	gtk_container_add(GTK_CONTAINER(serv->contents), gtk_label_new("service"));
 	gtk_widget_show_all(serv->item);
 
 	g_signal_connect(proxy, "g-signal", G_CALLBACK(service_proxy_signal),
 			serv);
+}
+
+struct service *service_create(GDBusProxy *proxy, const gchar *path,
+		GVariant *properties) {
+	struct service *serv;
+	enum connection_type type;
+	GVariantDict *properties_d;
+	GVariant *type_v;
+
+	properties_d = g_variant_dict_new(properties);
+	type_v = g_variant_dict_lookup_value(properties_d, "Type", NULL);
+	type = connection_type_from_string(g_variant_get_string(type_v, NULL));
+	if(type == CONNECTION_TYPE_UNKNOWN)
+		type = connection_type_from_path(path);
+	g_variant_unref(type_v);
+	g_variant_dict_unref(properties_d);
+
+	if(functions[type].create)
+		serv = functions[type].create();
+	else
+		serv = g_malloc(sizeof(*serv));
+
+	serv->type = type;
+	service_init(serv, proxy, path, properties);
+	if(functions[type].init)
+		functions[type].init(serv, proxy, path, properties);
 
 	return serv;
 }
@@ -93,11 +130,15 @@ void service_update(struct service *serv, GVariant *properties) {
 		g_hash_table_replace(serv->properties, hkey, value);
 	}
 	g_variant_iter_free(iter);
+	if(functions[serv->type].update)
+		functions[serv->type].update(serv, properties);
 }
 
 void service_free(struct service *serv) {
 	if(!serv)
 		return;
+	if(functions[serv->type].free)
+		functions[serv->type].free(serv);
 	g_object_unref(serv->proxy);
 	g_object_unref(serv->item);
 	g_free(serv->path);

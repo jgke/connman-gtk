@@ -18,29 +18,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CONNMAN_GTK_SERVICE_H
-#define _CONNMAN_GTK_SERVICE_H
-
-#include <gtk/gtk.h>
-#include <gio/gio.h>
 #include <glib.h>
+#include <string.h>
 
 #include "connection.h"
 
-struct service {
-	enum connection_type type;
-	GDBusProxy *proxy;
-	gchar *path;
-	GHashTable *properties;
-	GtkWidget *item;
-	GtkWidget *contents;
-};
+enum connection_type connection_type_from_string(const gchar *str) {
+	if(!strcmp(str, "ethernet"))
+		return CONNECTION_TYPE_ETHERNET;
+	if(!strcmp(str, "wifi"))
+		return CONNECTION_TYPE_WIRELESS;
+	if(!strcmp(str, "bluetooth"))
+		return CONNECTION_TYPE_BLUETOOTH;
+	if(!strcmp(str, "cellular"))
+		return CONNECTION_TYPE_CELLULAR;
+	if(!strcmp(str, "p2p"))
+		return CONNECTION_TYPE_P2P;
+	return CONNECTION_TYPE_UNKNOWN;
+}
 
-struct service *service_create(GDBusProxy *proxy, const gchar *path,
-		GVariant *properties);
-void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
-		GVariant *properties);
-void service_update(struct service *serv, GVariant *properties);
-void service_free(struct service *serv);
-
-#endif /* _CONNMAN_GTK_SERVICE_H */
+enum connection_type connection_type_from_path(const gchar *str) {
+	gchar *path = g_strdup(str);
+	/* find and replace first _ with 0 */
+	*strchr(path, '_') = '\0';
+	str = strrchr(path, '/') + 1;
+	enum connection_type type = connection_type_from_string(str);
+	g_free(path);
+	return type;
+}

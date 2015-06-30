@@ -26,17 +26,7 @@
 #include <gtk/gtk.h>
 
 #include "../services/service.h"
-
-enum technology_type {
-	TECHNOLOGY_TYPE_UNKNOWN,
-	TECHNOLOGY_TYPE_ETHERNET,
-	TECHNOLOGY_TYPE_WIRELESS,
-	TECHNOLOGY_TYPE_BLUETOOTH,
-	TECHNOLOGY_TYPE_CELLULAR,
-	TECHNOLOGY_TYPE_P2P,
-	TECHNOLOGY_TYPE_VPN,
-	TECHNOLOGY_TYPE_COUNT
-};
+#include "connection.h"
 
 struct technology;
 
@@ -72,11 +62,8 @@ struct technology {
 	struct technology_list_item *list_item;
 	struct technology_settings *settings;
 	GHashTable *services;
-	enum technology_type type;
+	enum connection_type type;
 };
-
-enum technology_type technology_type_from_string(const gchar *str);
-enum technology_type technology_type_from_path(const gchar *str);
 
 struct technology *technology_create(GDBusProxy *proxy, GVariant *path,
 		GVariant *properties);
@@ -88,6 +75,5 @@ void technology_update_service(struct technology *item, struct service *serv,
 		GVariant *properties);
 void technology_remove_service(struct technology *item, const gchar *path);
 void technology_free(struct technology *item);
-
 
 #endif /* _CONNMAN_GTK_TECHNOLOGY_H */

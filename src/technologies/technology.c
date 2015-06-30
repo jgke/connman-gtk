@@ -26,7 +26,9 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
+#include "connection.h"
 #include "style.h"
+#include "technology.h"
 #include "technologies/bluetooth.h"
 #include "technologies/cellular.h"
 #include "technologies/ethernet.h"
@@ -45,7 +47,7 @@ struct technology_functions {
 	void (*remove_service)(struct technology *tech, const gchar *path);
 };
 
-static struct technology_functions functions[TECHNOLOGY_TYPE_COUNT] = {
+static struct technology_functions functions[CONNECTION_TYPE_COUNT] = {
 	{},
 	{technology_ethernet_create, technology_ethernet_free},
 	{technology_wireless_create},
@@ -191,6 +193,7 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 	const gchar *name;
 	gboolean powered;
 	gboolean connected;
+	GtkWidget *frame;
 
 	item->technology = tech;
 	item->properties = g_hash_table_new_full(g_str_hash, g_str_equal,
@@ -257,9 +260,11 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 	gtk_widget_set_hexpand(item->contents, TRUE);
 	gtk_widget_set_vexpand(item->contents, TRUE);
 
+	frame = gtk_frame_new(NULL);
 	item->services = gtk_list_box_new();
 	g_object_ref(item->services);
-	gtk_grid_attach(GTK_GRID(item->contents), item->services, 0, 0, 1, 1);
+	gtk_container_add(GTK_CONTAINER(frame), item->services);
+	gtk_grid_attach(GTK_GRID(item->contents), frame, 0, 0, 1, 1);
 
 	gtk_grid_attach(GTK_GRID(item->grid), item->icon,	  0, 0, 1, 2);
 	gtk_grid_attach(GTK_GRID(item->grid), item->title,	  1, 0, 1, 1);
@@ -346,7 +351,7 @@ void technology_init(struct technology *tech, GVariant *properties_v,
 	tech->list_item = create_base_technology_list_item(tech, name);
 	tech->settings = create_base_technology_settings(tech, properties_v,
 			proxy);
-	tech->type = technology_type_from_string(type);
+	tech->type = connection_type_from_string(type);
 	g_object_set_data(G_OBJECT(tech->list_item->item), "technology-type",
 			&tech->type);
 
@@ -362,11 +367,11 @@ struct technology *technology_create(GDBusProxy *proxy, GVariant *path,
 	struct technology *item;
 	GVariantDict *properties_d;
 	GVariant *type_v;
-	enum technology_type type;
+	enum connection_type type;
 
 	properties_d = g_variant_dict_new(properties);
 	type_v = g_variant_dict_lookup_value(properties_d, "Type", NULL);
-	type = technology_type_from_string(g_variant_get_string(type_v, NULL));
+	type = connection_type_from_string(g_variant_get_string(type_v, NULL));
 	g_variant_unref(type_v);
 	g_variant_dict_unref(properties_d);
 
@@ -376,28 +381,4 @@ struct technology *technology_create(GDBusProxy *proxy, GVariant *path,
 	item->type = type;
 	technology_init(item, properties, proxy);
 	return item;
-}
-
-enum technology_type technology_type_from_string(const gchar *str) {
-	if(!strcmp(str, "ethernet"))
-		return TECHNOLOGY_TYPE_ETHERNET;
-	if(!strcmp(str, "wifi"))
-		return TECHNOLOGY_TYPE_WIRELESS;
-	if(!strcmp(str, "bluetooth"))
-		return TECHNOLOGY_TYPE_BLUETOOTH;
-	if(!strcmp(str, "cellular"))
-		return TECHNOLOGY_TYPE_CELLULAR;
-	if(!strcmp(str, "p2p"))
-		return TECHNOLOGY_TYPE_P2P;
-	return TECHNOLOGY_TYPE_UNKNOWN;
-}
-
-enum technology_type technology_type_from_path(const gchar *str) {
-	gchar *path = g_strdup(str);
-	/* find and replace first _ with 0 */
-	*strchr(path, '_') = '\0';
-	str = strrchr(path, '/') + 1;
-	enum technology_type type = technology_type_from_string(str);
-	g_free(path);
-	return type;
 }

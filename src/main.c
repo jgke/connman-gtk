@@ -25,6 +25,7 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
+#include "connection.h"
 #include "technologies/technology.h"
 #include "interfaces.h"
 #include "style.h"
@@ -32,14 +33,14 @@
 GtkWidget *list, *notebook;
 GHashTable *technology_types;
 GHashTable *services;
-struct technology *technologies[TECHNOLOGY_TYPE_COUNT];
+struct technology *technologies[CONNECTION_TYPE_COUNT];
 
 /* sort smallest enum value first */
 gint technology_list_sort_cb(GtkListBoxRow *row1, GtkListBoxRow *row2,
 		gpointer user_data) {
-	enum technology_type type1 = *(enum technology_type *)g_object_get_data(
+	enum connection_type type1 = *(enum connection_type *)g_object_get_data(
 			G_OBJECT(row1), "technology-type");
-	enum technology_type type2 = *(enum technology_type *)g_object_get_data(
+	enum connection_type type2 = *(enum connection_type *)g_object_get_data(
 			G_OBJECT(row2), "technology-type");
 	return type1 - type2;
 }
@@ -86,7 +87,7 @@ static void create_content(GtkWidget *window) {
 void destroy(GtkWidget *window, gpointer user_data) {
 	int i;
 	notebook = NULL;
-	for(i = 0; i < TECHNOLOGY_TYPE_COUNT; i++)
+	for(i = 0; i < CONNECTION_TYPE_COUNT; i++)
 		technology_free(technologies[i]);
 	g_hash_table_remove_all(services);
 }
@@ -142,8 +143,8 @@ out:
 void remove_technology(GVariant *parameters) {
 	GVariant *path_v;
 	const gchar *path;
-	enum technology_type *type_p;
-	enum technology_type type;
+	enum connection_type *type_p;
+	enum connection_type type;
 
 	path_v = g_variant_get_child_value(parameters, 0);
 	path = g_variant_get_string(path_v, NULL);
@@ -166,7 +167,7 @@ void add_service(GDBusConnection *connection, const gchar *path,
 	GDBusProxy *proxy;
 	GDBusNodeInfo *info;
 	GError *error = NULL;
-	enum technology_type type;
+	enum connection_type type;
 
 	info = g_dbus_node_info_new_for_xml(service_interface, &error);
 	if(error) {
@@ -191,7 +192,7 @@ void add_service(GDBusConnection *connection, const gchar *path,
 	serv = service_create(proxy, path, properties);
 	g_hash_table_insert(services, g_strdup(path), serv);
 
-	type = technology_type_from_path(path);
+	type = connection_type_from_path(path);
 	if(technologies[type])
 		technology_add_service(technologies[type], serv);
 out:
@@ -209,8 +210,8 @@ void services_changed(GDBusConnection *connection, GVariant *parameters) {
 
 	iter = g_variant_iter_new(modified);
 	while(g_variant_iter_loop(iter, "(o@*)", &path, &value)) {
-		enum technology_type type = technology_type_from_path(path);
-		if(type != TECHNOLOGY_TYPE_UNKNOWN) {
+		enum connection_type type = connection_type_from_path(path);
+		if(type != CONNECTION_TYPE_UNKNOWN) {
 			if(!g_hash_table_contains(services, path)) {
 				add_service(connection, path, value);
 				continue;
@@ -223,8 +224,8 @@ void services_changed(GDBusConnection *connection, GVariant *parameters) {
 
 	iter = g_variant_iter_new(deleted);
 	while(g_variant_iter_loop(iter, "o", &path)) {
-		enum technology_type type = technology_type_from_path(path);
-		if(type != TECHNOLOGY_TYPE_UNKNOWN)
+		enum connection_type type = connection_type_from_path(path);
+		if(type != CONNECTION_TYPE_UNKNOWN)
 			if(g_hash_table_contains(services, path)) {
 				technology_remove_service(technologies[type], path);
 				g_hash_table_remove(services, path);
@@ -256,7 +257,7 @@ void add_all_technologies(GDBusConnection *connection, GVariant *technologies_v)
 		add_technology(connection, child);
 		g_variant_unref(child);
 	}
-	for(i = TECHNOLOGY_TYPE_ETHERNET; i < TECHNOLOGY_TYPE_COUNT; i++) {
+	for(i = CONNECTION_TYPE_ETHERNET; i < CONNECTION_TYPE_COUNT; i++) {
 		if(technologies[i]) {
 			GtkWidget *row = technologies[i]->list_item->item;
 			gtk_list_box_select_row(GTK_LIST_BOX(list),

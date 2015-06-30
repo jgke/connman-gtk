@@ -18,29 +18,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CONNMAN_GTK_SERVICE_H
-#define _CONNMAN_GTK_SERVICE_H
+#ifndef _CONNMAN_GTK_CONNECTION_H
+#define _CONNMAN_GTK_CONNECTION_H
 
-#include <gtk/gtk.h>
-#include <gio/gio.h>
-#include <glib.h>
-
-#include "connection.h"
-
-struct service {
-	enum connection_type type;
-	GDBusProxy *proxy;
-	gchar *path;
-	GHashTable *properties;
-	GtkWidget *item;
-	GtkWidget *contents;
+enum connection_type {
+	CONNECTION_TYPE_UNKNOWN,
+	CONNECTION_TYPE_ETHERNET,
+	CONNECTION_TYPE_WIRELESS,
+	CONNECTION_TYPE_BLUETOOTH,
+	CONNECTION_TYPE_CELLULAR,
+	CONNECTION_TYPE_P2P,
+	CONNECTION_TYPE_VPN,
+	CONNECTION_TYPE_COUNT
 };
 
-struct service *service_create(GDBusProxy *proxy, const gchar *path,
-		GVariant *properties);
-void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
-		GVariant *properties);
-void service_update(struct service *serv, GVariant *properties);
-void service_free(struct service *serv);
+enum connection_type connection_type_from_string(const gchar *str);
+enum connection_type connection_type_from_path(const gchar *str);
 
-#endif /* _CONNMAN_GTK_SERVICE_H */
+#endif /* _CONNMAN_GTK_CONNECTION_H */
