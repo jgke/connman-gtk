@@ -27,4 +27,5 @@ Makefile.in
 .deps
 *.gmo
 *.o
+*~
 connman-gtk
