@@ -43,4 +43,7 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 void service_update(struct service *serv, GVariant *properties);
 void service_free(struct service *serv);
 
+GVariant *service_get_property(struct service *serv, const char *key,
+		const char *subkey);
+
 #endif /* _CONNMAN_GTK_SERVICE_H */

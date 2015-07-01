@@ -120,67 +120,26 @@ void service_ethernet_free(struct service *serv) {
 	g_free(item);
 }
 
-void service_ethernet_update(struct service *serv) {
-	struct ethernet_service *item = (struct ethernet_service *)serv;
-	GVariant *variant, *value_v;
-	GVariantDict *dict;
+static void service_ethernet_set_property(struct service *serv, GtkWidget *label,
+		const gchar *key, const gchar *subkey) {
+	GVariant *variant;
 	const gchar *value;
 
-	variant = g_hash_table_lookup(serv->properties, "IPv4");
-	dict = g_variant_dict_new(variant);
-
-	value_v = g_variant_dict_lookup_value(dict, "Address", NULL);
-	if(value_v) {
-		value = g_variant_get_string(value_v, NULL);
-		gtk_label_set_text(GTK_LABEL(item->ipv4), value);
-		g_variant_unref(value_v);
+	variant = service_get_property(serv, key, subkey);
+	if(variant) {
+		value = g_variant_get_string(variant, NULL);
+		gtk_label_set_text(GTK_LABEL(label), value);
+		g_variant_unref(variant);
 	}
+}
 
-	value_v = g_variant_dict_lookup_value(dict, "Gateway", NULL);
-	if(value_v) {
-		value = g_variant_get_string(value_v, NULL);
-		gtk_label_set_text(GTK_LABEL(item->ipv4gateway), value);
-		g_variant_unref(value_v);
-	}
+void service_ethernet_update(struct service *serv) {
+	struct ethernet_service *item = (struct ethernet_service *)serv;
 
-	g_variant_dict_unref(dict);
-
-	variant = g_hash_table_lookup(serv->properties, "IPv6");
-	dict = g_variant_dict_new(variant);
-
-	value_v = g_variant_dict_lookup_value(dict, "Address", NULL);
-	if(value_v) {
-		value = g_variant_get_string(value_v, NULL);
-		gtk_label_set_text(GTK_LABEL(item->ipv6), value);
-		g_variant_unref(value_v);
-	}
-
-	value_v = g_variant_dict_lookup_value(dict, "Gateway", NULL);
-	if(value_v) {
-		value = g_variant_get_string(value_v, NULL);
-		gtk_label_set_text(GTK_LABEL(item->ipv6gateway), value);
-		g_variant_unref(value_v);
-	}
-
-	g_variant_dict_unref(dict);
-
-	variant = g_hash_table_lookup(serv->properties, "Ethernet");
-	dict = g_variant_dict_new(variant);
-
-	value_v = g_variant_dict_lookup_value(dict, "Interface", NULL);
-	if(value_v) {
-		value = g_variant_get_string(value_v, NULL);
-		gtk_label_set_text(GTK_LABEL(item->interface), value);
-		g_variant_unref(value_v);
-	}
-
-	value_v = g_variant_dict_lookup_value(dict, "Address", NULL);
-	if(value_v) {
-		value = g_variant_get_string(value_v, NULL);
-		gtk_label_set_text(GTK_LABEL(item->mac), value);
-		g_variant_unref(value_v);
-	}
-
-	g_variant_dict_unref(dict);
-
+	service_ethernet_set_property(serv, item->ipv4, "IPv4", "Address");
+	service_ethernet_set_property(serv, item->ipv4gateway, "IPv4", "Gateway");
+	service_ethernet_set_property(serv, item->ipv6, "IPv6", "Address");
+	service_ethernet_set_property(serv, item->ipv6gateway, "IPv6", "Gateway");
+	service_ethernet_set_property(serv, item->interface, "Ethernet", "Interface");
+	service_ethernet_set_property(serv, item->mac, "Ethernet", "Address");
 }

@@ -150,3 +150,18 @@ void service_free(struct service *serv) {
 	else
 		g_free(serv);
 }
+
+GVariant *service_get_property(struct service *serv, const char *key,
+		const char *subkey) {
+	GVariant *variant;
+	GVariantDict *dict;
+
+	variant = g_hash_table_lookup(serv->properties, key);
+	if(!variant || !subkey)
+		return variant;
+
+	dict = g_variant_dict_new(variant);
+	variant = g_variant_dict_lookup_value(dict, subkey, NULL);
+	g_variant_dict_unref(dict);
+	return variant;
+}
