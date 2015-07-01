@@ -38,7 +38,8 @@ static struct {
 	{},
 	{service_ethernet_init, service_ethernet_create, service_ethernet_free,
 		service_ethernet_update},
-	{service_wireless_init}
+	{service_wireless_init, service_wireless_create, service_wireless_free,
+		service_wireless_update}
 };
 
 void service_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
@@ -157,8 +158,12 @@ GVariant *service_get_property(struct service *serv, const char *key,
 	GVariantDict *dict;
 
 	variant = g_hash_table_lookup(serv->properties, key);
-	if(!variant || !subkey)
+	if(!variant)
+	       return NULL;
+	if(!subkey) {
+		g_variant_ref(variant);
 		return variant;
+	}
 
 	dict = g_variant_dict_new(variant);
 	variant = g_variant_dict_lookup_value(dict, subkey, NULL);

@@ -76,6 +76,7 @@ struct technology_list_item *create_base_technology_list_item(struct technology 
 	g_object_ref(item->icon);
 
 	item->label = gtk_label_new(name);
+	gtk_widget_set_margin_start(item->label, MARGIN_SMALL);
 	g_object_ref(item->label);
 
 	gtk_container_add(GTK_CONTAINER(grid), item->icon);
