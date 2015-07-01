@@ -55,7 +55,10 @@ struct technology_settings {
 
 	GtkWidget *contents;
 	GtkWidget *services;
+
 	GtkWidget *buttons;
+	GtkWidget *filler;
+	GtkWidget *connect_button;
 };
 
 struct technology {

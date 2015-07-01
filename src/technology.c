@@ -292,11 +292,27 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 	gtk_container_add(GTK_CONTAINER(frame), scrolled_window);
 	gtk_grid_attach(GTK_GRID(item->contents), frame, 0, 0, 1, 1);
 
+	item->buttons = gtk_grid_new();
+	item->connect_button = gtk_button_new_with_mnemonic(_("_Connect"));
+	item->filler = gtk_label_new(NULL);
+
+	g_object_ref(item->buttons);
+	g_object_ref(item->connect_button);
+	g_object_ref(item->filler);
+
+	gtk_widget_set_hexpand(item->filler, TRUE);
+	gtk_widget_set_margin_top(item->buttons, MARGIN_SMALL);
+	gtk_widget_set_halign(item->connect_button, GTK_ALIGN_END);
+	gtk_widget_set_hexpand(item->buttons, TRUE);
+	gtk_grid_attach(GTK_GRID(item->buttons), item->filler, 0, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(item->buttons), item->connect_button, 1, 0, 1, 1);
+
 	gtk_grid_attach(GTK_GRID(item->grid), item->icon,	0, 0, 1, 2);
 	gtk_grid_attach(GTK_GRID(item->grid), item->title,	1, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(item->grid), item->status,	1, 1, 1, 1);
 	gtk_grid_attach(GTK_GRID(item->grid), powerbox,		2, 0, 1, 2);
 	gtk_grid_attach(GTK_GRID(item->grid), item->contents,	0, 2, 3, 1);
+	gtk_grid_attach(GTK_GRID(item->grid), item->buttons,	0, 3, 3, 1);
 
 	gtk_widget_show_all(item->grid);
 	return item;
@@ -313,6 +329,9 @@ void free_base_technology_settings(struct technology_settings *item) {
 
 	g_object_unref(item->contents);
 	g_object_unref(item->services);
+
+	g_object_unref(item->buttons);
+	g_object_unref(item->connect_button);
 
 	g_object_unref(item->grid);
 	gtk_widget_destroy(item->grid);
