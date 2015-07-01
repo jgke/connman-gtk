@@ -182,6 +182,18 @@ void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 	}
 }
 
+void technology_update_service_visibility(struct technology *item) {
+	int count = g_hash_table_size(item->services);
+	if(count) {
+		gtk_widget_show(item->settings->contents);
+		gtk_widget_show(item->settings->buttons);
+	}
+	else {
+		gtk_widget_hide(item->settings->contents);
+		gtk_widget_hide(item->settings->buttons);
+	}
+}
+
 void update_service_separator(GtkListBoxRow *row, GtkListBoxRow *before,
 		gpointer user_data) {
 	GtkWidget *cur;
@@ -285,7 +297,7 @@ struct technology_settings *create_base_technology_settings(struct technology *t
 	item->services = gtk_list_box_new();
 	g_object_ref(item->services);
 	gtk_list_box_set_selection_mode(GTK_LIST_BOX(item->services),
-			GTK_SELECTION_NONE);
+			GTK_SELECTION_SINGLE);
 	gtk_list_box_set_header_func(GTK_LIST_BOX(item->services),
 			update_service_separator, NULL, NULL);
 	gtk_container_add(GTK_CONTAINER(scrolled_window), item->services);
@@ -342,6 +354,7 @@ void free_base_technology_settings(struct technology_settings *item) {
 	g_free(item);
 }
 
+
 void technology_property_changed(struct technology *item, const gchar *key) {
 	if(functions[item->type].property_changed)
 		functions[item->type].property_changed(item, key);
@@ -352,6 +365,7 @@ void technology_add_service(struct technology *item, struct service *serv) {
 		functions[item->type].add_service(item, serv);
 	gtk_container_add(GTK_CONTAINER(item->settings->services), serv->item);
 	g_hash_table_insert(item->services, g_strdup(serv->path), serv);
+	technology_update_service_visibility(item);
 }
 
 void technology_update_service(struct technology *item, struct service *serv,
@@ -365,6 +379,7 @@ void technology_remove_service(struct technology *item, const gchar *path) {
 	if(functions[item->type].remove_service)
 		functions[item->type].remove_service(item, path);
 	g_hash_table_remove(item->services, path);
+	technology_update_service_visibility(item);
 }
 
 void technology_free(struct technology *item) {
@@ -393,18 +408,18 @@ void technology_init(struct technology *tech, GVariant *properties_v,
 	type = g_variant_get_string(type_v, NULL);
 	g_variant_dict_unref(properties);
 
+	tech->services = g_hash_table_new_full(g_str_hash, g_str_equal,
+			g_free, NULL);
 	tech->list_item = create_base_technology_list_item(tech, name);
 	tech->settings = create_base_technology_settings(tech, properties_v,
 			proxy);
+	technology_update_service_visibility(tech);
 	tech->type = connection_type_from_string(type);
 	g_object_set_data(G_OBJECT(tech->list_item->item), "technology-type",
 			&tech->type);
 
 	g_variant_unref(name_v);
 	g_variant_unref(type_v);
-
-	tech->services = g_hash_table_new_full(g_str_hash, g_str_equal,
-			g_free, NULL);
 }
 
 struct technology *technology_create(GDBusProxy *proxy, GVariant *path,
