@@ -25,9 +25,12 @@
 #include "technology.h"
 
 void technology_cellular_init(struct technology *item, GVariant *properties,
-		GDBusProxy *proxy) {
+                              GDBusProxy *proxy)
+{
 	gtk_image_set_from_icon_name(GTK_IMAGE(item->list_item->icon),
-			"emblem-system-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR);
+	                             "emblem-system-symbolic",
+	                             GTK_ICON_SIZE_LARGE_TOOLBAR);
 	gtk_image_set_from_icon_name(GTK_IMAGE(item->settings->icon),
-			"network-cellular-connected", GTK_ICON_SIZE_DIALOG);
+	                             "network-cellular-connected",
+	                             GTK_ICON_SIZE_DIALOG);
 }

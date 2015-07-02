@@ -36,19 +36,23 @@ struct wireless_service {
 };
 
 void technology_wireless_init(struct technology *item, GVariant *properties,
-		GDBusProxy *proxy) {
+                              GDBusProxy *proxy)
+{
 	gtk_image_set_from_icon_name(GTK_IMAGE(item->list_item->icon),
-			"network-wireless-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR);
+	                             "network-wireless-symbolic",
+	                             GTK_ICON_SIZE_LARGE_TOOLBAR);
 	gtk_image_set_from_icon_name(GTK_IMAGE(item->settings->icon),
-			"network-wireless", GTK_ICON_SIZE_DIALOG);
+	                             "network-wireless", GTK_ICON_SIZE_DIALOG);
 }
 
-struct service *service_wireless_create(void) {
+struct service *service_wireless_create(void)
+{
 	struct wireless_service *serv = g_malloc(sizeof(*serv));
 	return (struct service *)serv;
 }
 
-void service_wireless_free(struct service *serv) {
+void service_wireless_free(struct service *serv)
+{
 	struct wireless_service *item = (struct wireless_service *)serv;
 
 	g_object_unref(item->ssid);
@@ -58,7 +62,8 @@ void service_wireless_free(struct service *serv) {
 }
 
 void service_wireless_init(struct service *serv, GDBusProxy *proxy,
-		const gchar *path, GVariant *properties) {
+                           const gchar *path, GVariant *properties)
+{
 	struct wireless_service *item = (struct wireless_service *)serv;
 
 	item->ssid = gtk_label_new(NULL);
@@ -88,7 +93,8 @@ void service_wireless_init(struct service *serv, GDBusProxy *proxy,
 	service_wireless_update(serv);
 }
 
-void service_wireless_update(struct service *serv) {
+void service_wireless_update(struct service *serv)
+{
 	struct wireless_service *item = (struct wireless_service *)serv;
 
 	GVariant *variant;
@@ -100,8 +106,7 @@ void service_wireless_update(struct service *serv) {
 		gtk_label_set_text(GTK_LABEL(item->ssid), value);
 		g_variant_unref(variant);
 		gtk_widget_show(serv->item);
-	}
-	else
+	} else
 		gtk_widget_hide(serv->item);
 
 	variant = service_get_property(serv, "Security", NULL);
@@ -109,6 +114,7 @@ void service_wireless_update(struct service *serv) {
 		const gchar **value;
 		const gchar **cur;
 		int security = 0;
+		const gchar *icon_name;
 		value = g_variant_get_strv(variant, NULL);
 		for(cur = value; *cur; cur++) {
 			if(!strcmp("ieee8021x", *cur)) {
@@ -121,11 +127,12 @@ void service_wireless_update(struct service *serv) {
 				security = 1;
 		}
 		g_free(value);
+		icon_name = (security == 3 ? "security-high-symbolic" :
+		             security == 2 ? "security-medium-symbolic" :
+		             security == 1 ? "security-low-symbolic" :
+		             NULL);
 		gtk_image_set_from_icon_name(GTK_IMAGE(item->security),
-				(security == 3 ? "security-high-symbolic" :
-				 security == 2 ? "security-medium-symbolic" :
-				 security == 1 ? "security-low-symbolic" :
-				 NULL), GTK_ICON_SIZE_MENU);
+		                             icon_name, GTK_ICON_SIZE_MENU);
 		if(!security)
 			gtk_widget_hide(item->security);
 		else
@@ -139,8 +146,8 @@ void service_wireless_update(struct service *serv) {
 		unsigned char value;
 		value = g_variant_get_byte(variant);
 		gtk_image_set_from_icon_name(GTK_IMAGE(item->signal),
-				SIGNAL_TO_ICON("wireless", value),
-				GTK_ICON_SIZE_MENU);
+		                             SIGNAL_TO_ICON("wireless", value),
+		                             GTK_ICON_SIZE_MENU);
 		g_variant_unref(variant);
 	}
 }

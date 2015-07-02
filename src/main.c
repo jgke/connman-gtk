@@ -38,24 +38,28 @@ gboolean shutting_down = FALSE;
 
 /* sort smallest enum value first */
 gint technology_list_sort_cb(GtkListBoxRow *row1, GtkListBoxRow *row2,
-		gpointer user_data) {
+                             gpointer user_data)
+{
 	enum connection_type type1 = *(enum connection_type *)g_object_get_data(
-			G_OBJECT(row1), "technology-type");
+	                                     G_OBJECT(row1), "technology-type");
 	enum connection_type type2 = *(enum connection_type *)g_object_get_data(
-			G_OBJECT(row2), "technology-type");
+	                                     G_OBJECT(row2), "technology-type");
 	return type1 - type2;
 }
 
-void technology_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data) {
+void technology_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data)
+{
 	if(!G_IS_OBJECT(row))
 		return;
-	struct technology *tech = g_object_get_data(G_OBJECT(row), "technology");
+	struct technology *tech = g_object_get_data(G_OBJECT(row),
+	                          "technology");
 	gint num = gtk_notebook_page_num(GTK_NOTEBOOK(notebook),
-			tech->settings->grid);
+	                                 tech->settings->grid);
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), num);
 }
 
-static void create_content(GtkWidget *window) {
+static void create_content(GtkWidget *window)
+{
 	GtkWidget *frame, *grid;
 
 	grid = gtk_grid_new();
@@ -66,11 +70,11 @@ static void create_content(GtkWidget *window) {
 	frame = gtk_frame_new(NULL);
 	list = gtk_list_box_new();
 	gtk_list_box_set_selection_mode(GTK_LIST_BOX(list),
-			GTK_SELECTION_BROWSE);
+	                                GTK_SELECTION_BROWSE);
 	gtk_list_box_set_sort_func(GTK_LIST_BOX(list), technology_list_sort_cb,
-			NULL, NULL);
+	                           NULL, NULL);
 	g_signal_connect(list, "row-selected", G_CALLBACK(technology_selected),
-			NULL);
+	                 NULL);
 	gtk_widget_set_size_request(list, LIST_WIDTH, -1);
 
 	notebook = gtk_notebook_new();
@@ -85,7 +89,8 @@ static void create_content(GtkWidget *window) {
 	gtk_container_add(GTK_CONTAINER(window), grid);
 }
 
-void destroy(GtkWidget *window, gpointer user_data) {
+void destroy(GtkWidget *window, gpointer user_data)
+{
 	int i;
 	notebook = NULL;
 	for(i = 0; i < CONNECTION_TYPE_COUNT; i++)
@@ -93,7 +98,8 @@ void destroy(GtkWidget *window, gpointer user_data) {
 	g_hash_table_remove_all(services);
 }
 
-void add_technology(GDBusConnection *connection, GVariant *technology) {
+void add_technology(GDBusConnection *connection, GVariant *technology)
+{
 	GVariant *path;
 	const gchar *object_path;
 	GVariant *properties;
@@ -101,10 +107,10 @@ void add_technology(GDBusConnection *connection, GVariant *technology) {
 	GDBusNodeInfo *info;
 	GError *error = NULL;
 	struct technology *item;
-	info = g_dbus_node_info_new_for_xml(technology_interface, &error);
+	info = g_dbus_node_info_new_for_xml(TECHNOLOGY_INTERFACE, &error);
 	if(error) {
 		g_warning("Failed to load technology interface: %s",
-				error->message);
+		          error->message);
 		g_error_free(error);
 		return;
 	}
@@ -115,25 +121,26 @@ void add_technology(GDBusConnection *connection, GVariant *technology) {
 	object_path = g_variant_get_string(path, NULL);
 
 	proxy = g_dbus_proxy_new_sync(connection, G_DBUS_PROXY_FLAGS_NONE,
-			g_dbus_node_info_lookup_interface(info,
-				"net.connman.Technology"),
-			"net.connman", object_path, "net.connman.Technology",
-			NULL, &error);
+	                              g_dbus_node_info_lookup_interface(info,
+	                                              "net.connman.Technology"),
+	                              "net.connman", object_path,
+	                              "net.connman.Technology", NULL, &error);
 	if(error) {
 		g_warning("failed to connect ConnMan technology proxy: %s",
-				error->message);
+		          error->message);
 		g_error_free(error);
 		goto out;
 	}
 
 	item = technology_create(proxy, path, properties);
 
-	g_hash_table_insert(technology_types, g_strdup(object_path), &item->type);
+	g_hash_table_insert(technology_types, g_strdup(object_path),
+	                    &item->type);
 	technologies[item->type] = item;
 
 	gtk_container_add(GTK_CONTAINER(list), item->list_item->item);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
-			item->settings->grid, NULL);
+	                         item->settings->grid, NULL);
 
 out:
 	g_dbus_node_info_unref(info);
@@ -141,7 +148,8 @@ out:
 	g_variant_unref(properties);
 }
 
-void remove_technology(GVariant *parameters) {
+void remove_technology(GVariant *parameters)
+{
 	GVariant *path_v;
 	const gchar *path;
 	enum connection_type *type_p;
@@ -163,29 +171,30 @@ out:
 }
 
 void add_service(GDBusConnection *connection, const gchar *path,
-		GVariant *properties) {
+                 GVariant *properties)
+{
 	struct service *serv;
 	GDBusProxy *proxy;
 	GDBusNodeInfo *info;
 	GError *error = NULL;
 	enum connection_type type;
 
-	info = g_dbus_node_info_new_for_xml(service_interface, &error);
+	info = g_dbus_node_info_new_for_xml(SERVICE_INTERFACE, &error);
 	if(error) {
 		g_warning("Failed to load service interface: %s",
-				error->message);
+		          error->message);
 		g_error_free(error);
 		return;
 	}
 
 	proxy = g_dbus_proxy_new_sync(connection, G_DBUS_PROXY_FLAGS_NONE,
-			g_dbus_node_info_lookup_interface(info,
-				"net.connman.Service"),
-			"net.connman", path, "net.connman.Service",
-			NULL, &error);
+	                              g_dbus_node_info_lookup_interface(info,
+	                                              "net.connman.Service"),
+	                              "net.connman", path,
+	                              "net.connman.Service", NULL, &error);
 	if(error) {
 		g_warning("failed to connect ConnMan service proxy: %s",
-				error->message);
+		          error->message);
 		g_error_free(error);
 		goto out;
 	}
@@ -201,7 +210,8 @@ out:
 	g_dbus_node_info_unref(info);
 }
 
-void services_changed(GDBusConnection *connection, GVariant *parameters) {
+void services_changed(GDBusConnection *connection, GVariant *parameters)
+{
 	GVariant *modified, *deleted;
 	GVariantIter *iter;
 	gchar *path;
@@ -218,8 +228,10 @@ void services_changed(GDBusConnection *connection, GVariant *parameters) {
 				add_service(connection, path, value);
 				continue;
 			}
-			struct service *serv = g_hash_table_lookup(services, path);
-			technology_update_service(technologies[type], serv, value);
+			struct service *serv = g_hash_table_lookup(services,
+			                       path);
+			technology_update_service(technologies[type], serv,
+			                          value);
 		}
 	}
 	g_variant_iter_free(iter);
@@ -229,7 +241,8 @@ void services_changed(GDBusConnection *connection, GVariant *parameters) {
 		enum connection_type type = connection_type_from_path(path);
 		if(type != CONNECTION_TYPE_UNKNOWN)
 			if(g_hash_table_contains(services, path)) {
-				technology_remove_service(technologies[type], path);
+				technology_remove_service(technologies[type],
+				                          path);
 				g_hash_table_remove(services, path);
 			}
 	}
@@ -240,7 +253,8 @@ void services_changed(GDBusConnection *connection, GVariant *parameters) {
 }
 
 void manager_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
-		GVariant *parameters, gpointer user_data) {
+                    GVariant *parameters, gpointer user_data)
+{
 	GDBusConnection *connection = g_dbus_proxy_get_connection(proxy);
 	if(!strcmp(signal, "TechnologyAdded")) {
 		add_technology(connection, parameters);
@@ -251,7 +265,8 @@ void manager_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 	}
 }
 
-void add_all_technologies(GDBusConnection *connection, GVariant *technologies_v) {
+void add_all_technologies(GDBusConnection *connection, GVariant *technologies_v)
+{
 	int i;
 	int size = g_variant_n_children(technologies_v);
 	for(i = 0; i < size; i++) {
@@ -263,13 +278,14 @@ void add_all_technologies(GDBusConnection *connection, GVariant *technologies_v)
 		if(technologies[i]) {
 			GtkWidget *row = technologies[i]->list_item->item;
 			gtk_list_box_select_row(GTK_LIST_BOX(list),
-					GTK_LIST_BOX_ROW(row));
+			                        GTK_LIST_BOX_ROW(row));
 			break;
 		}
 	}
 }
 
-void add_all_services(GDBusConnection *connection, GVariant *services_v) {
+void add_all_services(GDBusConnection *connection, GVariant *services_v)
+{
 	int i;
 	int size = g_variant_n_children(services_v);
 	for(i = 0; i < size; i++) {
@@ -280,7 +296,8 @@ void add_all_services(GDBusConnection *connection, GVariant *services_v) {
 		child = g_variant_get_child_value(services_v, i);
 		path = g_variant_get_child_value(child, 0);
 		properties = g_variant_get_child_value(child, 1);
-		add_service(connection, g_variant_get_string(path, NULL), properties);
+		add_service(connection, g_variant_get_string(path, NULL),
+		            properties);
 
 		g_variant_unref(child);
 		g_variant_unref(path);
@@ -288,7 +305,8 @@ void add_all_services(GDBusConnection *connection, GVariant *services_v) {
 	}
 }
 
-void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
+void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data)
+{
 	(void)source;
 	(void)user_data;
 	GDBusConnection *connection;
@@ -300,25 +318,25 @@ void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
 	connection = g_bus_get_finish(res, &error);
 	if(error) {
 		g_error("failed to connect to system dbus: %s",
-				error->message);
+		        error->message);
 		g_error_free(error);
 		return;
 	}
 
-	info = g_dbus_node_info_new_for_xml(manager_interface, &error);
+	info = g_dbus_node_info_new_for_xml(MANAGER_INTERFACE, &error);
 	if(error) {
 		/* TODO: show user error message */
 		g_critical("Failed to load manager interface: %s",
-				error->message);
+		           error->message);
 		g_error_free(error);
 		return;
 	}
 
 	proxy = g_dbus_proxy_new_sync(connection, G_DBUS_PROXY_FLAGS_NONE,
-			g_dbus_node_info_lookup_interface(info,
-				"net.connman.Manager"),
-			"net.connman", "/", "net.connman.Manager", NULL,
-			&error);
+	                              g_dbus_node_info_lookup_interface(info,
+	                                              "net.connman.Manager"),
+	                              "net.connman", "/", "net.connman.Manager",
+	                              NULL, &error);
 	g_dbus_node_info_unref(info);
 	if(error) {
 		g_warning("failed to connect to ConnMan: %s", error->message);
@@ -327,7 +345,7 @@ void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
 	}
 
 	data = g_dbus_proxy_call_sync(proxy, "GetTechnologies", NULL,
-			G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+	                              G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
 	if(error) {
 		g_warning("failed to get technologies: %s", error->message);
 		g_error_free(error);
@@ -344,7 +362,7 @@ void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
 	g_variant_unref(child);
 
 	data = g_dbus_proxy_call_sync(proxy, "GetServices", NULL,
-			G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+	                              G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
 	if(error) {
 		g_warning("failed to get services: %s", error->message);
 		g_error_free(error);
@@ -360,28 +378,32 @@ void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
 }
 
 static gboolean delete_event(GtkApplication *app, GdkEvent *event,
-		gpointer user_data) {
+                             gpointer user_data)
+{
 	shutting_down = TRUE;
 	return FALSE;
 }
 
-static void activate(GtkApplication *app, gpointer user_data) {
+static void activate(GtkApplication *app, gpointer user_data)
+{
 	GtkWidget *window;
 
 	g_bus_get(G_BUS_TYPE_SYSTEM, NULL, dbus_connected, NULL);
 
 	window = gtk_application_window_new(app);
-	g_signal_connect(window, "delete-event", G_CALLBACK(delete_event), NULL);
+	g_signal_connect(window, "delete-event", G_CALLBACK(delete_event),
+	                 NULL);
 	gtk_window_set_title(GTK_WINDOW(window), _("Network Settings"));
 	gtk_window_set_default_size(GTK_WINDOW(window), DEFAULT_WIDTH,
-			DEFAULT_HEIGHT);
+	                            DEFAULT_HEIGHT);
 
 	create_content(window);
 
 	gtk_widget_show_all(window);
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 	GtkApplication *app;
 	int status;
 
@@ -393,9 +415,9 @@ int main(int argc, char *argv[]) {
 	style_init();
 
 	technology_types = g_hash_table_new_full(g_str_hash, g_str_equal,
-			g_free, NULL);
+	                   g_free, NULL);
 	services = g_hash_table_new_full(g_str_hash, g_str_equal,
-			g_free, (GDestroyNotify)service_free);
+	                                 g_free, (GDestroyNotify)service_free);
 
 	app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);

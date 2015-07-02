@@ -70,13 +70,13 @@ struct technology {
 };
 
 struct technology *technology_create(GDBusProxy *proxy, GVariant *path,
-		GVariant *properties);
+                                     GVariant *properties);
 void technology_init(struct technology *tech, GVariant *properties_v,
-		GDBusProxy *proxy);
+                     GDBusProxy *proxy);
 void technology_property_changed(struct technology *item, const gchar *key);
 void technology_add_service(struct technology *item, struct service *serv);
 void technology_update_service(struct technology *item, struct service *serv,
-		GVariant *properties);
+                               GVariant *properties);
 void technology_remove_service(struct technology *item, const gchar *path);
 void technology_free(struct technology *item);
 

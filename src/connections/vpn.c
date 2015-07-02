@@ -25,9 +25,12 @@
 #include "technology.h"
 
 void technology_vpn_init(struct technology *item, GVariant *properties,
-		GDBusProxy *proxy) {
+                         GDBusProxy *proxy)
+{
 	gtk_image_set_from_icon_name(GTK_IMAGE(item->list_item->icon),
-			"network-vpn-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR);
+	                             "network-vpn-symbolic",
+	                             GTK_ICON_SIZE_LARGE_TOOLBAR);
 	gtk_image_set_from_icon_name(GTK_IMAGE(item->settings->icon),
-			"network-vpn", GTK_ICON_SIZE_DIALOG);
+	                             "network-vpn",
+	                             GTK_ICON_SIZE_DIALOG);
 }

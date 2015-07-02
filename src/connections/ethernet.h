@@ -28,10 +28,10 @@
 #include "technology.h"
 
 void technology_ethernet_init(struct technology *tech, GVariant *properties,
-		GDBusProxy *proxy);
+                              GDBusProxy *proxy);
 
-void service_ethernet_init(struct service *serv, GDBusProxy *proxy, 
-		const gchar *path, GVariant *properties);
+void service_ethernet_init(struct service *serv, GDBusProxy *proxy,
+                           const gchar *path, GVariant *properties);
 struct service *service_ethernet_create(void);
 void service_ethernet_free(struct service *serv);
 void service_ethernet_update(struct service *serv);

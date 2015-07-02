@@ -24,15 +24,17 @@
 
 GtkCssProvider *css_provider;
 
-void style_init() {
+void style_init()
+{
 	GError *error = NULL;
 	css_provider = gtk_css_provider_new();
 	gtk_css_provider_load_from_path(css_provider,
-				CONNMAN_GTK_UIDIR "stylesheet.css", &error);
+	                                CONNMAN_GTK_UIDIR "stylesheet.css",
+	                                &error);
 	if(error != NULL) {
 		g_warning("couldn't load stylesheet %s: %s",
-				CONNMAN_GTK_UIDIR "stylesheet.css",
-				error->message);
+		          CONNMAN_GTK_UIDIR "stylesheet.css",
+		          error->message);
 		g_error_free(error);
 	}
 }

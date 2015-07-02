@@ -37,21 +37,21 @@ struct service {
 };
 
 #define SIGNAL_TO_ICON(type, strength) \
-	((strength) > 80 ? ("network-" type "-signal-excellent-symbolic") : \
-	(strength) > 55 ? ("network-" type "-signal-good-symbolic") : \
-	(strength) > 30 ? ("network-" type "-signal-ok-symbolic") : \
-	(strength) > 5 ? ("network-" type "-signal-weak-symbolic") : \
-	("network-" type "-signal-none-symbolic"))
+        ((strength) > 80 ? ("network-" type "-signal-excellent-symbolic") : \
+        (strength) > 55 ? ("network-" type "-signal-good-symbolic") : \
+        (strength) > 30 ? ("network-" type "-signal-ok-symbolic") : \
+        (strength) > 5 ? ("network-" type "-signal-weak-symbolic") : \
+        ("network-" type "-signal-none-symbolic"))
 
 struct service *service_create(GDBusProxy *proxy, const gchar *path,
-		GVariant *properties);
+                               GVariant *properties);
 void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
-		GVariant *properties);
+                  GVariant *properties);
 void service_update(struct service *serv, GVariant *properties);
 void service_free(struct service *serv);
 void service_toggle_connection(struct service *serv);
 
 GVariant *service_get_property(struct service *serv, const char *key,
-		const char *subkey);
+                               const char *subkey);
 
 #endif /* _CONNMAN_GTK_SERVICE_H */

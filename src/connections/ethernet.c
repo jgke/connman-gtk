@@ -42,18 +42,22 @@ struct ethernet_service {
 };
 
 void technology_ethernet_init(struct technology *item, GVariant *properties,
-		GDBusProxy *proxy) {
+                              GDBusProxy *proxy)
+{
 	gtk_image_set_from_icon_name(GTK_IMAGE(item->list_item->icon),
-			"network-wired-symbolic", GTK_ICON_SIZE_LARGE_TOOLBAR);
+	                             "network-wired-symbolic",
+	                             GTK_ICON_SIZE_LARGE_TOOLBAR);
 	gtk_image_set_from_icon_name(GTK_IMAGE(item->settings->icon),
-			"network-wired", GTK_ICON_SIZE_DIALOG);
+	                             "network-wired", GTK_ICON_SIZE_DIALOG);
 }
 
-static GtkWidget *add_label(GtkGrid *grid, gint y, const gchar *text) {
+static GtkWidget *add_label(GtkGrid *grid, gint y, const gchar *text)
+{
 	GtkWidget *label, *value;
 
 	label = gtk_label_new(text);
-	gtk_style_context_add_class(gtk_widget_get_style_context(label), "dim-label");
+	gtk_style_context_add_class(gtk_widget_get_style_context(label),
+	                            "dim-label");
 	gtk_widget_set_hexpand(label, TRUE);
 	STYLE_ADD_MARGIN(label, MARGIN_SMALL);
 	gtk_widget_set_margin_start(label, MARGIN_LARGE);
@@ -69,7 +73,8 @@ static GtkWidget *add_label(GtkGrid *grid, gint y, const gchar *text) {
 }
 
 void service_ethernet_init(struct service *serv, GDBusProxy *proxy,
-		const gchar *path, GVariant *properties) {
+                           const gchar *path, GVariant *properties)
+{
 	struct ethernet_service *item = (struct ethernet_service *)serv;
 	item->header = GTK_GRID(gtk_grid_new());
 	g_object_ref(item->header);
@@ -93,21 +98,23 @@ void service_ethernet_init(struct service *serv, GDBusProxy *proxy,
 	item->mac = add_label(item->properties, 4, _("MAC address"));
 
 	gtk_grid_attach(GTK_GRID(serv->contents), GTK_WIDGET(item->header),
-			0, 0, 1, 1);
+	                0, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(serv->contents), GTK_WIDGET(item->properties),
-			0, 1, 1, 1);
+	                0, 1, 1, 1);
 
 	gtk_widget_show_all(serv->contents);
 
 	service_ethernet_update(serv);
 }
 
-struct service *service_ethernet_create(void) {
+struct service *service_ethernet_create(void)
+{
 	struct ethernet_service *serv = g_malloc(sizeof(*serv));
 	return (struct service *)serv;
 }
 
-void service_ethernet_free(struct service *serv) {
+void service_ethernet_free(struct service *serv)
+{
 	struct ethernet_service *item = (struct ethernet_service *)serv;
 	g_object_unref(item->interface);
 	g_object_unref(item->header);
@@ -120,8 +127,9 @@ void service_ethernet_free(struct service *serv) {
 	g_free(item);
 }
 
-static void service_ethernet_set_property(struct service *serv, GtkWidget *label,
-		const gchar *key, const gchar *subkey) {
+static void ethernet_set_property(struct service *serv, GtkWidget *label,
+                                  const gchar *key, const gchar *subkey)
+{
 	GVariant *variant;
 	const gchar *value;
 
@@ -133,13 +141,14 @@ static void service_ethernet_set_property(struct service *serv, GtkWidget *label
 	}
 }
 
-void service_ethernet_update(struct service *serv) {
+void service_ethernet_update(struct service *serv)
+{
 	struct ethernet_service *item = (struct ethernet_service *)serv;
 
-	service_ethernet_set_property(serv, item->ipv4, "IPv4", "Address");
-	service_ethernet_set_property(serv, item->ipv4gateway, "IPv4", "Gateway");
-	service_ethernet_set_property(serv, item->ipv6, "IPv6", "Address");
-	service_ethernet_set_property(serv, item->ipv6gateway, "IPv6", "Gateway");
-	service_ethernet_set_property(serv, item->interface, "Ethernet", "Interface");
-	service_ethernet_set_property(serv, item->mac, "Ethernet", "Address");
+	ethernet_set_property(serv, item->ipv4, "IPv4", "Address");
+	ethernet_set_property(serv, item->ipv4gateway, "IPv4", "Gateway");
+	ethernet_set_property(serv, item->ipv6, "IPv6", "Address");
+	ethernet_set_property(serv, item->ipv6gateway, "IPv6", "Gateway");
+	ethernet_set_property(serv, item->interface, "Ethernet", "Interface");
+	ethernet_set_property(serv, item->mac, "Ethernet", "Address");
 }

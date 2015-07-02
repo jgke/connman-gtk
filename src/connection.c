@@ -23,7 +23,8 @@
 
 #include "connection.h"
 
-enum connection_type connection_type_from_string(const gchar *str) {
+enum connection_type connection_type_from_string(const gchar *str)
+{
 	if(!strcmp(str, "ethernet"))
 		return CONNECTION_TYPE_ETHERNET;
 	if(!strcmp(str, "wifi"))
@@ -37,7 +38,8 @@ enum connection_type connection_type_from_string(const gchar *str) {
 	return CONNECTION_TYPE_UNKNOWN;
 }
 
-enum connection_type connection_type_from_path(const gchar *str) {
+enum connection_type connection_type_from_path(const gchar *str)
+{
 	gchar *path = g_strdup(str);
 	/* find and replace first _ with 0 */
 	*strchr(path, '_') = '\0';

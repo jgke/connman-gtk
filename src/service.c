@@ -30,20 +30,25 @@
 
 static struct {
 	void (*init)(struct service *serv, GDBusProxy *proxy, const gchar *path,
-			GVariant *properties);
+	             GVariant *properties);
 	struct service *(*create)(void);
 	void (*free)(struct service *serv);
 	void (*update)(struct service *serv);
 } functions[CONNECTION_TYPE_COUNT] = {
 	{},
-	{service_ethernet_init, service_ethernet_create, service_ethernet_free,
-		service_ethernet_update},
-	{service_wireless_init, service_wireless_create, service_wireless_free,
-		service_wireless_update}
+	{
+		service_ethernet_init, service_ethernet_create,
+		service_ethernet_free, service_ethernet_update
+	},
+	{
+		service_wireless_init, service_wireless_create,
+		service_wireless_free, service_wireless_update
+	}
 };
 
 void service_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
-		GVariant *parameters, gpointer user_data) {
+                          GVariant *parameters, gpointer user_data)
+{
 	struct service *serv = user_data;
 	if(!strcmp(signal, "PropertyChanged")) {
 		GVariant *name_v, *value_v, *value;
@@ -63,7 +68,8 @@ void service_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 }
 
 void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
-		GVariant *properties) {
+                  GVariant *properties)
+{
 	GVariantIter *iter;
 	gchar *key;
 	GVariant *value;
@@ -71,7 +77,7 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 	serv->proxy = proxy;
 	serv->path = g_strdup(path);
 	serv->properties = g_hash_table_new_full(g_str_hash, g_str_equal,
-			g_free, (GDestroyNotify)g_variant_unref);
+	                   g_free, (GDestroyNotify)g_variant_unref);
 
 	iter = g_variant_iter_new(properties);
 	while(g_variant_iter_loop(iter, "{sv}", &key, &value)) {
@@ -92,11 +98,12 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 	gtk_widget_show_all(serv->item);
 
 	g_signal_connect(proxy, "g-signal", G_CALLBACK(service_proxy_signal),
-			serv);
+	                 serv);
 }
 
 struct service *service_create(GDBusProxy *proxy, const gchar *path,
-		GVariant *properties) {
+                               GVariant *properties)
+{
 	struct service *serv;
 	enum connection_type type;
 	GVariantDict *properties_d;
@@ -123,7 +130,8 @@ struct service *service_create(GDBusProxy *proxy, const gchar *path,
 	return serv;
 }
 
-void service_update(struct service *serv, GVariant *properties) {
+void service_update(struct service *serv, GVariant *properties)
+{
 	GVariantIter *iter;
 	gchar *key;
 	GVariant *value;
@@ -139,7 +147,8 @@ void service_update(struct service *serv, GVariant *properties) {
 		functions[serv->type].update(serv);
 }
 
-void service_free(struct service *serv) {
+void service_free(struct service *serv)
+{
 	if(!serv)
 		return;
 	g_object_unref(serv->proxy);
@@ -153,7 +162,8 @@ void service_free(struct service *serv) {
 		g_free(serv);
 }
 
-void service_toggle_connection(struct service *serv) {
+void service_toggle_connection(struct service *serv)
+{
 	GVariant *ret, *state_v;
 	GError *error = NULL;
 	const gchar *state, *function;
@@ -167,9 +177,10 @@ void service_toggle_connection(struct service *serv) {
 		function = "Disconnect";
 
 	ret = g_dbus_proxy_call_sync(serv->proxy, function, NULL,
-			G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+	                             G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
 	if(error) {
-		g_warning("failed to toggle connection state: %s", error->message);
+		g_warning("failed to toggle connection state: %s",
+		          error->message);
 		g_error_free(error);
 		return;
 	}
@@ -178,13 +189,14 @@ void service_toggle_connection(struct service *serv) {
 }
 
 GVariant *service_get_property(struct service *serv, const char *key,
-		const char *subkey) {
+                               const char *subkey)
+{
 	GVariant *variant;
 	GVariantDict *dict;
 
 	variant = g_hash_table_lookup(serv->properties, key);
 	if(!variant)
-	       return NULL;
+		return NULL;
 	if(!subkey) {
 		g_variant_ref(variant);
 		return variant;

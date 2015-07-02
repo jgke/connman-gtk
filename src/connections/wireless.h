@@ -27,12 +27,12 @@
 #include "technology.h"
 
 void technology_wireless_init(struct technology *item, GVariant *properties,
-		GDBusProxy *proxy);
+                              GDBusProxy *proxy);
 
 struct service *service_wireless_create(void);
 void service_wireless_free(struct service *serv);
-void service_wireless_init(struct service *serv, GDBusProxy *proxy, 
-		const gchar *path, GVariant *properties);
+void service_wireless_init(struct service *serv, GDBusProxy *proxy,
+                           const gchar *path, GVariant *properties);
 void service_wireless_update(struct service *serv);
 
 #endif /* _CONNMAN_GTK_WIRELESS_H */
