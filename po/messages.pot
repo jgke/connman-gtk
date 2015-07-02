@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-01 12:36+0300\n"
+"POT-Creation-Date: 2015-07-02 09:41+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,24 +17,32 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/main.c:367
+#: src/main.c:375
 msgid "Network Settings"
 msgstr ""
 
-#: src/technology.c:137 src/technology.c:254
+#: src/technology.c:138 src/technology.c:310
 msgid "Connected"
 msgstr ""
 
-#: src/technology.c:141 src/technology.c:256
+#: src/technology.c:142 src/technology.c:312
 msgid "Not connected"
 msgstr ""
 
-#: src/technology.c:144
+#: src/technology.c:145
 msgid "Disabled"
 msgstr ""
 
-#: src/technology.c:296
+#: src/technology.c:235 src/technology.c:354
 msgid "_Connect"
+msgstr ""
+
+#: src/technology.c:237
+msgid "Re_connect"
+msgstr ""
+
+#: src/technology.c:239
+msgid "Dis_connect"
 msgstr ""
 
 #: src/connections/ethernet.c:89

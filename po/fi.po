@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-01 12:36+0300\n"
+"POT-Creation-Date: 2015-07-02 09:41+0300\n"
 "PO-Revision-Date: 2015-06-11 15:15+0300\n"
 "Last-Translator: Jaakko Hannikainen <jaakko.hannikainen@intel.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -18,25 +18,33 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/main.c:367
+#: src/main.c:375
 msgid "Network Settings"
 msgstr "Verkkoasetukset"
 
-#: src/technology.c:137 src/technology.c:254
+#: src/technology.c:138 src/technology.c:310
 msgid "Connected"
 msgstr "Yhdistetty"
 
-#: src/technology.c:141 src/technology.c:256
+#: src/technology.c:142 src/technology.c:312
 msgid "Not connected"
 msgstr "Ei yhteytt‰"
 
-#: src/technology.c:144
+#: src/technology.c:145
 msgid "Disabled"
 msgstr "Pois p‰‰lt‰"
 
-#: src/technology.c:296
+#: src/technology.c:235 src/technology.c:354
 msgid "_Connect"
 msgstr "_Yhdist‰"
+
+#: src/technology.c:237
+msgid "Re_connect"
+msgstr "Uudelleen_yhdist‰"
+
+#: src/technology.c:239
+msgid "Dis_connect"
+msgstr "Katkaise _yhteys"
 
 #: src/connections/ethernet.c:89
 msgid "IPv4 address"
