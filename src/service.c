@@ -83,6 +83,7 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 
 	serv->item = gtk_list_box_row_new();
 	g_object_ref(serv->item);
+	g_object_set_data(G_OBJECT(serv->item), "service", serv);
 	STYLE_ADD_MARGIN(serv->item, MARGIN_SMALL);
 	gtk_widget_set_hexpand(serv->item, TRUE);
 
@@ -150,6 +151,30 @@ void service_free(struct service *serv) {
 		functions[serv->type].free(serv);
 	else
 		g_free(serv);
+}
+
+void service_toggle_connection(struct service *serv) {
+	GVariant *ret, *state_v;
+	GError *error = NULL;
+	const gchar *state, *function;
+
+	state_v = service_get_property(serv, "State", NULL);
+	state = g_variant_get_string(state_v, NULL);
+
+	if(!strcmp(state, "idle") || !strcmp(state, "failure"))
+		function = "Connect";
+	else
+		function = "Disconnect";
+
+	ret = g_dbus_proxy_call_sync(serv->proxy, function, NULL,
+			G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+	if(error) {
+		g_warning("failed to toggle connection state: %s", error->message);
+		g_error_free(error);
+		return;
+	}
+	g_variant_unref(ret);
+	return;
 }
 
 GVariant *service_get_property(struct service *serv, const char *key,

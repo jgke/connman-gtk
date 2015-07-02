@@ -34,6 +34,7 @@ GtkWidget *list, *notebook;
 GHashTable *technology_types;
 GHashTable *services;
 struct technology *technologies[CONNECTION_TYPE_COUNT];
+gboolean shutting_down = FALSE;
 
 /* sort smallest enum value first */
 gint technology_list_sort_cb(GtkListBoxRow *row1, GtkListBoxRow *row2,
@@ -358,12 +359,19 @@ void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data) {
 	g_variant_unref(child);
 }
 
+static gboolean delete_event(GtkApplication *app, GdkEvent *event,
+		gpointer user_data) {
+	shutting_down = TRUE;
+	return FALSE;
+}
+
 static void activate(GtkApplication *app, gpointer user_data) {
 	GtkWidget *window;
 
 	g_bus_get(G_BUS_TYPE_SYSTEM, NULL, dbus_connected, NULL);
 
 	window = gtk_application_window_new(app);
+	g_signal_connect(window, "delete-event", G_CALLBACK(delete_event), NULL);
 	gtk_window_set_title(GTK_WINDOW(window), _("Network Settings"));
 	gtk_window_set_default_size(GTK_WINDOW(window), DEFAULT_WIDTH,
 			DEFAULT_HEIGHT);

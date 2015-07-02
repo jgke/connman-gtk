@@ -41,6 +41,7 @@ struct technology_list_item {
 
 struct technology_settings {
 	struct technology *technology;
+	struct service *selected;
 	GHashTable *properties;
 
 	GDBusProxy *proxy;
