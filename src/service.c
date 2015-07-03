@@ -162,10 +162,24 @@ void service_free(struct service *serv)
 		g_free(serv);
 }
 
+void service_toggle_connection_cb(GObject *source, GAsyncResult *res,
+                                  gpointer user_data)
+{
+	GError *error = NULL;
+	GVariant *out;
+	out = g_dbus_proxy_call_finish((GDBusProxy *)user_data, res, &error);
+	if(error) {
+		g_warning("failed to toggle connection state: %s",
+		          error->message);
+		g_error_free(error);
+		return;
+	}
+	g_variant_unref(out);
+}
+
 void service_toggle_connection(struct service *serv)
 {
-	GVariant *ret, *state_v;
-	GError *error = NULL;
+	GVariant *state_v;
 	const gchar *state, *function;
 
 	state_v = service_get_property(serv, "State", NULL);
@@ -176,16 +190,11 @@ void service_toggle_connection(struct service *serv)
 	else
 		function = "Disconnect";
 
-	ret = g_dbus_proxy_call_sync(serv->proxy, function, NULL,
-	                             G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
-	if(error) {
-		g_warning("failed to toggle connection state: %s",
-		          error->message);
-		g_error_free(error);
-		return;
-	}
-	g_variant_unref(ret);
-	return;
+	g_variant_unref(state_v);
+
+	g_dbus_proxy_call(serv->proxy, function, NULL,
+	                  G_DBUS_CALL_FLAGS_NONE, -1, NULL,
+	                  service_toggle_connection_cb, serv->proxy);
 }
 
 GVariant *service_get_property(struct service *serv, const char *key,

@@ -25,6 +25,7 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
+#include "agent.h"
 #include "connection.h"
 #include "technology.h"
 #include "interfaces.h"
@@ -375,6 +376,8 @@ void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data)
 
 	g_variant_unref(data);
 	g_variant_unref(child);
+
+	register_agent(connection, proxy);
 }
 
 static gboolean delete_event(GtkApplication *app, GdkEvent *event,
