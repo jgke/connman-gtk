@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-02 09:41+0300\n"
+"POT-Creation-Date: 2015-07-06 13:31+0300\n"
 "PO-Revision-Date: 2015-06-11 15:15+0300\n"
 "Last-Translator: Jaakko Hannikainen <jaakko.hannikainen@intel.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -18,50 +18,70 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/main.c:375
+#: src/agent.c:113
+msgid "Authentication required"
+msgstr "Tunnistautuminen vaadittu"
+
+#: src/agent.c:116
+msgid "_OK"
+msgstr "_OK"
+
+#: src/agent.c:117
+msgid "_Cancel"
+msgstr "_Peruuta"
+
+#: src/main.c:389
 msgid "Network Settings"
 msgstr "Verkkoasetukset"
 
-#: src/technology.c:138 src/technology.c:310
+#: src/technology.c:138
 msgid "Connected"
 msgstr "Yhdistetty"
 
-#: src/technology.c:142 src/technology.c:312
+#: src/technology.c:142
 msgid "Not connected"
 msgstr "Ei yhteytt‰"
 
-#: src/technology.c:145
+#: src/technology.c:146
 msgid "Disabled"
 msgstr "Pois p‰‰lt‰"
 
-#: src/technology.c:235 src/technology.c:354
+#: src/technology.c:225 src/technology.c:286
 msgid "_Connect"
 msgstr "_Yhdist‰"
 
-#: src/technology.c:237
+#: src/technology.c:227
 msgid "Re_connect"
 msgstr "Uudelleen_yhdist‰"
 
-#: src/technology.c:239
+#: src/technology.c:229
 msgid "Dis_connect"
 msgstr "Katkaise _yhteys"
 
-#: src/connections/ethernet.c:89
+#: src/connections/ethernet.c:94
 msgid "IPv4 address"
 msgstr "IPv4-osoite"
 
-#: src/connections/ethernet.c:90
+#: src/connections/ethernet.c:95
 msgid "IPv4 gateway"
 msgstr "IPv4-yhdysk‰yt‰v‰"
 
-#: src/connections/ethernet.c:91
+#: src/connections/ethernet.c:96
 msgid "IPv6 address"
 msgstr "IPv6-osoite"
 
-#: src/connections/ethernet.c:92
+#: src/connections/ethernet.c:97
 msgid "IPv6 gateway"
 msgstr "IPv6-yhdysk‰yt‰v‰"
 
-#: src/connections/ethernet.c:93
+#: src/connections/ethernet.c:98
 msgid "MAC address"
 msgstr "MAC-osoite"
+
+#: src/connections/wireless.c:52 src/connections/wireless.c:97
+msgid "_Scan"
+msgstr ""
+
+#: src/connections/wireless.c:66
+msgid "Scanning"
+msgstr ""
