@@ -139,6 +139,8 @@ void service_wireless_init(struct service *serv, GDBusProxy *proxy,
 	gtk_widget_set_valign(item->signal, GTK_ALIGN_CENTER);
 	gtk_widget_set_valign(item->security, GTK_ALIGN_CENTER);
 
+	gtk_grid_insert_column(GTK_GRID(serv->header), 1);
+	gtk_grid_insert_column(GTK_GRID(serv->header), 1);
 	gtk_grid_attach(GTK_GRID(serv->header), item->security, 1, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(serv->header), item->signal, 2, 0, 1, 1);
 

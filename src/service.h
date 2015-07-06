@@ -37,6 +37,7 @@ struct service {
 	GtkWidget *header;
 	GtkWidget *title;
 	GtkWidget *contents;
+	GtkWidget *settings_button;
 };
 
 #define SIGNAL_TO_ICON(type, strength) \
