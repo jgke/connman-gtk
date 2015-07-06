@@ -25,6 +25,7 @@
 
 #include "style.h"
 #include "service.h"
+#include "settings.h"
 #include "connections/ethernet.h"
 #include "connections/wireless.h"
 
@@ -68,6 +69,12 @@ static void service_proxy_signal(GDBusProxy *proxy, gchar *sender,
 	}
 }
 
+static void settings_button_cb(GtkButton *button, gpointer user_data)
+{
+	struct service *serv = user_data;
+	settings_create(serv);
+}
+
 void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
                   GVariant *properties)
 {
@@ -109,6 +116,8 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 
 	g_signal_connect(proxy, "g-signal", G_CALLBACK(service_proxy_signal),
 	                 serv);
+	g_signal_connect(serv->settings_button, "clicked",
+			 G_CALLBACK(settings_button_cb), serv);
 
 	gtk_grid_set_column_homogeneous(GTK_GRID(serv->contents), TRUE);
 
