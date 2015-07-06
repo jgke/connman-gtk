@@ -104,8 +104,8 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 	serv->title = gtk_label_new(title);
 	serv->contents = gtk_grid_new();
 	serv->settings_button = gtk_button_new_from_icon_name(
-			"emblem-system-symbolic",
-			GTK_ICON_SIZE_MENU);
+	                                "emblem-system-symbolic",
+	                                GTK_ICON_SIZE_MENU);
 	item_grid = GTK_GRID(gtk_grid_new());
 
 	g_object_ref(serv->item);
@@ -117,7 +117,7 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 	g_signal_connect(proxy, "g-signal", G_CALLBACK(service_proxy_signal),
 	                 serv);
 	g_signal_connect(serv->settings_button, "clicked",
-			 G_CALLBACK(settings_button_cb), serv);
+	                 G_CALLBACK(settings_button_cb), serv);
 
 	gtk_grid_set_column_homogeneous(GTK_GRID(serv->contents), TRUE);
 
@@ -136,7 +136,7 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 
 	gtk_grid_attach(GTK_GRID(serv->header), serv->title, 0, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(serv->header), serv->settings_button,
-			1, 0, 1, 1);
+	                1, 0, 1, 1);
 	gtk_grid_attach(item_grid, serv->header, 0, 0, 1, 1);
 	gtk_grid_attach(item_grid, serv->contents, 0, 1, 1, 1);
 	gtk_container_add(GTK_CONTAINER(serv->item), GTK_WIDGET(item_grid));

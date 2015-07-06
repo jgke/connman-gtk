@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <glib.h>
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
@@ -28,6 +29,8 @@
 
 struct settings {
 	GtkWidget *window;
+	GtkWidget *list;
+	GtkWidget *notebook;
 
 	struct service *serv;
 };
@@ -41,18 +44,108 @@ static struct {
 	{}
 };
 
+static void page_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data)
+{
+	if(!G_IS_OBJECT(row))
+		return;
+	struct settings *sett = data;
+	GtkWidget *content = g_object_get_data(G_OBJECT(row), "content");
+	gint num = gtk_notebook_page_num(GTK_NOTEBOOK(sett->notebook),
+	                                 content);
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(sett->notebook), num);
+}
+
+GtkWidget *settings_add_page(struct settings *sett, const gchar *name)
+{
+	GtkWidget *grid = gtk_grid_new();
+	GtkWidget *item = gtk_list_box_row_new();
+	GtkWidget *label = gtk_label_new(name);
+	GtkWidget *frame = gtk_frame_new(NULL);
+
+	g_object_set_data(G_OBJECT(item), "content", grid);
+
+	STYLE_ADD_MARGIN(label, MARGIN_SMALL);
+	gtk_widget_set_margin_start(grid, MARGIN_LARGE);
+	gtk_widget_set_margin_start(label, MARGIN_LARGE);
+
+	gtk_widget_set_halign(label, GTK_ALIGN_START);
+
+	gtk_widget_set_hexpand(frame, TRUE);
+	gtk_widget_set_vexpand(frame, TRUE);
+
+	gtk_container_add(GTK_CONTAINER(item), label);
+	gtk_container_add(GTK_CONTAINER(grid), frame);
+	gtk_container_add(GTK_CONTAINER(sett->list), item);
+
+	gtk_widget_show_all(grid);
+
+	gtk_notebook_append_page(GTK_NOTEBOOK(sett->notebook), grid, NULL);
+
+	return grid;
+}
+
+void settings_free(struct settings *sett)
+{
+	if(functions[sett->serv->type].free)
+		functions[sett->serv->type].free(sett);
+	else
+		g_free(sett);
+}
+
+static gboolean delete_event(GtkWidget *window, GdkEvent *event,
+                             gpointer user_data)
+{
+	settings_free(user_data);
+	return FALSE;
+}
+
 void settings_init(struct settings *sett)
 {
 	GVariant *name_v;
 	gchar *title;
+	GtkWidget *frame;
+	GtkGrid *grid = GTK_GRID(gtk_grid_new());
 
+	sett->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	name_v = service_get_property(sett->serv, "Name", NULL);
 	title = g_strdup_printf("%s - %s", _("Network Settings"),
 	                        g_variant_get_string(name_v, NULL));
 	gtk_window_set_title(GTK_WINDOW(sett->window), title);
 	g_free(title);
-	gtk_window_set_default_size(GTK_WINDOW(sett->window), DEFAULT_WIDTH,
-	                            DEFAULT_HEIGHT);
+	g_variant_unref(name_v);
+	gtk_window_set_default_size(GTK_WINDOW(sett->window), SETTINGS_WIDTH,
+	                            SETTINGS_HEIGHT);
+
+
+	sett->list = gtk_list_box_new();
+	sett->notebook = gtk_notebook_new();
+	frame = gtk_frame_new(NULL);
+
+	g_object_ref(sett->window);
+	g_object_ref(sett->list);
+	g_object_ref(sett->notebook);
+
+	g_signal_connect(sett->window, "delete-event", G_CALLBACK(delete_event),
+	                 sett);
+	g_signal_connect(sett->list, "row-selected",
+	                 G_CALLBACK(page_selected), sett);
+
+	STYLE_ADD_MARGIN(GTK_WIDGET(grid), MARGIN_LARGE);
+
+	gtk_widget_set_size_request(sett->list, SETTINGS_LIST_WIDTH, -1);
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(sett->notebook), FALSE);
+	gtk_notebook_set_show_border(GTK_NOTEBOOK(sett->notebook), FALSE);
+	gtk_widget_set_vexpand(sett->list, TRUE);
+	gtk_widget_set_hexpand(sett->notebook, TRUE);
+	gtk_widget_set_vexpand(sett->notebook, TRUE);
+
+	gtk_container_add(GTK_CONTAINER(frame), sett->list);
+	gtk_grid_attach(grid, frame, 0, 0, 1, 1);
+	gtk_grid_attach(grid, sett->notebook, 1, 0, 1, 1);
+	gtk_container_add(GTK_CONTAINER(sett->window), GTK_WIDGET(grid));
+
+	settings_add_page(sett, "Info");
+	settings_add_page(sett, "IPv4");
 
 	if(functions[sett->serv->type].init)
 		functions[sett->serv->type].init(sett);
@@ -69,7 +162,6 @@ void settings_create(struct service *serv)
 	else
 		sett = g_malloc(sizeof(*sett));
 
-	sett->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	sett->serv = serv;
 
 	settings_init(sett);
