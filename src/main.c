@@ -31,7 +31,7 @@
 #include "interfaces.h"
 #include "style.h"
 
-GtkWidget *list, *notebook;
+GtkWidget *list, *notebook, *main_window;
 GHashTable *technology_types;
 GHashTable *services;
 struct technology *technologies[CONNECTION_TYPE_COUNT];
@@ -59,7 +59,7 @@ void technology_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data)
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), num);
 }
 
-static void create_content(GtkWidget *window)
+static void create_content(void)
 {
 	GtkWidget *frame, *grid;
 
@@ -87,7 +87,7 @@ static void create_content(GtkWidget *window)
 	gtk_container_add(GTK_CONTAINER(frame), list);
 	gtk_grid_attach(GTK_GRID(grid), frame, 0, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(grid), notebook, 1, 0, 1, 1);
-	gtk_container_add(GTK_CONTAINER(window), grid);
+	gtk_container_add(GTK_CONTAINER(main_window), grid);
 }
 
 void destroy(GtkWidget *window, gpointer user_data)
@@ -97,6 +97,7 @@ void destroy(GtkWidget *window, gpointer user_data)
 	for(i = 0; i < CONNECTION_TYPE_COUNT; i++)
 		technology_free(technologies[i]);
 	g_hash_table_remove_all(services);
+	agent_release();
 }
 
 void add_technology(GDBusConnection *connection, GVariant *technology)
@@ -389,20 +390,18 @@ static gboolean delete_event(GtkApplication *app, GdkEvent *event,
 
 static void activate(GtkApplication *app, gpointer user_data)
 {
-	GtkWidget *window;
-
 	g_bus_get(G_BUS_TYPE_SYSTEM, NULL, dbus_connected, NULL);
 
-	window = gtk_application_window_new(app);
-	g_signal_connect(window, "delete-event", G_CALLBACK(delete_event),
+	main_window = gtk_application_window_new(app);
+	g_signal_connect(main_window, "delete-event", G_CALLBACK(delete_event),
 	                 NULL);
-	gtk_window_set_title(GTK_WINDOW(window), _("Network Settings"));
-	gtk_window_set_default_size(GTK_WINDOW(window), DEFAULT_WIDTH,
+	gtk_window_set_title(GTK_WINDOW(main_window), _("Network Settings"));
+	gtk_window_set_default_size(GTK_WINDOW(main_window), DEFAULT_WIDTH,
 	                            DEFAULT_HEIGHT);
 
-	create_content(window);
+	create_content();
 
-	gtk_widget_show_all(window);
+	gtk_widget_show_all(main_window);
 }
 
 int main(int argc, char *argv[])

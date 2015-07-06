@@ -24,5 +24,6 @@
 #include <gio/gio.h>
 
 void register_agent(GDBusConnection *connection, GDBusProxy *manager);
+void agent_release(void);
 
 #endif /* _CONNMAN_GTK_AGENT_H */

@@ -22,5 +22,6 @@
 #define _CONNMAN_GTK_MAIN_H
 
 extern gboolean shutting_down;
+extern GtkWidget *main_window;
 
 #endif /* _CONNMAN_GTK_MAIN_H */
