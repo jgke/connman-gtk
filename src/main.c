@@ -201,13 +201,13 @@ void add_service(GDBusConnection *connection, const gchar *path,
 		goto out;
 	}
 
-	serv = service_create(proxy, path, properties);
-	g_hash_table_insert(services, g_strdup(path), serv);
-
 	type = connection_type_from_path(path);
 
+	serv = service_create(technologies[type], proxy, path, properties);
+	g_hash_table_insert(services, g_strdup(path), serv);
 	if(technologies[type])
 		technology_add_service(technologies[type], serv);
+
 out:
 	g_dbus_node_info_unref(info);
 }

@@ -74,6 +74,7 @@ struct technology *technology_create(GDBusProxy *proxy, GVariant *path,
 void technology_init(struct technology *tech, GVariant *properties_v,
                      GDBusProxy *proxy);
 void technology_property_changed(struct technology *item, const gchar *key);
+void technology_services_updated(struct technology *item);
 void technology_add_service(struct technology *item, struct service *serv);
 void technology_update_service(struct technology *item, struct service *serv,
                                GVariant *properties);

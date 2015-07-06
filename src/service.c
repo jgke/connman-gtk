@@ -101,8 +101,8 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 	                 serv);
 }
 
-struct service *service_create(GDBusProxy *proxy, const gchar *path,
-                               GVariant *properties)
+struct service *service_create(struct technology *tech, GDBusProxy *proxy,
+                               const gchar *path, GVariant *properties)
 {
 	struct service *serv;
 	enum connection_type type;
@@ -123,6 +123,7 @@ struct service *service_create(GDBusProxy *proxy, const gchar *path,
 		serv = g_malloc(sizeof(*serv));
 
 	serv->type = type;
+	serv->tech = tech;
 	service_init(serv, proxy, path, properties);
 	if(functions[type].init)
 		functions[type].init(serv, proxy, path, properties);
@@ -176,7 +177,7 @@ void service_toggle_connection_cb(GObject *source, GAsyncResult *res,
 		 */
 		if(strncmp(ia, error->message, strlen(ia)))
 			g_warning("failed to toggle connection state: %s",
-					error->message);
+			          error->message);
 		g_error_free(error);
 		return;
 	}

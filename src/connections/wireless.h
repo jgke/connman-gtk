@@ -26,6 +26,8 @@
 
 #include "technology.h"
 
+struct technology *technology_wireless_create(void);
+void technology_wireless_free(struct technology *serv);
 void technology_wireless_init(struct technology *item, GVariant *properties,
                               GDBusProxy *proxy);
 

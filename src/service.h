@@ -29,6 +29,7 @@
 
 struct service {
 	enum connection_type type;
+	struct technology *tech;
 	GDBusProxy *proxy;
 	gchar *path;
 	GHashTable *properties;
@@ -43,8 +44,8 @@ struct service {
         (strength) > 5 ? ("network-" type "-signal-weak-symbolic") : \
         ("network-" type "-signal-none-symbolic"))
 
-struct service *service_create(GDBusProxy *proxy, const gchar *path,
-                               GVariant *properties);
+struct service *service_create(struct technology *tech, GDBusProxy *proxy,
+                               const gchar *path, GVariant *properties);
 void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
                   GVariant *properties);
 void service_update(struct service *serv, GVariant *properties);

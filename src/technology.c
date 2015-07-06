@@ -42,6 +42,7 @@ static struct {
 	             GDBusProxy *proxy);
 	struct technology *(*create)(void);
 	void (*free)(struct technology *tech);
+	void (*services_updated)(struct technology *tech);
 	void (*property_changed)(struct technology *tech, const gchar *name);
 	void (*add_service)(struct technology *tech, struct service *serv);
 	void (*update_service)(struct technology *tech, struct service *serv,
@@ -50,7 +51,10 @@ static struct {
 } functions[CONNECTION_TYPE_COUNT] = {
 	{},
 	{technology_ethernet_init},
-	{technology_wireless_init},
+	{
+		technology_wireless_init, technology_wireless_create,
+		technology_wireless_free
+	},
 	{technology_bluetooth_init},
 	{technology_cellular_init},
 	{},
@@ -145,12 +149,15 @@ void technology_update_status(struct technology_settings *item)
 		gtk_label_set_text(GTK_LABEL(item->status),
 		                   _("Connected"));
 	else {
-		if(powered)
+		if(powered) {
 			gtk_label_set_text(GTK_LABEL(item->status),
 			                   _("Not connected"));
-		else
+			gtk_widget_show(item->buttons);
+		} else {
 			gtk_label_set_text(GTK_LABEL(item->status),
 			                   _("Disabled"));
+			gtk_widget_hide(item->buttons);
+		}
 	}
 }
 
@@ -189,18 +196,6 @@ void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 
 		g_variant_unref(name_v);
 		g_variant_unref(value_v);
-	}
-}
-
-void technology_update_service_visibility(struct technology *item)
-{
-	int count = g_hash_table_size(item->services);
-	if(count) {
-		gtk_widget_show(item->settings->contents);
-		gtk_widget_show(item->settings->buttons);
-	} else {
-		gtk_widget_hide(item->settings->contents);
-		gtk_widget_hide(item->settings->buttons);
 	}
 }
 
@@ -379,6 +374,7 @@ struct technology_settings *create_technology_settings(struct technology *tech,
 	gtk_widget_set_margin_top(item->buttons, MARGIN_SMALL);
 	gtk_widget_set_halign(item->connect_button, GTK_ALIGN_END);
 	gtk_widget_set_hexpand(item->buttons, TRUE);
+	gtk_widget_set_valign(item->buttons, GTK_ALIGN_END);
 	gtk_grid_attach(GTK_GRID(item->buttons), item->filler, 0, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(item->buttons), item->connect_button,
 	                1, 0, 1, 1);
@@ -390,9 +386,10 @@ struct technology_settings *create_technology_settings(struct technology *tech,
 	gtk_grid_attach(GTK_GRID(item->grid), item->contents,0, 2, 3, 1);
 	gtk_grid_attach(GTK_GRID(item->grid), item->buttons, 0, 3, 3, 1);
 
-	update_connect_button(item);
-
 	gtk_widget_show_all(item->grid);
+
+	update_connect_button(item);
+	technology_update_status(item);
 	return item;
 }
 
@@ -428,13 +425,27 @@ void technology_property_changed(struct technology *item, const gchar *key)
 		functions[item->type].property_changed(item, key);
 }
 
+void technology_services_updated(struct technology *item)
+{
+	int count = g_hash_table_size(item->services);
+	if(count) {
+		gtk_widget_show(item->settings->contents);
+		gtk_widget_show(item->settings->connect_button);
+	} else {
+		gtk_widget_hide(item->settings->contents);
+		gtk_widget_hide(item->settings->connect_button);
+	}
+	if(functions[item->type].services_updated)
+		functions[item->type].services_updated(item);
+}
+
 void technology_add_service(struct technology *item, struct service *serv)
 {
 	if(functions[item->type].add_service)
 		functions[item->type].add_service(item, serv);
 	gtk_container_add(GTK_CONTAINER(item->settings->services), serv->item);
 	g_hash_table_insert(item->services, g_strdup(serv->path), serv);
-	technology_update_service_visibility(item);
+	technology_services_updated(item);
 }
 
 void technology_update_service(struct technology *item, struct service *serv,
@@ -445,6 +456,7 @@ void technology_update_service(struct technology *item, struct service *serv,
 	service_update(serv, properties);
 	if(item->settings->selected == serv);
 	update_connect_button(item->settings);
+	technology_services_updated(item);
 }
 
 void technology_remove_service(struct technology *item, const gchar *path)
@@ -457,7 +469,7 @@ void technology_remove_service(struct technology *item, const gchar *path)
 		update_connect_button(item->settings);
 	}
 	g_hash_table_remove(item->services, path);
-	technology_update_service_visibility(item);
+	technology_services_updated(item);
 }
 
 void technology_free(struct technology *item)
@@ -493,7 +505,7 @@ void technology_init(struct technology *tech, GVariant *properties_v,
 	tech->list_item = create_technology_list_item(tech, name);
 	tech->settings = create_technology_settings(tech, properties_v,
 	                 proxy);
-	technology_update_service_visibility(tech);
+	technology_services_updated(tech);
 	tech->type = connection_type_from_string(type);
 	g_object_set_data(G_OBJECT(tech->list_item->item), "technology-type",
 	                  &tech->type);
