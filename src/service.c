@@ -46,8 +46,9 @@ static struct {
 	}
 };
 
-void service_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
-                          GVariant *parameters, gpointer user_data)
+static void service_proxy_signal(GDBusProxy *proxy, gchar *sender,
+                                 gchar *signal, GVariant *parameters,
+                                 gpointer user_data)
 {
 	struct service *serv = user_data;
 	if(!strcmp(signal, "PropertyChanged")) {
@@ -163,8 +164,8 @@ void service_free(struct service *serv)
 		g_free(serv);
 }
 
-void service_toggle_connection_cb(GObject *source, GAsyncResult *res,
-                                  gpointer user_data)
+static void service_toggle_connection_cb(GObject *source, GAsyncResult *res,
+                gpointer user_data)
 {
 	GError *error = NULL;
 	GVariant *out;
