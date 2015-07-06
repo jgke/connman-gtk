@@ -30,10 +30,6 @@
 struct ethernet_service {
 	struct service parent;
 
-	GtkGrid *header;
-	GtkWidget *interface;
-
-	GtkGrid *properties;
 	GtkWidget *ipv4;
 	GtkWidget *ipv4gateway;
 	GtkWidget *ipv6;
@@ -51,23 +47,26 @@ void technology_ethernet_init(struct technology *item, GVariant *properties,
 	                             "network-wired", GTK_ICON_SIZE_DIALOG);
 }
 
-static GtkWidget *add_label(GtkGrid *grid, gint y, const gchar *text)
+static GtkWidget *add_label(GtkWidget *grid, gint y, const gchar *text)
 {
 	GtkWidget *label, *value;
 
 	label = gtk_label_new(text);
-	gtk_style_context_add_class(gtk_widget_get_style_context(label),
-	                            "dim-label");
-	gtk_widget_set_hexpand(label, TRUE);
+	value = gtk_label_new(NULL);
+
+	g_object_ref(value);
+
 	STYLE_ADD_MARGIN(label, MARGIN_SMALL);
 	gtk_widget_set_margin_start(label, MARGIN_LARGE);
-	gtk_widget_set_halign(label, GTK_ALIGN_START);
-	gtk_grid_attach(grid, label, 0, y, 1, 1);
+	gtk_style_context_add_class(gtk_widget_get_style_context(label),
+	                            "dim-label");
 
-	value = gtk_label_new(NULL);
-	g_object_ref(value);
+	gtk_widget_set_hexpand(label, TRUE);
+	gtk_widget_set_halign(label, GTK_ALIGN_START);
 	gtk_widget_set_halign(value, GTK_ALIGN_START);
-	gtk_grid_attach(grid, value, 1, y, 1, 1);
+
+	gtk_grid_attach(GTK_GRID(grid), label, 0, y, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), value, 1, y, 1, 1);
 
 	return value;
 }
@@ -76,31 +75,12 @@ void service_ethernet_init(struct service *serv, GDBusProxy *proxy,
                            const gchar *path, GVariant *properties)
 {
 	struct ethernet_service *item = (struct ethernet_service *)serv;
-	item->header = GTK_GRID(gtk_grid_new());
-	g_object_ref(item->header);
-	item->interface = gtk_label_new(NULL);
-	g_object_ref(item->interface);
-	STYLE_ADD_MARGIN(item->interface, MARGIN_SMALL);
-	gtk_widget_set_margin_start(item->interface, MARGIN_LARGE);
-	gtk_widget_set_margin_bottom(item->interface, 0);
-	gtk_grid_attach(item->header, item->interface,  0, 0, 1, 1);
 
-	item->properties = GTK_GRID(gtk_grid_new());
-	g_object_ref(item->properties);
-	STYLE_ADD_MARGIN(GTK_WIDGET(item->properties), MARGIN_LARGE);
-	gtk_widget_set_margin_top(GTK_WIDGET(item->properties), 0);
-	gtk_grid_set_column_homogeneous(item->properties, TRUE);
-
-	item->ipv4 = add_label(item->properties, 0, _("IPv4 address"));
-	item->ipv4gateway = add_label(item->properties, 1, _("IPv4 gateway"));
-	item->ipv6 = add_label(item->properties, 2, _("IPv6 address"));
-	item->ipv6gateway = add_label(item->properties, 3, _("IPv6 gateway"));
-	item->mac = add_label(item->properties, 4, _("MAC address"));
-
-	gtk_grid_attach(GTK_GRID(serv->contents), GTK_WIDGET(item->header),
-	                0, 0, 1, 1);
-	gtk_grid_attach(GTK_GRID(serv->contents), GTK_WIDGET(item->properties),
-	                0, 1, 1, 1);
+	item->ipv4 = add_label(serv->contents, 0, _("IPv4 address"));
+	item->ipv4gateway = add_label(serv->contents, 1, _("IPv4 gateway"));
+	item->ipv6 = add_label(serv->contents, 2, _("IPv6 address"));
+	item->ipv6gateway = add_label(serv->contents, 3, _("IPv6 gateway"));
+	item->mac = add_label(serv->contents, 4, _("MAC address"));
 
 	gtk_widget_show_all(serv->contents);
 
@@ -116,9 +96,6 @@ struct service *service_ethernet_create(void)
 void service_ethernet_free(struct service *serv)
 {
 	struct ethernet_service *item = (struct ethernet_service *)serv;
-	g_object_unref(item->interface);
-	g_object_unref(item->header);
-	g_object_unref(item->properties);
 	g_object_unref(item->ipv4);
 	g_object_unref(item->ipv4gateway);
 	g_object_unref(item->ipv6);
@@ -149,6 +126,6 @@ void service_ethernet_update(struct service *serv)
 	ethernet_set_property(serv, item->ipv4gateway, "IPv4", "Gateway");
 	ethernet_set_property(serv, item->ipv6, "IPv6", "Address");
 	ethernet_set_property(serv, item->ipv6gateway, "IPv6", "Gateway");
-	ethernet_set_property(serv, item->interface, "Ethernet", "Interface");
+	ethernet_set_property(serv, serv->title, "Ethernet", "Interface");
 	ethernet_set_property(serv, item->mac, "Ethernet", "Address");
 }

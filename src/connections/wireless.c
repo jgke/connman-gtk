@@ -36,7 +36,6 @@ struct wireless_technology {
 struct wireless_service {
 	struct service parent;
 
-	GtkWidget *ssid;
 	GtkWidget *security;
 	GtkWidget *signal;
 };
@@ -94,6 +93,7 @@ void technology_wireless_init(struct technology *tech, GVariant *properties,
 	                             GTK_ICON_SIZE_LARGE_TOOLBAR);
 	gtk_image_set_from_icon_name(GTK_IMAGE(tech->settings->icon),
 	                             "network-wireless", GTK_ICON_SIZE_DIALOG);
+
 	item->scan_button = gtk_button_new_with_mnemonic(_("_Scan"));
 	g_object_ref(item->scan_button);
 	g_signal_connect(item->scan_button, "clicked",
@@ -115,7 +115,6 @@ void service_wireless_free(struct service *serv)
 {
 	struct wireless_service *item = (struct wireless_service *)serv;
 
-	g_object_unref(item->ssid);
 	g_object_unref(item->security);
 	g_object_unref(item->signal);
 	g_free(item);
@@ -126,29 +125,25 @@ void service_wireless_init(struct service *serv, GDBusProxy *proxy,
 {
 	struct wireless_service *item = (struct wireless_service *)serv;
 
-	item->ssid = gtk_label_new(NULL);
 	item->security = gtk_image_new_from_icon_name("", GTK_ICON_SIZE_MENU);
 	item->signal = gtk_image_new_from_icon_name("", GTK_ICON_SIZE_MENU);
 
-	g_object_ref(item->ssid);
 	g_object_ref(item->security);
 	g_object_ref(item->signal);
 
 	STYLE_ADD_MARGIN(item->security, MARGIN_SMALL);
 	STYLE_ADD_MARGIN(item->signal, MARGIN_SMALL);
 
-	gtk_widget_set_halign(item->ssid, GTK_ALIGN_START);
-	gtk_widget_set_hexpand(item->ssid, TRUE);
 	gtk_widget_set_halign(item->signal, GTK_ALIGN_END);
 	gtk_widget_set_halign(item->security, GTK_ALIGN_END);
 	gtk_widget_set_valign(item->signal, GTK_ALIGN_CENTER);
 	gtk_widget_set_valign(item->security, GTK_ALIGN_CENTER);
 
-	gtk_grid_attach(GTK_GRID(serv->contents), item->ssid, 0, 0, 1, 1);
-	gtk_grid_attach(GTK_GRID(serv->contents), item->security, 1, 0, 1, 1);
-	gtk_grid_attach(GTK_GRID(serv->contents), item->signal, 2, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(serv->header), item->security, 1, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(serv->header), item->signal, 2, 0, 1, 1);
 
-	gtk_widget_show_all(serv->contents);
+	gtk_widget_show_all(serv->header);
+	gtk_widget_hide(serv->contents);
 
 	service_wireless_update(serv);
 }
@@ -163,7 +158,7 @@ void service_wireless_update(struct service *serv)
 	if(variant) {
 		const gchar *value;
 		value = g_variant_get_string(variant, NULL);
-		gtk_label_set_text(GTK_LABEL(item->ssid), value);
+		gtk_label_set_text(GTK_LABEL(serv->title), value);
 		g_variant_unref(variant);
 		gtk_widget_show(serv->item);
 	} else

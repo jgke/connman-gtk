@@ -34,6 +34,8 @@ struct service {
 	gchar *path;
 	GHashTable *properties;
 	GtkWidget *item;
+	GtkWidget *header;
+	GtkWidget *title;
 	GtkWidget *contents;
 };
 

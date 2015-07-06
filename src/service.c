@@ -74,6 +74,8 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 	GVariantIter *iter;
 	gchar *key;
 	GVariant *value;
+	GtkGrid *item_grid;
+	const gchar *title = NULL;
 
 	serv->proxy = proxy;
 	serv->path = g_strdup(path);
@@ -85,21 +87,47 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 		gchar *hkey = g_strdup(key);
 		g_variant_ref(value);
 		g_hash_table_insert(serv->properties, hkey, value);
+		if(!strcmp(key, "Name"))
+			title = g_variant_get_string(value, NULL);
 	}
 	g_variant_iter_free(iter);
 
 	serv->item = gtk_list_box_row_new();
-	g_object_ref(serv->item);
-	g_object_set_data(G_OBJECT(serv->item), "service", serv);
-	STYLE_ADD_MARGIN(serv->item, MARGIN_SMALL);
-	gtk_widget_set_hexpand(serv->item, TRUE);
-
+	serv->header = gtk_grid_new();
+	serv->title = gtk_label_new(title);
 	serv->contents = gtk_grid_new();
-	gtk_container_add(GTK_CONTAINER(serv->item), serv->contents);
-	gtk_widget_show_all(serv->item);
+	item_grid = GTK_GRID(gtk_grid_new());
+
+	g_object_ref(serv->item);
+	g_object_ref(serv->header);
+	g_object_ref(serv->title);
+	g_object_ref(serv->contents);
+	g_object_set_data(G_OBJECT(serv->item), "service", serv);
 
 	g_signal_connect(proxy, "g-signal", G_CALLBACK(service_proxy_signal),
 	                 serv);
+
+	gtk_grid_set_column_homogeneous(GTK_GRID(serv->contents), TRUE);
+
+	STYLE_ADD_MARGIN(serv->item, MARGIN_SMALL);
+	STYLE_ADD_MARGIN(serv->title, MARGIN_SMALL);
+	gtk_widget_set_margin_start(serv->title, MARGIN_LARGE);
+	gtk_widget_set_margin_start(serv->contents, MARGIN_LARGE);
+	gtk_widget_set_margin_top(serv->contents, 0);
+	gtk_widget_set_margin_bottom(serv->contents, 0);
+
+	gtk_widget_set_hexpand(serv->item, TRUE);
+	gtk_widget_set_hexpand(serv->header, TRUE);
+	gtk_widget_set_hexpand(serv->title, TRUE);
+	gtk_widget_set_hexpand(serv->contents, TRUE);
+	gtk_widget_set_halign(serv->title, GTK_ALIGN_START);
+
+	gtk_grid_attach(GTK_GRID(serv->header), serv->title, 0, 0, 1, 1);
+	gtk_grid_attach(item_grid, serv->header, 0, 0, 1, 1);
+	gtk_grid_attach(item_grid, serv->contents, 0, 1, 1, 1);
+	gtk_container_add(GTK_CONTAINER(serv->item), GTK_WIDGET(item_grid));
+
+	gtk_widget_show_all(serv->item);
 }
 
 struct service *service_create(struct technology *tech, GDBusProxy *proxy,
