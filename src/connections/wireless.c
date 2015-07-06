@@ -90,6 +90,10 @@ void service_wireless_init(struct service *serv, GDBusProxy *proxy,
 
 	gtk_widget_show_all(serv->contents);
 
+	g_dbus_proxy_call(serv->proxy, "Scan", NULL,
+	                  G_DBUS_CALL_FLAGS_NONE, -1, NULL,
+	                  NULL, serv->proxy);
+
 	service_wireless_update(serv);
 }
 
