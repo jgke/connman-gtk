@@ -48,7 +48,7 @@ gint technology_list_sort_cb(GtkListBoxRow *row1, GtkListBoxRow *row2,
 	return type1 - type2;
 }
 
-void technology_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data)
+static void technology_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data)
 {
 	if(!G_IS_OBJECT(row))
 		return;
@@ -90,17 +90,7 @@ static void create_content(void)
 	gtk_container_add(GTK_CONTAINER(main_window), grid);
 }
 
-void destroy(GtkWidget *window, gpointer user_data)
-{
-	int i;
-	notebook = NULL;
-	for(i = 0; i < CONNECTION_TYPE_COUNT; i++)
-		technology_free(technologies[i]);
-	g_hash_table_remove_all(services);
-	agent_release();
-}
-
-void add_technology(GDBusConnection *connection, GVariant *technology)
+static void add_technology(GDBusConnection *connection, GVariant *technology)
 {
 	GVariant *path;
 	const gchar *object_path;
@@ -150,7 +140,7 @@ out:
 	g_variant_unref(properties);
 }
 
-void remove_technology(GVariant *parameters)
+static void remove_technology(GVariant *parameters)
 {
 	GVariant *path_v;
 	const gchar *path;
@@ -172,8 +162,8 @@ out:
 	g_variant_unref(path_v);
 }
 
-void add_service(GDBusConnection *connection, const gchar *path,
-                 GVariant *properties)
+static void add_service(GDBusConnection *connection, const gchar *path,
+                        GVariant *properties)
 {
 	struct service *serv;
 	GDBusProxy *proxy;
@@ -212,7 +202,7 @@ out:
 	g_dbus_node_info_unref(info);
 }
 
-void services_changed(GDBusConnection *connection, GVariant *parameters)
+static void services_changed(GDBusConnection *connection, GVariant *parameters)
 {
 	GVariant *modified, *deleted;
 	GVariantIter *iter;
@@ -254,8 +244,8 @@ void services_changed(GDBusConnection *connection, GVariant *parameters)
 	g_variant_unref(deleted);
 }
 
-void manager_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
-                    GVariant *parameters, gpointer user_data)
+static void manager_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
+                           GVariant *parameters, gpointer user_data)
 {
 	GDBusConnection *connection = g_dbus_proxy_get_connection(proxy);
 	if(!strcmp(signal, "TechnologyAdded")) {
@@ -267,7 +257,7 @@ void manager_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 	}
 }
 
-void add_all_technologies(GDBusConnection *connection, GVariant *technologies_v)
+static void add_all_technologies(GDBusConnection *connection, GVariant *technologies_v)
 {
 	int i;
 	int size = g_variant_n_children(technologies_v);
@@ -286,7 +276,7 @@ void add_all_technologies(GDBusConnection *connection, GVariant *technologies_v)
 	}
 }
 
-void add_all_services(GDBusConnection *connection, GVariant *services_v)
+static void add_all_services(GDBusConnection *connection, GVariant *services_v)
 {
 	int i;
 	int size = g_variant_n_children(services_v);
@@ -307,7 +297,7 @@ void add_all_services(GDBusConnection *connection, GVariant *services_v)
 	}
 }
 
-void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data)
+static void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data)
 {
 	(void)source;
 	(void)user_data;
@@ -385,6 +375,7 @@ static gboolean delete_event(GtkApplication *app, GdkEvent *event,
                              gpointer user_data)
 {
 	shutting_down = TRUE;
+	agent_release();
 	return FALSE;
 }
 

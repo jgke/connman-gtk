@@ -55,6 +55,7 @@ static void wireless_scan_cb(GObject *source, GAsyncResult *res,
 	if(error) {
 		g_warning("failed to scan wifi: %s", error->message);
 		g_error_free(error);
+		return;
 	}
 	g_variant_unref(ret);
 }
