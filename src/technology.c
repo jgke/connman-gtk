@@ -61,30 +61,29 @@ static struct {
 	{technology_vpn_init}
 };
 
-struct technology_list_item *create_technology_list_item(struct technology *tech,
+static struct technology_list_item *create_list_item(struct technology *tech,
                 const gchar *name)
 {
 	GtkWidget *grid;
 	struct technology_list_item *item;
 
 	item = g_malloc(sizeof(*item));
-
 	item->technology = tech;
 
 	grid = gtk_grid_new();
-	STYLE_ADD_MARGIN(grid, MARGIN_SMALL);
-
 	item->item = gtk_list_box_row_new();
-	g_object_ref(item->item);
-	g_object_set_data(G_OBJECT(item->item), "technology", tech);
-
 	item->icon = gtk_image_new_from_icon_name("network-transmit-symbolic",
 	                GTK_ICON_SIZE_LARGE_TOOLBAR);
-	g_object_ref(item->icon);
-
 	item->label = gtk_label_new(name);
-	gtk_widget_set_margin_start(item->label, MARGIN_SMALL);
+
+	g_object_ref(item->item);
+	g_object_ref(item->icon);
 	g_object_ref(item->label);
+
+	g_object_set_data(G_OBJECT(item->item), "technology", tech);
+
+	STYLE_ADD_MARGIN(grid, MARGIN_SMALL);
+	gtk_widget_set_margin_start(item->label, MARGIN_SMALL);
 
 	gtk_container_add(GTK_CONTAINER(grid), item->icon);
 	gtk_container_add(GTK_CONTAINER(grid), item->label);
@@ -94,31 +93,20 @@ struct technology_list_item *create_technology_list_item(struct technology *tech
 	return item;
 }
 
-void free_technology_list_item(struct technology_list_item *item)
+static void free_list_item(struct technology_list_item *item)
 {
 	if(!item)
 		return;
 	g_object_unref(item->icon);
 	g_object_unref(item->label);
-
 	g_object_unref(item->item);
-
 	gtk_widget_destroy(item->item);
 
 	g_free(item);
 }
 
-GtkWidget *create_technology_settings_title(const char *title)
-{
-	GtkWidget *label = gtk_label_new(title);
-	STYLE_ADD_CONTEXT(label);
-	gtk_style_context_add_class(gtk_widget_get_style_context(label),
-	                            "cm-header-title");
-	return label;
-}
-
-gboolean technology_toggle_power(GtkSwitch *widget, GParamSpec *pspec,
-                                 gpointer user_data)
+static gboolean toggle_power(GtkSwitch *widget, GParamSpec *pspec,
+                             gpointer user_data)
 {
 	struct technology_settings *item = user_data;
 	GVariant *ret;
@@ -139,7 +127,7 @@ gboolean technology_toggle_power(GtkSwitch *widget, GParamSpec *pspec,
 	return FALSE;
 }
 
-void technology_update_status(struct technology_settings *item)
+static void update_status(struct technology_settings *item)
 {
 	gboolean connected = g_variant_get_boolean(g_hash_table_lookup(
 	                             item->properties, "Connected"));
@@ -161,7 +149,7 @@ void technology_update_status(struct technology_settings *item)
 	}
 }
 
-void technology_update_power(struct technology_settings *item)
+static void update_power(struct technology_settings *item)
 {
 	gboolean powered = g_variant_get_boolean(g_hash_table_lookup(
 	                           item->properties, "Powered"));
@@ -172,11 +160,12 @@ void technology_update_power(struct technology_settings *item)
 	                      powered);
 	g_signal_handler_unblock(G_OBJECT(item->power_switch),
 	                         item->powersig);
-	technology_update_status(item);
+	update_status(item);
 }
 
-void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
-                             GVariant *parameters, gpointer user_data)
+static void handle_proxy_signal(GDBusProxy *proxy, gchar *sender,
+                                gchar *signal, GVariant *parameters,
+                                gpointer user_data)
 {
 	struct technology_settings *item = user_data;
 	if(!strcmp(signal, "PropertyChanged")) {
@@ -187,11 +176,6 @@ void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 		value = g_variant_get_child_value(value_v, 0);
 		name = g_variant_dup_string(name_v, NULL);
 		g_hash_table_replace(item->properties, name, value);
-		if(!strcmp(name, "Powered")) {
-			technology_update_power(item);
-		} else if(!strcmp(name, "Connected")) {
-			technology_update_status(item);
-		}
 		technology_property_changed(item->technology, name);
 
 		g_variant_unref(name_v);
@@ -199,8 +183,8 @@ void technology_proxy_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 	}
 }
 
-void update_service_separator(GtkListBoxRow *row, GtkListBoxRow *before,
-                              gpointer user_data)
+static void update_service_separator(GtkListBoxRow *row, GtkListBoxRow *before,
+                                     gpointer user_data)
 {
 	GtkWidget *cur;
 	if(!before) {
@@ -215,14 +199,14 @@ void update_service_separator(GtkListBoxRow *row, GtkListBoxRow *before,
 	}
 }
 
-void connect_button_cb(GtkButton *widget, gpointer user_data)
+static void connect_button_cb(GtkButton *widget, gpointer user_data)
 {
 	struct technology_settings *tech = user_data;
 	if(tech->selected)
 		service_toggle_connection(tech->selected);
 }
 
-void update_connect_button(struct technology_settings *tech)
+static void update_connect_button(struct technology_settings *tech)
 {
 	const gchar *state, *button_state;
 	GVariant *state_v;
@@ -248,8 +232,8 @@ void update_connect_button(struct technology_settings *tech)
 	g_variant_unref(state_v);
 }
 
-void service_selected(GtkListBox *box, GtkListBoxRow *row,
-                      gpointer user_data)
+static void service_selected(GtkListBox *box, GtkListBoxRow *row,
+                             gpointer user_data)
 {
 	struct technology_settings *tech = user_data;
 	struct service *serv = NULL;
@@ -268,8 +252,6 @@ struct technology_settings *create_technology_settings(struct technology *tech,
 	gchar *key;
 	GVariant *value;
 	const gchar *name;
-	gboolean powered;
-	gboolean connected;
 	GtkWidget *powerbox, *frame, *scrolled_window;
 
 	item->technology = tech;
@@ -285,100 +267,89 @@ struct technology_settings *create_technology_settings(struct technology *tech,
 	}
 	g_variant_iter_free(iter);
 
-	powered = g_variant_get_boolean(g_hash_table_lookup(item->properties,
-	                                "Powered"));
-	connected = g_variant_get_boolean(g_hash_table_lookup(item->properties,
-	                                  "Connected"));
 	name = g_variant_get_string(g_hash_table_lookup(item->properties,
 	                            "Name"), NULL);
 
 	item->proxy = proxy;
-	g_signal_connect(proxy, "g-signal", G_CALLBACK(technology_proxy_signal),
+	g_signal_connect(proxy, "g-signal", G_CALLBACK(handle_proxy_signal),
 	                 item);
 
 	item->grid = gtk_grid_new();
-	g_object_ref(item->grid);
-	gtk_widget_set_margin_start(item->grid, MARGIN_LARGE);
-	gtk_widget_set_margin_end(item->grid, MARGIN_LARGE);
-	g_object_set_data(G_OBJECT(item->grid), "technology", tech);
-
 	item->icon = gtk_image_new_from_icon_name("preferences-system-network",
 	                GTK_ICON_SIZE_DIALOG);
-	g_object_ref(item->icon);
-	gtk_widget_set_halign(item->icon, GTK_ALIGN_START);
-
-	item->title = create_technology_settings_title(name);
-	g_object_ref(item->title);
-	gtk_widget_set_margin_start(item->title, MARGIN_MEDIUM);
-	gtk_widget_set_margin_end(item->title, MARGIN_MEDIUM);
-	gtk_widget_set_halign(item->title, GTK_ALIGN_START);
-	gtk_widget_set_hexpand(item->title, TRUE);
-
-	if(connected)
-		item->status = gtk_label_new(_("Connected"));
-	else
-		item->status = gtk_label_new(_("Not connected"));
-	g_object_ref(item->status);
-	gtk_widget_set_margin_start(item->status, MARGIN_MEDIUM);
-	gtk_widget_set_margin_end(item->status, MARGIN_MEDIUM);
-	gtk_widget_set_halign(item->status, GTK_ALIGN_START);
-	gtk_widget_set_hexpand(item->status, TRUE);
-
+	item->title = gtk_label_new(name);
+	item->status = gtk_label_new(NULL);
 	item->power_switch = gtk_switch_new();
-	powerbox = gtk_grid_new();
-	g_object_ref(item->power_switch);
-	gtk_switch_set_active(GTK_SWITCH(item->power_switch), powered);
-	gtk_widget_set_halign(item->power_switch, GTK_ALIGN_END);
-	gtk_widget_set_valign(item->power_switch, GTK_ALIGN_START);
-	gtk_widget_set_valign(powerbox, GTK_ALIGN_CENTER);
-	gtk_widget_set_halign(powerbox, GTK_ALIGN_END);
-	gtk_widget_set_vexpand(powerbox, FALSE);
-	item->powersig = g_signal_connect(item->power_switch, "notify::active",
-	                                  G_CALLBACK(technology_toggle_power),
-	                                  item);
-	gtk_container_add(GTK_CONTAINER(powerbox), item->power_switch);
-
 	item->contents = gtk_grid_new();
-	g_object_ref(item->contents);
-	gtk_widget_set_margin_top(item->contents, MARGIN_LARGE);
-	gtk_widget_set_hexpand(item->contents, TRUE);
-	gtk_widget_set_vexpand(item->contents, TRUE);
-
+	item->services = gtk_list_box_new();
+	item->buttons = gtk_grid_new();
+	item->connect_button = gtk_button_new_with_mnemonic(_("_Connect"));
+	item->filler = gtk_label_new(NULL);
+	powerbox = gtk_grid_new();
 	frame = gtk_frame_new(NULL);
 	scrolled_window = gtk_scrolled_window_new(NULL, NULL);
-	gtk_widget_set_vexpand(scrolled_window, TRUE);
-	item->services = gtk_list_box_new();
+
+	g_object_ref(item->grid);
+	g_object_ref(item->icon);
+	g_object_ref(item->title);
+	g_object_ref(item->status);
+	g_object_ref(item->power_switch);
+	g_object_ref(item->contents);
 	g_object_ref(item->services);
+	g_object_ref(item->buttons);
+	g_object_ref(item->connect_button);
+	g_object_ref(item->filler);
+
+	g_object_set_data(G_OBJECT(item->grid), "technology", tech);
+	item->powersig = g_signal_connect(item->power_switch, "notify::active",
+	                                  G_CALLBACK(toggle_power), item);
 	gtk_list_box_set_selection_mode(GTK_LIST_BOX(item->services),
 	                                GTK_SELECTION_SINGLE);
 	gtk_list_box_set_header_func(GTK_LIST_BOX(item->services),
 	                             update_service_separator, NULL, NULL);
 	g_signal_connect(item->services, "row-selected",
 	                 G_CALLBACK(service_selected), item);
-	gtk_container_add(GTK_CONTAINER(scrolled_window), item->services);
-	gtk_container_add(GTK_CONTAINER(frame), scrolled_window);
-	gtk_grid_attach(GTK_GRID(item->contents), frame, 0, 0, 1, 1);
-
-	item->buttons = gtk_grid_new();
-	item->connect_button = gtk_button_new_with_mnemonic(_("_Connect"));
-	item->filler = gtk_label_new(NULL);
-
-	g_object_ref(item->buttons);
-	g_object_ref(item->connect_button);
-	g_object_ref(item->filler);
-
 	g_signal_connect(item->connect_button, "clicked",
 	                 G_CALLBACK(connect_button_cb), item);
 
-	gtk_widget_set_hexpand(item->filler, TRUE);
+	gtk_widget_set_margin_start(item->grid, MARGIN_LARGE);
+	gtk_widget_set_margin_end(item->grid, MARGIN_LARGE);
+	gtk_widget_set_margin_start(item->title, MARGIN_MEDIUM);
+	gtk_widget_set_margin_end(item->title, MARGIN_MEDIUM);
+	STYLE_ADD_CONTEXT(item->title);
+	gtk_style_context_add_class(gtk_widget_get_style_context(item->title),
+	                            "cm-header-title");
+	gtk_widget_set_margin_start(item->status, MARGIN_MEDIUM);
+	gtk_widget_set_margin_end(item->status, MARGIN_MEDIUM);
+	gtk_widget_set_margin_top(item->contents, MARGIN_LARGE);
 	gtk_widget_set_margin_top(item->buttons, MARGIN_SMALL);
-	gtk_widget_set_halign(item->connect_button, GTK_ALIGN_END);
+
+	gtk_widget_set_hexpand(item->title, TRUE);
+	gtk_widget_set_hexpand(item->status, TRUE);
+	gtk_widget_set_vexpand(powerbox, FALSE);
+	gtk_widget_set_hexpand(item->contents, TRUE);
+	gtk_widget_set_vexpand(item->contents, TRUE);
+	gtk_widget_set_vexpand(scrolled_window, TRUE);
+	gtk_widget_set_hexpand(item->filler, TRUE);
 	gtk_widget_set_hexpand(item->buttons, TRUE);
+
+	gtk_widget_set_halign(item->icon, GTK_ALIGN_START);
+	gtk_widget_set_halign(item->title, GTK_ALIGN_START);
+	gtk_widget_set_halign(item->status, GTK_ALIGN_START);
+	gtk_widget_set_halign(item->power_switch, GTK_ALIGN_END);
+	gtk_widget_set_valign(item->power_switch, GTK_ALIGN_START);
+	gtk_widget_set_valign(powerbox, GTK_ALIGN_CENTER);
+	gtk_widget_set_halign(powerbox, GTK_ALIGN_END);
 	gtk_widget_set_valign(item->buttons, GTK_ALIGN_END);
+	gtk_widget_set_halign(item->connect_button, GTK_ALIGN_END);
+
+	gtk_container_add(GTK_CONTAINER(powerbox), item->power_switch);
+	gtk_container_add(GTK_CONTAINER(scrolled_window), item->services);
+	gtk_container_add(GTK_CONTAINER(frame), scrolled_window);
+	gtk_grid_attach(GTK_GRID(item->contents), frame, 0, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(item->buttons), item->filler, 0, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(item->buttons), item->connect_button,
 	                1, 0, 1, 1);
-
 	gtk_grid_attach(GTK_GRID(item->grid), item->icon, 0, 0, 1, 2);
 	gtk_grid_attach(GTK_GRID(item->grid), item->title,1, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(item->grid), item->status, 1, 1, 1, 1);
@@ -389,7 +360,8 @@ struct technology_settings *create_technology_settings(struct technology *tech,
 	gtk_widget_show_all(item->grid);
 
 	update_connect_button(item);
-	technology_update_status(item);
+	update_status(item);
+	update_power(item);
 	return item;
 }
 
@@ -402,13 +374,10 @@ void free_technology_settings(struct technology_settings *item)
 	g_object_unref(item->title);
 	g_object_unref(item->status);
 	g_object_unref(item->power_switch);
-
 	g_object_unref(item->contents);
 	g_object_unref(item->services);
-
 	g_object_unref(item->buttons);
 	g_object_unref(item->connect_button);
-
 	g_object_unref(item->grid);
 	gtk_widget_destroy(item->grid);
 
@@ -421,6 +390,11 @@ void free_technology_settings(struct technology_settings *item)
 
 void technology_property_changed(struct technology *item, const gchar *key)
 {
+	if(!strcmp(key, "Powered")) {
+		update_power(item->settings);
+	} else if(!strcmp(key, "Connected")) {
+		update_status(item->settings);
+	}
 	if(functions[item->type].property_changed)
 		functions[item->type].property_changed(item, key);
 }
@@ -478,7 +452,7 @@ void technology_free(struct technology *item)
 		return;
 	if(functions[item->type].free)
 		functions[item->type].free(item);
-	free_technology_list_item(item->list_item);
+	free_list_item(item->list_item);
 	free_technology_settings(item->settings);
 	g_hash_table_unref(item->services);
 	g_free(item);
@@ -502,7 +476,7 @@ void technology_init(struct technology *tech, GVariant *properties_v,
 
 	tech->services = g_hash_table_new_full(g_str_hash, g_str_equal,
 	                                       g_free, NULL);
-	tech->list_item = create_technology_list_item(tech, name);
+	tech->list_item = create_list_item(tech, name);
 	tech->settings = create_technology_settings(tech, properties_v,
 	                 proxy);
 	technology_services_updated(tech);
