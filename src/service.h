@@ -58,5 +58,8 @@ void service_toggle_connection(struct service *serv);
 
 GVariant *service_get_property(struct service *serv, const char *key,
                                const char *subkey);
+void service_set_property(struct service *serv, const char *key,
+                          GVariant *value);
+void service_set_properties(struct service *serv, GVariant *properties);
 
 #endif /* _CONNMAN_GTK_SERVICE_H */

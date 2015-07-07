@@ -54,6 +54,9 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *key,
 GtkWidget *settings_add_entry(struct settings_page *page, const gchar *key,
                               const gchar *subkey, const gchar *label,
                               const gchar *value, settings_field_validator valid);
+GtkWidget *settings_add_switch(struct settings_page *page, const gchar *key,
+                              const gchar *subkey, const gchar *label,
+                              gboolean value);
 
 void free_content(GtkWidget *widget, gpointer user_data);
 

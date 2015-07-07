@@ -52,6 +52,13 @@ GVariant *settings_content_value_entry(struct settings_content *content)
 	return g_variant_new("s", str);
 }
 
+GVariant *settings_content_value_switch(struct settings_content *content)
+{
+	GtkWidget *toggle = g_object_get_data(G_OBJECT(content->content),
+	                                     "toggle");
+	return g_variant_new("b", gtk_switch_get_active(GTK_SWITCH(toggle)));
+}
+
 void free_content(GtkWidget *widget, gpointer user_data)
 {
 	struct settings_content *content = user_data;
@@ -145,4 +152,36 @@ GtkWidget *settings_add_entry(struct settings_page *page, const gchar *key,
 	settings_add_content(page, content);
 
 	return entry;
+}
+
+GtkWidget *settings_add_switch(struct settings_page *page, const gchar *key,
+                              const gchar *subkey, const gchar *label,
+                              gboolean value)
+{
+	GtkWidget *label_w, *toggle;
+	struct settings_content *content = create_base_content(key, subkey);
+	content->free = g_free;
+	content->value = settings_content_value_switch;
+
+	label_w = gtk_label_new(label);
+	toggle = gtk_switch_new();
+
+	gtk_switch_set_active(GTK_SWITCH(toggle), value);
+
+	g_signal_connect(content->content, "destroy",
+	                 G_CALLBACK(free_content), content);
+	g_object_set_data(G_OBJECT(content->content), "toggle", toggle);
+
+	STYLE_ADD_MARGIN(content->content, MARGIN_LARGE);
+	STYLE_ADD_CONTEXT(label_w);
+	gtk_style_context_add_class(gtk_widget_get_style_context(label_w),
+	                            "dim-label");
+
+	add_centered(GTK_GRID(content->content), label_w, toggle);
+
+	gtk_widget_show_all(content->content);
+
+	settings_add_content(page, content);
+
+	return toggle;
 }

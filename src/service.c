@@ -266,3 +266,33 @@ GVariant *service_get_property(struct service *serv, const char *key,
 	g_variant_dict_unref(dict);
 	return variant;
 }
+
+void service_set_property(struct service *serv, const char *key,
+                               GVariant *value)
+{
+	GVariant *ret;
+	GVariant *parameters;
+	GError *error = NULL;
+
+	parameters = g_variant_new("(sv)", key, value);
+	ret = g_dbus_proxy_call_sync(serv->proxy, "SetProperty", parameters,
+	                              G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+	if(error) {
+		g_warning("failed to set property %s: %s", key, error->message);
+		g_error_free(error);
+		return;
+	}
+	g_variant_unref(ret);
+}
+
+void service_set_properties(struct service *serv, GVariant *properties)
+{
+	GVariantIter *iter;
+	gchar *key;
+	GVariant *value;
+
+	iter = g_variant_iter_new(properties);
+	while(g_variant_iter_loop(iter, "{sv}", &key, &value))
+		service_set_property(serv, key, value);
+	g_variant_iter_free(iter);
+}

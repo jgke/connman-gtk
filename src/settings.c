@@ -148,9 +148,7 @@ static void apply_cb(GtkWidget *window, gpointer user_data)
 	}
 	g_list_free(children);
 	out = g_variant_dict_end(dict);
-	gchar *str = g_variant_print(out, FALSE);
-	printf("%s\n", str);
-	g_free(str);
+	service_set_properties(sett->serv, out);
 	g_variant_unref(out);
 	g_variant_dict_unref(dict);
 }
@@ -174,11 +172,8 @@ void settings_init(struct settings *sett)
 	title = g_strdup_printf("%s - %s", _("Network Settings"),
 	                        g_variant_get_string(name_v, NULL));
 	gtk_window_set_title(GTK_WINDOW(sett->window), title);
-	g_free(title);
-	g_variant_unref(name_v);
 	gtk_window_set_default_size(GTK_WINDOW(sett->window), SETTINGS_WIDTH,
 	                            SETTINGS_HEIGHT);
-
 
 	sett->list = gtk_list_box_new();
 	sett->notebook = gtk_notebook_new();
@@ -214,15 +209,18 @@ void settings_init(struct settings *sett)
 	gtk_grid_attach(grid, apply, 1, 1, 1, 1);
 	gtk_container_add(GTK_CONTAINER(sett->window), GTK_WIDGET(grid));
 
-	settings_add_text(settings_add_page(sett, "Info"), NULL, NULL,
-	                  "Connected", "yes");
-	settings_add_entry(settings_add_page(sett, "IPv4"), "IPv4", "Address",
-	                   "IP", "123.123.2.1", NULL);
+	settings_add_text(settings_add_page(sett, "Name"), "Name", NULL,
+	                  "Name", g_variant_get_string(name_v, NULL));
+	settings_add_switch(settings_add_page(sett, "Properties"),
+			"AutoConnect", NULL, "Autoconnect", TRUE);
 
 	if(functions[sett->serv->type].init)
 		functions[sett->serv->type].init(sett);
 
 	gtk_widget_show_all(sett->window);
+
+	g_free(title);
+	g_variant_unref(name_v);
 }
 
 void settings_create(struct service *serv)
