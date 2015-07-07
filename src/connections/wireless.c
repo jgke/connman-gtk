@@ -30,7 +30,7 @@
 struct wireless_technology {
 	struct technology parent;
 
-	GtkWidget *scan_button;
+	guint scan_id;
 };
 
 struct wireless_service {
@@ -40,17 +40,11 @@ struct wireless_service {
 	GtkWidget *signal;
 };
 
-static void wireless_scan_cb(GObject *source, GAsyncResult *res,
-                             gpointer user_data)
+static void scan_cb_cb(GObject *source, GAsyncResult *res, gpointer user_data)
 {
 	GVariant *ret;
 	GError *error = NULL;
-	struct wireless_technology *tech = user_data;
-
-	ret = g_dbus_proxy_call_finish(tech->parent.settings->proxy, res, &error);
-	gtk_button_set_label(GTK_BUTTON(tech->scan_button), _("_Scan"));
-	gtk_widget_set_sensitive(tech->scan_button, TRUE);
-	gtk_widget_set_can_focus(tech->scan_button, TRUE);
+	ret = g_dbus_proxy_call_finish((GDBusProxy *)user_data, res, &error);
 	if(error) {
 		g_warning("failed to scan wifi: %s", error->message);
 		g_error_free(error);
@@ -59,15 +53,16 @@ static void wireless_scan_cb(GObject *source, GAsyncResult *res,
 	g_variant_unref(ret);
 }
 
-static void scan_button_cb(GtkButton *widget, gpointer user_data)
+static gboolean scan_cb(gpointer user_data)
 {
 	struct wireless_technology *tech = user_data;
-	gtk_button_set_label(GTK_BUTTON(tech->scan_button), _("Scanning"));
-	gtk_widget_set_sensitive(tech->scan_button, FALSE);
-	gtk_widget_set_can_focus(tech->scan_button, FALSE);
-	g_dbus_proxy_call(tech->parent.settings->proxy, "Scan",
-	                  NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL,
-	                  wireless_scan_cb, tech);
+	if(!gtk_switch_get_active(GTK_SWITCH(tech->parent.settings->power_switch)))
+		return TRUE;
+
+	g_dbus_proxy_call(tech->parent.settings->proxy, "Scan", NULL,
+			G_DBUS_CALL_FLAGS_NONE, -1, NULL, scan_cb_cb,
+		        tech->parent.settings->proxy);
+	return TRUE;
 }
 
 struct technology *technology_wireless_create(void)
@@ -80,7 +75,7 @@ void technology_wireless_free(struct technology *tech)
 {
 	struct wireless_technology *item = (struct wireless_technology *)tech;
 
-	g_object_unref(item->scan_button);
+	g_source_remove(item->scan_id);
 	g_free(item);
 }
 
@@ -94,15 +89,9 @@ void technology_wireless_init(struct technology *tech, GVariant *properties,
 	gtk_image_set_from_icon_name(GTK_IMAGE(tech->settings->icon),
 	                             "network-wireless", GTK_ICON_SIZE_DIALOG);
 
-	item->scan_button = gtk_button_new_with_mnemonic(_("_Scan"));
-	g_object_ref(item->scan_button);
-	g_signal_connect(item->scan_button, "clicked",
-	                 G_CALLBACK(scan_button_cb), item);
-	gtk_widget_set_valign(item->scan_button, GTK_ALIGN_START);
-	gtk_grid_attach_next_to(GTK_GRID(tech->settings->buttons),
-	                        item->scan_button, tech->settings->filler,
-	                        GTK_POS_LEFT, 1, 1);
-	gtk_widget_show_all(item->scan_button);
+	scan_cb(item);
+	item->scan_id = g_timeout_add_seconds(WIRELESS_SCAN_INTERVAL,
+			scan_cb, item);
 }
 
 struct service *service_wireless_create(void)
