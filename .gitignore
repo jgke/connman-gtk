@@ -28,4 +28,5 @@ Makefile.in
 *.gmo
 *.o
 *~
+*.orig
 connman-gtk
