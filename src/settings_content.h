@@ -23,10 +23,12 @@
 
 #include "settings.h"
 
+typedef gboolean (*settings_field_validator)(gchar *value);
+
 struct settings_content {
 	GtkWidget *content;
 
-	gboolean (*valid)(gchar *value);
+	settings_field_validator valid;
 	void (*free)(void *ptr);
 	gchar *original;
 };
@@ -38,6 +40,9 @@ gboolean settings_content_always_valid(gchar *value);
 
 GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
                              const gchar *value);
+
+GtkWidget *settings_add_entry(struct settings_page *page, const gchar *label,
+                             const gchar *value, settings_field_validator valid);
 
 void free_content(GtkWidget *widget, gpointer user_data);
 

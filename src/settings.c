@@ -152,8 +152,9 @@ void settings_init(struct settings *sett)
 	gtk_grid_attach(grid, sett->notebook, 1, 0, 1, 1);
 	gtk_container_add(GTK_CONTAINER(sett->window), GTK_WIDGET(grid));
 
-	settings_add_page(sett, "Info");
-	settings_add_text(settings_add_page(sett, "IPv4"), "IP", "123.123.2.1");
+	settings_add_text(settings_add_page(sett, "Info"), "Connected", "yes");
+	settings_add_entry(settings_add_page(sett, "IPv4"), "IP", "123.123.2.1",
+			NULL);
 
 	if(functions[sett->serv->type].init)
 		functions[sett->serv->type].init(sett);
