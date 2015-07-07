@@ -27,14 +27,6 @@
 #include "settings.h"
 #include "style.h"
 
-struct settings {
-	GtkWidget *window;
-	GtkWidget *list;
-	GtkWidget *notebook;
-
-	struct service *serv;
-};
-
 static struct {
 	struct settings *(*create)(void);
 	void (*free)(struct settings *sett);
@@ -55,17 +47,90 @@ static void page_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data)
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(sett->notebook), num);
 }
 
-GtkWidget *settings_add_page(struct settings *sett, const gchar *name)
+void settings_add_content(struct settings_page *page,
+                          struct settings_content *content)
 {
-	GtkWidget *grid = gtk_grid_new();
+	gtk_grid_attach(GTK_GRID(page->grid), content->content,
+	                page->index, 0, 1, 1);
+	page->index++;
+}
+
+gboolean always_valid(gchar *value)
+{
+	return TRUE;
+}
+
+void free_content(GtkWidget *widget, gpointer user_data)
+{
+	struct settings_content *content = user_data;
+	content->free(content);
+}
+
+GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
+                             const gchar *value)
+{
+	GtkWidget *label_w, *value_w;
+	struct settings_content *content = g_malloc(sizeof(*content));
+	content->content = gtk_grid_new();
+	content->valid = always_valid;
+	content->free = g_free;
+
+	label_w = gtk_label_new(label);
+	value_w = gtk_label_new(value);
+
+	g_object_set_data(G_OBJECT(content->content), "content", content);
+
+	g_signal_connect(content->content, "destroy",
+	                 G_CALLBACK(free_content), content);
+
+	STYLE_ADD_MARGIN(content->content, MARGIN_LARGE);
+	STYLE_ADD_CONTEXT(label_w);
+	gtk_style_context_add_class(gtk_widget_get_style_context(label_w),
+	                            "dim-label");
+	gtk_widget_set_margin_end(label_w, MARGIN_SMALL);
+	gtk_widget_set_margin_start(value_w, MARGIN_SMALL);
+
+	gtk_widget_set_halign(label_w, GTK_ALIGN_END);
+	gtk_widget_set_halign(value_w, GTK_ALIGN_START);
+	gtk_widget_set_hexpand(content->content, TRUE);
+	gtk_widget_set_hexpand(label_w, TRUE);
+	gtk_widget_set_hexpand(value_w, TRUE);
+
+	gtk_grid_attach(GTK_GRID(content->content), label_w, 0, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(content->content), value_w, 1, 0, 1, 1);
+
+	gtk_widget_show_all(content->content);
+
+	settings_add_content(page, content);
+
+	return value_w;
+}
+
+void free_page(GtkWidget *widget, gpointer user_data)
+{
+	struct settings_page *page = user_data;
+	g_free(page);
+}
+
+struct settings_page *settings_add_page(struct settings *sett,
+                                        const gchar *name)
+{
+	struct settings_page *page = g_malloc(sizeof(*page));
+
+	page->index = 0;
+
+	page->grid = gtk_grid_new();
 	GtkWidget *item = gtk_list_box_row_new();
 	GtkWidget *label = gtk_label_new(name);
 	GtkWidget *frame = gtk_frame_new(NULL);
 
-	g_object_set_data(G_OBJECT(item), "content", grid);
+	g_object_set_data(G_OBJECT(item), "content", page->grid);
+
+	g_signal_connect(page->grid, "destroy",
+	                 G_CALLBACK(free_page), page);
 
 	STYLE_ADD_MARGIN(label, MARGIN_SMALL);
-	gtk_widget_set_margin_start(grid, MARGIN_LARGE);
+	gtk_widget_set_margin_start(page->grid, MARGIN_LARGE);
 	gtk_widget_set_margin_start(label, MARGIN_LARGE);
 
 	gtk_widget_set_halign(label, GTK_ALIGN_START);
@@ -74,14 +139,15 @@ GtkWidget *settings_add_page(struct settings *sett, const gchar *name)
 	gtk_widget_set_vexpand(frame, TRUE);
 
 	gtk_container_add(GTK_CONTAINER(item), label);
-	gtk_container_add(GTK_CONTAINER(grid), frame);
+	gtk_container_add(GTK_CONTAINER(page->grid), frame);
 	gtk_container_add(GTK_CONTAINER(sett->list), item);
 
-	gtk_widget_show_all(grid);
+	gtk_widget_show_all(page->grid);
 
-	gtk_notebook_append_page(GTK_NOTEBOOK(sett->notebook), grid, NULL);
+	gtk_notebook_append_page(GTK_NOTEBOOK(sett->notebook), page->grid,
+	                         NULL);
 
-	return grid;
+	return page;
 }
 
 void settings_free(struct settings *sett)
@@ -145,7 +211,7 @@ void settings_init(struct settings *sett)
 	gtk_container_add(GTK_CONTAINER(sett->window), GTK_WIDGET(grid));
 
 	settings_add_page(sett, "Info");
-	settings_add_page(sett, "IPv4");
+	settings_add_text(settings_add_page(sett, "IPv4"), "IP", "123.123.2.1");
 
 	if(functions[sett->serv->type].init)
 		functions[sett->serv->type].init(sett);

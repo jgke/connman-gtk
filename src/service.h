@@ -26,6 +26,7 @@
 #include <glib.h>
 
 #include "connection.h"
+#include "technology.h"
 
 struct service {
 	enum connection_type type;

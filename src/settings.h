@@ -23,6 +23,29 @@
 
 #include "service.h"
 
+struct settings_content {
+	GtkWidget *content;
+
+	gboolean (*valid)(gchar *value);
+	void (*free)(void *ptr);
+	gchar *original;
+};
+
+struct settings_page {
+	GtkWidget *grid;
+	int index;
+};
+
+struct settings {
+	GtkWidget *window;
+	GtkWidget *list;
+	GtkWidget *notebook;
+
+	struct service *serv;
+};
+
 void settings_create(struct service *serv);
+struct settings_page *settings_add_page(struct settings *sett,
+                                        const gchar *name);
 
 #endif /* _CONNMAN_GTK_SETTINGS_H */
