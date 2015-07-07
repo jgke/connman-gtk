@@ -21,28 +21,39 @@
 #ifndef _CONNMAN_GTK_SETTINGS_CONTENT_H
 #define _CONNMAN_GTK_SETTINGS_CONTENT_H
 
+#include <glib.h>
+
 #include "settings.h"
 
-typedef gboolean (*settings_field_validator)(gchar *value);
+struct settings_content;
+
+typedef gboolean (*settings_field_validator)(struct settings_content *content);
+typedef GVariant *(*settings_field_value)(struct settings_content *content);
 
 struct settings_content {
 	GtkWidget *content;
 
 	settings_field_validator valid;
+	settings_field_value value;
 	void (*free)(void *ptr);
 	gchar *original;
+	const gchar *key;
+	const gchar *subkey;
 };
 
 void settings_add_content(struct settings_page *page,
-		struct settings_content *content);
+                          struct settings_content *content);
 
-gboolean settings_content_always_valid(gchar *value);
+gboolean settings_content_valid_always(struct settings_content *content);
+GVariant *settings_content_value_null(struct settings_content *content);
+GVariant *settings_content_value_entry(struct settings_content *content);
 
-GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
+GtkWidget *settings_add_text(struct settings_page *page, const gchar *key,
+                             const gchar *subkey, const gchar *label,
                              const gchar *value);
-
-GtkWidget *settings_add_entry(struct settings_page *page, const gchar *label,
-                             const gchar *value, settings_field_validator valid);
+GtkWidget *settings_add_entry(struct settings_page *page, const gchar *key,
+                              const gchar *subkey, const gchar *label,
+                              const gchar *value, settings_field_validator valid);
 
 void free_content(GtkWidget *widget, gpointer user_data);
 

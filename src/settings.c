@@ -42,7 +42,8 @@ static void page_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data)
 	if(!G_IS_OBJECT(row))
 		return;
 	struct settings *sett = data;
-	GtkWidget *content = g_object_get_data(G_OBJECT(row), "content");
+	struct settings_page *page = g_object_get_data(G_OBJECT(row), "content");
+	GtkWidget *content = page->grid;
 	gint num = gtk_notebook_page_num(GTK_NOTEBOOK(sett->notebook),
 	                                 content);
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(sett->notebook), num);
@@ -64,9 +65,8 @@ struct settings_page *settings_add_page(struct settings *sett,
 	page->grid = gtk_grid_new();
 	GtkWidget *item = gtk_list_box_row_new();
 	GtkWidget *label = gtk_label_new(name);
-	GtkWidget *frame = gtk_frame_new(NULL);
 
-	g_object_set_data(G_OBJECT(item), "content", page->grid);
+	g_object_set_data(G_OBJECT(item), "content", page);
 
 	g_signal_connect(page->grid, "destroy",
 	                 G_CALLBACK(free_page), page);
@@ -77,11 +77,7 @@ struct settings_page *settings_add_page(struct settings *sett,
 
 	gtk_widget_set_halign(label, GTK_ALIGN_START);
 
-	gtk_widget_set_hexpand(frame, TRUE);
-	gtk_widget_set_vexpand(frame, TRUE);
-
 	gtk_container_add(GTK_CONTAINER(item), label);
-	gtk_container_add(GTK_CONTAINER(page->grid), frame);
 	gtk_container_add(GTK_CONTAINER(sett->list), item);
 
 	gtk_widget_show_all(page->grid);
@@ -100,6 +96,65 @@ void settings_free(struct settings *sett)
 		g_free(sett);
 }
 
+static void append_variant(GVariantDict *dict, struct settings_content *content)
+{
+	GVariant *variant = content->value(content);
+	if(!variant)
+		return;
+	if(!content->subkey)
+		goto end;
+	GVariant *subdict_v;
+	subdict_v = g_variant_dict_lookup_value(dict, content->key, NULL);
+	if(!subdict_v)
+		subdict_v = g_variant_new("a{sv}", NULL);
+	GVariantDict *subdict = g_variant_dict_new(subdict_v);
+	g_variant_unref(subdict_v);
+
+	g_variant_dict_insert_value(subdict, content->subkey, variant);
+	variant = g_variant_dict_end(subdict);
+	g_variant_dict_unref(subdict);
+end:
+	g_variant_dict_insert_value(dict, content->key, variant);
+}
+
+static void append_values(GVariantDict *dict, struct settings_page *page)
+{
+	GList *children = gtk_container_get_children(GTK_CONTAINER(page->grid));
+	GList *l;
+	for(l = children; l != NULL; l = l->next) {
+		GtkWidget *child = l->data;
+		if(strcmp(G_OBJECT_TYPE_NAME(child), "GtkGrid"))
+			continue;
+		struct settings_content *content =
+		        g_object_get_data(G_OBJECT(child), "content");
+		append_variant(dict, content);
+	}
+	g_list_free(children);
+}
+
+static void apply_cb(GtkWidget *window, gpointer user_data)
+{
+	struct settings *sett = user_data;
+	GtkWidget *list = sett->list;
+	GVariantDict *dict = g_variant_dict_new(NULL);
+	GVariant *out;
+	GList *children = gtk_container_get_children(GTK_CONTAINER(list));
+	GList *l;
+	for(l = children; l != NULL; l = l->next) {
+		GtkWidget *child = l->data;
+		struct settings_page *page = g_object_get_data(G_OBJECT(child),
+		                             "content");
+		append_values(dict, page);
+	}
+	g_list_free(children);
+	out = g_variant_dict_end(dict);
+	gchar *str = g_variant_print(out, FALSE);
+	printf("%s\n", str);
+	g_free(str);
+	g_variant_unref(out);
+	g_variant_dict_unref(dict);
+}
+
 static gboolean delete_event(GtkWidget *window, GdkEvent *event,
                              gpointer user_data)
 {
@@ -111,7 +166,7 @@ void settings_init(struct settings *sett)
 {
 	GVariant *name_v;
 	gchar *title;
-	GtkWidget *frame;
+	GtkWidget *frame, *apply;
 	GtkGrid *grid = GTK_GRID(gtk_grid_new());
 
 	sett->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -128,6 +183,7 @@ void settings_init(struct settings *sett)
 	sett->list = gtk_list_box_new();
 	sett->notebook = gtk_notebook_new();
 	frame = gtk_frame_new(NULL);
+	apply = gtk_button_new_with_mnemonic(_("_Apply"));
 
 	g_object_ref(sett->window);
 	g_object_ref(sett->list);
@@ -137,8 +193,11 @@ void settings_init(struct settings *sett)
 	                 sett);
 	g_signal_connect(sett->list, "row-selected",
 	                 G_CALLBACK(page_selected), sett);
+	g_signal_connect(apply, "clicked",
+	                 G_CALLBACK(apply_cb), sett);
 
 	STYLE_ADD_MARGIN(GTK_WIDGET(grid), MARGIN_LARGE);
+	gtk_widget_set_margin_top(apply, MARGIN_LARGE);
 
 	gtk_widget_set_size_request(sett->list, SETTINGS_LIST_WIDTH, -1);
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(sett->notebook), FALSE);
@@ -146,15 +205,19 @@ void settings_init(struct settings *sett)
 	gtk_widget_set_vexpand(sett->list, TRUE);
 	gtk_widget_set_hexpand(sett->notebook, TRUE);
 	gtk_widget_set_vexpand(sett->notebook, TRUE);
+	gtk_widget_set_valign(apply, GTK_ALIGN_END);
+	gtk_widget_set_halign(apply, GTK_ALIGN_END);
 
 	gtk_container_add(GTK_CONTAINER(frame), sett->list);
-	gtk_grid_attach(grid, frame, 0, 0, 1, 1);
+	gtk_grid_attach(grid, frame, 0, 0, 1, 2);
 	gtk_grid_attach(grid, sett->notebook, 1, 0, 1, 1);
+	gtk_grid_attach(grid, apply, 1, 1, 1, 1);
 	gtk_container_add(GTK_CONTAINER(sett->window), GTK_WIDGET(grid));
 
-	settings_add_text(settings_add_page(sett, "Info"), "Connected", "yes");
-	settings_add_entry(settings_add_page(sett, "IPv4"), "IP", "123.123.2.1",
-			NULL);
+	settings_add_text(settings_add_page(sett, "Info"), NULL, NULL,
+	                  "Connected", "yes");
+	settings_add_entry(settings_add_page(sett, "IPv4"), "IPv4", "Address",
+	                   "IP", "123.123.2.1", NULL);
 
 	if(functions[sett->serv->type].init)
 		functions[sett->serv->type].init(sett);
