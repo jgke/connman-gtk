@@ -18,26 +18,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CONNMAN_GTK_SETTINGS_H
-#define _CONNMAN_GTK_SETTINGS_H
+#ifndef _CONNMAN_GTK_SETTINGS_CONTENT_H
+#define _CONNMAN_GTK_SETTINGS_CONTENT_H
 
-#include "service.h"
+#include "settings.h"
 
-struct settings_page {
-	GtkWidget *grid;
-	int index;
+struct settings_content {
+	GtkWidget *content;
+
+	gboolean (*valid)(gchar *value);
+	void (*free)(void *ptr);
+	gchar *original;
 };
 
-struct settings {
-	GtkWidget *window;
-	GtkWidget *list;
-	GtkWidget *notebook;
+void settings_add_content(struct settings_page *page,
+		struct settings_content *content);
 
-	struct service *serv;
-};
+gboolean settings_content_always_valid(gchar *value);
 
-void settings_create(struct service *serv);
-struct settings_page *settings_add_page(struct settings *sett,
-                                        const gchar *name);
+GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
+                             const gchar *value);
 
-#endif /* _CONNMAN_GTK_SETTINGS_H */
+void free_content(GtkWidget *widget, gpointer user_data);
+
+#endif /* _CONNMAN_GTK_SETTINGS_CONTENT_H */
