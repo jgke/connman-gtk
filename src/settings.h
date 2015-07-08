@@ -21,6 +21,8 @@
 #ifndef _CONNMAN_GTK_SETTINGS_H
 #define _CONNMAN_GTK_SETTINGS_H
 
+struct settings;
+
 #include "service.h"
 
 struct settings_page {
@@ -34,9 +36,12 @@ struct settings {
 	GtkWidget *notebook;
 
 	struct service *serv;
+	void (*closed)(struct service *serv);
 };
 
-void settings_create(struct service *serv);
+struct settings *settings_create(struct service *serv,
+                                 void (*closed)(struct service *serv));
+void settings_update(struct settings *sett, const gchar *key, GVariant *value);
 struct settings_page *settings_add_page(struct settings *sett,
                                         const gchar *name);
 

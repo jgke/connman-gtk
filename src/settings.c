@@ -90,6 +90,7 @@ struct settings_page *settings_add_page(struct settings *sett,
 
 void settings_free(struct settings *sett)
 {
+	sett->closed(sett->serv);
 	if(functions[sett->serv->type].free)
 		functions[sett->serv->type].free(sett);
 	else
@@ -171,7 +172,7 @@ static void add_info_page(struct settings *sett)
 	arr = g_variant_get_strv(prop, NULL);
 	str = g_string_new(arr[0]);
 	iter = arr + 1;
-	while(*iter)
+	while(*arr && *iter)
 		g_string_append_printf(str, ", %s", *iter++);
 	g_free(arr);
 	settings_add_text(page, _("Nameservers"), str->str);
@@ -269,7 +270,8 @@ void settings_init(struct settings *sett)
 	g_variant_unref(name_v);
 }
 
-void settings_create(struct service *serv)
+struct settings *settings_create(struct service *serv,
+                                 void (*closed)(struct service *serv))
 {
 	struct settings *sett;
 
@@ -279,6 +281,13 @@ void settings_create(struct service *serv)
 		sett = g_malloc(sizeof(*sett));
 
 	sett->serv = serv;
+	sett->closed = closed;
 
 	settings_init(sett);
+
+	return sett;
+}
+
+void settings_update(struct settings *sett, const gchar *key, GVariant *value)
+{
 }

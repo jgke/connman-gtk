@@ -28,6 +28,8 @@
 #include "connection.h"
 #include "technology.h"
 
+#include "settings.h"
+
 struct service {
 	enum connection_type type;
 	struct technology *tech;
@@ -39,6 +41,7 @@ struct service {
 	GtkWidget *title;
 	GtkWidget *contents;
 	GtkWidget *settings_button;
+	struct settings *sett;
 };
 
 #define SIGNAL_TO_ICON(type, strength) \

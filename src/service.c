@@ -48,6 +48,16 @@ static struct {
 	}
 };
 
+void service_update_property(struct service *serv, const gchar *key,
+                             GVariant *value)
+{
+	gchar *hkey = g_strdup(key);
+	g_variant_ref(value);
+	g_hash_table_replace(serv->properties, hkey, value);
+	if(serv->sett)
+		settings_update(serv->sett, key, value);
+}
+
 static void service_proxy_signal(GDBusProxy *proxy, gchar *sender,
                                  gchar *signal, GVariant *parameters,
                                  gpointer user_data)
@@ -55,25 +65,30 @@ static void service_proxy_signal(GDBusProxy *proxy, gchar *sender,
 	struct service *serv = user_data;
 	if(!strcmp(signal, "PropertyChanged")) {
 		GVariant *name_v, *value_v, *value;
-		gchar *name;
+		const gchar *name;
 
 		name_v = g_variant_get_child_value(parameters, 0);
 		value_v = g_variant_get_child_value(parameters, 1);
 
-		name = g_variant_dup_string(name_v, NULL);
+		name = g_variant_get_string(name_v, NULL);
 		value = g_variant_get_child_value(value_v, 0);
 
-		g_hash_table_replace(serv->properties, name, value);
-
+		service_update_property(serv, name, value);
+		g_variant_unref(value);
 		g_variant_unref(name_v);
 		g_variant_unref(value_v);
 	}
 }
 
+static void settings_closed(struct service *serv)
+{
+	serv->sett = NULL;
+}
+
 static void settings_button_cb(GtkButton *button, gpointer user_data)
 {
 	struct service *serv = user_data;
-	settings_create(serv);
+	serv->sett = settings_create(serv, settings_closed);
 }
 
 void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
@@ -168,6 +183,8 @@ struct service *service_create(struct technology *tech, GDBusProxy *proxy,
 
 	serv->type = type;
 	serv->tech = tech;
+	serv->sett = NULL;
+
 	service_init(serv, proxy, path, properties);
 	if(functions[type].init)
 		functions[type].init(serv, proxy, path, properties);
@@ -182,11 +199,8 @@ void service_update(struct service *serv, GVariant *properties)
 	GVariant *value;
 
 	iter = g_variant_iter_new(properties);
-	while(g_variant_iter_loop(iter, "{sv}", &key, &value)) {
-		gchar *hkey = g_strdup(key);
-		g_variant_ref(value);
-		g_hash_table_replace(serv->properties, hkey, value);
-	}
+	while(g_variant_iter_loop(iter, "{sv}", &key, &value))
+		service_update_property(serv, key, value);
 	g_variant_iter_free(iter);
 	if(functions[serv->type].update)
 		functions[serv->type].update(serv);
