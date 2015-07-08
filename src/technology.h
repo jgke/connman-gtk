@@ -66,10 +66,11 @@ struct technology {
 	struct technology_list_item *list_item;
 	struct technology_settings *settings;
 	GHashTable *services;
+	gchar *path;
 	enum connection_type type;
 };
 
-struct technology *technology_create(GDBusProxy *proxy, GVariant *path,
+struct technology *technology_create(GDBusProxy *proxy, const gchar *path,
                                      GVariant *properties);
 void technology_init(struct technology *tech, GVariant *properties_v,
                      GDBusProxy *proxy);

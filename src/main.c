@@ -112,6 +112,9 @@ static void add_technology(GDBusConnection *connection, GVariant *technology)
 
 	object_path = g_variant_get_string(path, NULL);
 
+	if(g_hash_table_contains(technology_types, object_path))
+		goto out;
+
 	proxy = g_dbus_proxy_new_sync(connection, G_DBUS_PROXY_FLAGS_NONE,
 	                              g_dbus_node_info_lookup_interface(info,
 	                                              "net.connman.Technology"),
@@ -124,7 +127,7 @@ static void add_technology(GDBusConnection *connection, GVariant *technology)
 		goto out;
 	}
 
-	item = technology_create(proxy, path, properties);
+	item = technology_create(proxy, object_path, properties);
 
 	g_hash_table_insert(technology_types, g_strdup(object_path),
 	                    &item->type);
@@ -140,25 +143,28 @@ out:
 	g_variant_unref(properties);
 }
 
-static void remove_technology(GVariant *parameters)
+static void remove_technology_by_path(const gchar *path)
 {
-	GVariant *path_v;
-	const gchar *path;
 	enum connection_type *type_p;
 	enum connection_type type;
 
-	path_v = g_variant_get_child_value(parameters, 0);
-	path = g_variant_get_string(path_v, NULL);
 	type_p = g_hash_table_lookup(technology_types, path);
-	if(!type_p) {
-		g_warning("Tried to remove unknown technology");
-		goto out;
-	}
+	if(!type_p)
+		return;
 	type = *type_p;
 	g_hash_table_remove(technology_types, path);
 	technology_free(technologies[type]);
 	technologies[type] = NULL;
-out:
+}
+
+static void remove_technology(GVariant *parameters)
+{
+	GVariant *path_v;
+	const gchar *path;
+
+	path_v = g_variant_get_child_value(parameters, 0);
+	path = g_variant_get_string(path_v, NULL);
+	remove_technology_by_path(path);
 	g_variant_unref(path_v);
 }
 
@@ -202,6 +208,36 @@ out:
 	g_dbus_node_info_unref(info);
 }
 
+static void modify_service(GDBusConnection *connection, const gchar *path,
+                           GVariant *properties)
+{
+	enum connection_type type = connection_type_from_path(path);
+	if(type != CONNECTION_TYPE_UNKNOWN) {
+		if(!g_hash_table_contains(services, path)) {
+			add_service(connection, path, properties);
+			return;
+		}
+		struct service *serv = g_hash_table_lookup(services, path);
+		technology_update_service(technologies[type], serv, properties);
+	}
+}
+
+static void remove_service(const gchar *path)
+{
+	enum connection_type type = connection_type_from_path(path);
+	if(type != CONNECTION_TYPE_UNKNOWN &&
+	    technologies[type] &&
+	    g_hash_table_contains(services, path)) {
+		technology_remove_service(technologies[type], path);
+		g_hash_table_remove(services, path);
+	}
+}
+
+static void remove_service_struct(void *serv)
+{
+	remove_service(((struct service *)serv)->path);
+}
+
 static void services_changed(GDBusConnection *connection, GVariant *parameters)
 {
 	GVariant *modified, *deleted;
@@ -213,31 +249,13 @@ static void services_changed(GDBusConnection *connection, GVariant *parameters)
 	deleted = g_variant_get_child_value(parameters, 1);
 
 	iter = g_variant_iter_new(modified);
-	while(g_variant_iter_loop(iter, "(o@*)", &path, &value)) {
-		enum connection_type type = connection_type_from_path(path);
-		if(type != CONNECTION_TYPE_UNKNOWN) {
-			if(!g_hash_table_contains(services, path)) {
-				add_service(connection, path, value);
-				continue;
-			}
-			struct service *serv = g_hash_table_lookup(services,
-			                       path);
-			technology_update_service(technologies[type], serv,
-			                          value);
-		}
-	}
+	while(g_variant_iter_loop(iter, "(o@*)", &path, &value))
+		modify_service(connection, path, value);
 	g_variant_iter_free(iter);
 
 	iter = g_variant_iter_new(deleted);
-	while(g_variant_iter_loop(iter, "o", &path)) {
-		enum connection_type type = connection_type_from_path(path);
-		if(type != CONNECTION_TYPE_UNKNOWN)
-			if(g_hash_table_contains(services, path)) {
-				technology_remove_service(technologies[type],
-				                          path);
-				g_hash_table_remove(services, path);
-			}
-	}
+	while(g_variant_iter_loop(iter, "o", &path))
+		remove_service(path);
 	g_variant_iter_free(iter);
 
 	g_variant_unref(modified);
@@ -297,23 +315,13 @@ static void add_all_services(GDBusConnection *connection, GVariant *services_v)
 	}
 }
 
-static void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data)
+static void connman_appeared(GDBusConnection *connection, const gchar *name,
+                             const gchar *name_owner, gpointer user_data)
 {
-	(void)source;
-	(void)user_data;
-	GDBusConnection *connection;
 	GDBusNodeInfo *info;
 	GError *error = NULL;
 	GVariant *data, *child;
 	GDBusProxy *proxy;
-
-	connection = g_bus_get_finish(res, &error);
-	if(error) {
-		g_error("failed to connect to system dbus: %s",
-		        error->message);
-		g_error_free(error);
-		return;
-	}
 
 	info = g_dbus_node_info_new_for_xml(MANAGER_INTERFACE, &error);
 	if(error) {
@@ -371,6 +379,37 @@ static void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_dat
 	register_agent(connection, proxy);
 }
 
+static void connman_disappeared(GDBusConnection *connection, const gchar *name,
+                                gpointer user_data)
+{
+	int i;
+	for(i = CONNECTION_TYPE_ETHERNET; i < CONNECTION_TYPE_COUNT; i++)
+		if(technologies[i])
+			remove_technology_by_path(technologies[i]->path);
+	g_hash_table_remove_all(services);
+	agent_release();
+}
+
+static void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data)
+{
+	(void)source;
+	(void)user_data;
+	GDBusConnection *connection;
+	GError *error = NULL;
+
+	connection = g_bus_get_finish(res, &error);
+	if(error) {
+		g_error("failed to connect to system dbus: %s",
+		        error->message);
+		g_error_free(error);
+		return;
+	}
+
+	g_bus_watch_name_on_connection(connection, "net.connman",
+	                               G_BUS_NAME_WATCHER_FLAGS_NONE, connman_appeared,
+	                               connman_disappeared, NULL, NULL);
+}
+
 static gboolean delete_event(GtkApplication *app, GdkEvent *event,
                              gpointer user_data)
 {
@@ -410,7 +449,7 @@ int main(int argc, char *argv[])
 	technology_types = g_hash_table_new_full(g_str_hash, g_str_equal,
 	                   g_free, NULL);
 	services = g_hash_table_new_full(g_str_hash, g_str_equal,
-	                                 g_free, (GDestroyNotify)service_free);
+	                                 g_free, remove_service_struct);
 
 	app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);

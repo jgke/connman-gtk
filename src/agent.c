@@ -29,7 +29,7 @@
 #include "main.h"
 #include "style.h"
 
-GDBusConnection *conn;
+GDBusConnection *conn = NULL;
 gint agent_id;
 
 void release(GDBusMethodInvocation *invocation)
@@ -238,5 +238,8 @@ void register_agent(GDBusConnection *connection, GDBusProxy *manager)
 
 void agent_release(void)
 {
-	g_dbus_connection_unregister_object(conn, agent_id);
+	if(conn && agent_id)
+		g_dbus_connection_unregister_object(conn, agent_id);
+	conn = NULL;
+	agent_id = 0;
 }

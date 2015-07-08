@@ -55,7 +55,7 @@ GVariant *settings_content_value_entry(struct settings_content *content)
 GVariant *settings_content_value_switch(struct settings_content *content)
 {
 	GtkWidget *toggle = g_object_get_data(G_OBJECT(content->content),
-	                                     "toggle");
+	                                      "toggle");
 	return g_variant_new("b", gtk_switch_get_active(GTK_SWITCH(toggle)));
 }
 
@@ -170,8 +170,8 @@ GtkWidget *settings_add_entry(struct settings_page *page, const gchar *key,
 }
 
 GtkWidget *settings_add_switch(struct settings_page *page, const gchar *key,
-                              const gchar *subkey, const gchar *label,
-                              gboolean value)
+                               const gchar *subkey, const gchar *label,
+                               gboolean value)
 {
 	GtkWidget *label_w, *toggle;
 	struct settings_content *content = create_base_content(key, subkey);

@@ -450,12 +450,14 @@ void technology_free(struct technology *item)
 {
 	if(!item)
 		return;
-	if(functions[item->type].free)
-		functions[item->type].free(item);
 	free_list_item(item->list_item);
 	free_technology_settings(item->settings);
 	g_hash_table_unref(item->services);
-	g_free(item);
+	g_free(item->path);
+	if(functions[item->type].free)
+		functions[item->type].free(item);
+	else
+		g_free(item);
 }
 
 void technology_init(struct technology *tech, GVariant *properties_v,
@@ -488,7 +490,7 @@ void technology_init(struct technology *tech, GVariant *properties_v,
 	g_variant_unref(type_v);
 }
 
-struct technology *technology_create(GDBusProxy *proxy, GVariant *path,
+struct technology *technology_create(GDBusProxy *proxy, const gchar *path,
                                      GVariant *properties)
 {
 	struct technology *item;
@@ -507,6 +509,7 @@ struct technology *technology_create(GDBusProxy *proxy, GVariant *path,
 	else
 		item = g_malloc(sizeof(*item));
 	item->type = type;
+	item->path = g_strdup(path);
 
 	technology_init(item, properties, proxy);
 	if(functions[type].init)

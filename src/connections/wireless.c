@@ -60,8 +60,8 @@ static gboolean scan_cb(gpointer user_data)
 		return TRUE;
 
 	g_dbus_proxy_call(tech->parent.settings->proxy, "Scan", NULL,
-			G_DBUS_CALL_FLAGS_NONE, -1, NULL, scan_cb_cb,
-		        tech->parent.settings->proxy);
+	                  G_DBUS_CALL_FLAGS_NONE, -1, NULL, scan_cb_cb,
+	                  tech->parent.settings->proxy);
 	return TRUE;
 }
 
@@ -91,7 +91,7 @@ void technology_wireless_init(struct technology *tech, GVariant *properties,
 
 	scan_cb(item);
 	item->scan_id = g_timeout_add_seconds(WIRELESS_SCAN_INTERVAL,
-			scan_cb, item);
+	                                      scan_cb, item);
 }
 
 struct service *service_wireless_create(void)

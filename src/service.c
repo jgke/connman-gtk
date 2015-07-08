@@ -269,7 +269,7 @@ GVariant *service_get_property(struct service *serv, const char *key,
 }
 
 void service_set_property(struct service *serv, const char *key,
-                               GVariant *value)
+                          GVariant *value)
 {
 	GVariant *ret;
 	GVariant *parameters;
@@ -277,7 +277,7 @@ void service_set_property(struct service *serv, const char *key,
 
 	parameters = g_variant_new("(sv)", key, value);
 	ret = g_dbus_proxy_call_sync(serv->proxy, "SetProperty", parameters,
-	                              G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+	                             G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
 	if(error) {
 		g_warning("failed to set property %s: %s", key, error->message);
 		g_error_free(error);

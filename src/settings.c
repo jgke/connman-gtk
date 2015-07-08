@@ -135,7 +135,7 @@ static void append_values(GVariantDict *dict, struct settings_page *page)
 }
 
 static void add_info_text(struct settings_page *page, struct service *serv,
-		const gchar *key, const gchar *subkey, const gchar *label)
+                          const gchar *key, const gchar *subkey, const gchar *label)
 {
 	GVariant *prop = service_get_property(serv, key, subkey);
 	if(!prop)
@@ -156,7 +156,7 @@ static void add_info_page(struct settings *sett)
 	add_info_text(page, sett->serv, "Name", NULL, _("Name"));
 
 	settings_add_text(page, _("State"),
-			service_status_localized(sett->serv));
+	                  service_status_localized(sett->serv));
 
 	add_info_text(page, sett->serv, "Ethernet", "Address", _("MAC address"));
 	add_info_text(page, sett->serv, "Ethernet", "Interface", _("Interface"));
