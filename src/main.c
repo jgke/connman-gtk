@@ -32,8 +32,7 @@
 #include "style.h"
 
 GtkWidget *list, *notebook, *main_window;
-GHashTable *technology_types;
-GHashTable *services;
+GHashTable *technology_types, *services;
 struct technology *technologies[CONNECTION_TYPE_COUNT];
 gboolean shutting_down = FALSE;
 
@@ -225,12 +224,13 @@ static void modify_service(GDBusConnection *connection, const gchar *path,
 static void remove_service(const gchar *path)
 {
 	enum connection_type type = connection_type_from_path(path);
-	if(type != CONNECTION_TYPE_UNKNOWN &&
-	    technologies[type] &&
-	    g_hash_table_contains(services, path)) {
+	void *spath;
+	if(type != CONNECTION_TYPE_UNKNOWN && technologies[type])
 		technology_remove_service(technologies[type], path);
-		g_hash_table_remove(services, path);
-	}
+	service_free(g_hash_table_lookup(services, path));
+	g_hash_table_lookup_extended(services, path, &spath, NULL);
+	g_hash_table_steal(services, path);
+	g_free(spath);
 }
 
 static void remove_service_struct(void *serv)
@@ -275,7 +275,8 @@ static void manager_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 	}
 }
 
-static void add_all_technologies(GDBusConnection *connection, GVariant *technologies_v)
+static void add_all_technologies(GDBusConnection *connection,
+                                 GVariant *technologies_v)
 {
 	int i;
 	int size = g_variant_n_children(technologies_v);
