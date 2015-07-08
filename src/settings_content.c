@@ -30,7 +30,7 @@ void settings_add_content(struct settings_page *page,
                           struct settings_content *content)
 {
 	gtk_grid_attach(GTK_GRID(page->grid), content->content,
-	                page->index, 0, 1, 1);
+	                0, page->index, 1, 1);
 	page->index++;
 }
 
@@ -75,16 +75,23 @@ static struct settings_content *create_base_content(const gchar *key,
 	content->free = g_free;
 	content->key = key;
 	content->subkey = subkey;
+
 	g_object_set_data(G_OBJECT(content->content), "content", content);
+
+	gtk_widget_set_margin_bottom(content->content, MARGIN_SMALL);
+
+	gtk_grid_set_column_homogeneous(GTK_GRID(content->content), TRUE);
+
 	return content;
 }
 
-static void add_centered(GtkGrid *grid, GtkWidget *a, GtkWidget *b)
+static void add_left_aligned(GtkGrid *grid, GtkWidget *a, GtkWidget *b)
 {
+	gtk_widget_set_margin_start(a, MARGIN_LARGE);
 	gtk_widget_set_margin_end(a, MARGIN_SMALL);
 	gtk_widget_set_margin_start(b, MARGIN_SMALL);
 
-	gtk_widget_set_halign(a, GTK_ALIGN_END);
+	gtk_widget_set_halign(a, GTK_ALIGN_START);
 	gtk_widget_set_halign(b, GTK_ALIGN_START);
 	gtk_widget_set_hexpand(a, TRUE);
 	gtk_widget_set_hexpand(b, TRUE);
@@ -93,12 +100,11 @@ static void add_centered(GtkGrid *grid, GtkWidget *a, GtkWidget *b)
 	gtk_grid_attach(grid, b, 1, 0, 1, 1);
 }
 
-GtkWidget *settings_add_text(struct settings_page *page, const gchar *key,
-                             const gchar *subkey, const gchar *label,
+GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
                              const gchar *value)
 {
 	GtkWidget *label_w, *value_w;
-	struct settings_content *content = create_base_content(key, subkey);
+	struct settings_content *content = create_base_content(NULL, NULL);
 
 	label_w = gtk_label_new(label);
 	value_w = gtk_label_new(value);
@@ -106,14 +112,24 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *key,
 	g_signal_connect(content->content, "destroy",
 	                 G_CALLBACK(free_content), content);
 
-	STYLE_ADD_MARGIN(content->content, MARGIN_LARGE);
 	STYLE_ADD_CONTEXT(label_w);
 	gtk_style_context_add_class(gtk_widget_get_style_context(label_w),
 	                            "dim-label");
 
 	gtk_widget_set_hexpand(content->content, TRUE);
+	gtk_label_set_line_wrap(GTK_LABEL(value_w), TRUE);
+	gtk_label_set_justify(GTK_LABEL(value_w), GTK_JUSTIFY_LEFT);
+#if (GTK_MAJOR_VERSION > 3) || (GTK_MINOR_VERSION >= 16)
+	if(gtk_get_major_version() > 3 || gtk_get_minor_version() >= 16)
+		gtk_label_set_xalign(GTK_LABEL(value_w), 0);
+	else
+		gtk_misc_set_alignment(GTK_MISC(value_w), 0, 0.5);
+#else
+	/* deprecated at 3.14, but above only implemented at 3.16 */
+	gtk_misc_set_alignment(GTK_MISC(value_w), 0, 0.5);
+#endif
 
-	add_centered(GTK_GRID(content->content), label_w, value_w);
+	add_left_aligned(GTK_GRID(content->content), label_w, value_w);
 
 	settings_add_content(page, content);
 
@@ -140,12 +156,11 @@ GtkWidget *settings_add_entry(struct settings_page *page, const gchar *key,
 	                 G_CALLBACK(free_content), content);
 	g_object_set_data(G_OBJECT(content->content), "entry", entry);
 
-	STYLE_ADD_MARGIN(content->content, MARGIN_LARGE);
 	STYLE_ADD_CONTEXT(label_w);
 	gtk_style_context_add_class(gtk_widget_get_style_context(label_w),
 	                            "dim-label");
 
-	add_centered(GTK_GRID(content->content), label_w, entry);
+	add_left_aligned(GTK_GRID(content->content), label_w, entry);
 
 	gtk_widget_show_all(content->content);
 
@@ -172,12 +187,11 @@ GtkWidget *settings_add_switch(struct settings_page *page, const gchar *key,
 	                 G_CALLBACK(free_content), content);
 	g_object_set_data(G_OBJECT(content->content), "toggle", toggle);
 
-	STYLE_ADD_MARGIN(content->content, MARGIN_LARGE);
 	STYLE_ADD_CONTEXT(label_w);
 	gtk_style_context_add_class(gtk_widget_get_style_context(label_w),
 	                            "dim-label");
 
-	add_centered(GTK_GRID(content->content), label_w, toggle);
+	add_left_aligned(GTK_GRID(content->content), label_w, toggle);
 
 	gtk_widget_show_all(content->content);
 

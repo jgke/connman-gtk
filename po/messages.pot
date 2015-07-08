@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-06 13:31+0300\n"
+"POT-Creation-Date: 2015-07-07 16:52+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,8 +29,92 @@ msgstr ""
 msgid "_Cancel"
 msgstr ""
 
-#: src/main.c:389
+#: src/main.c:389 src/settings.c:216
 msgid "Network Settings"
+msgstr ""
+
+#: src/service.c:307
+msgid "Idle"
+msgstr ""
+
+#: src/service.c:309
+msgid "Failure"
+msgstr ""
+
+#: src/service.c:311
+msgid "Association"
+msgstr ""
+
+#: src/service.c:313
+msgid "Configuration"
+msgstr ""
+
+#: src/service.c:315
+msgid "Ready"
+msgstr ""
+
+#: src/service.c:317
+msgid "Disconnected"
+msgstr ""
+
+#: src/service.c:319
+msgid "Online"
+msgstr ""
+
+#: src/service.c:321
+msgid "Error"
+msgstr ""
+
+#: src/settings.c:156
+msgid "Name"
+msgstr ""
+
+#: src/settings.c:158
+msgid "State"
+msgstr ""
+
+#: src/settings.c:161 src/connections/ethernet.c:79
+msgid "IPv4 address"
+msgstr ""
+
+#: src/settings.c:162 src/connections/ethernet.c:80
+msgid "IPv4 gateway"
+msgstr ""
+
+#: src/settings.c:163
+msgid "IPv4 netmask"
+msgstr ""
+
+#: src/settings.c:164 src/connections/ethernet.c:81
+msgid "IPv6 address"
+msgstr ""
+
+#: src/settings.c:165 src/connections/ethernet.c:82
+msgid "IPv6 gateway"
+msgstr ""
+
+#: src/settings.c:166
+msgid "IPv6 netmask"
+msgstr ""
+
+#: src/settings.c:175
+msgid "Nameservers"
+msgstr ""
+
+#: src/settings.c:225
+msgid "_Apply"
+msgstr ""
+
+#: src/settings.c:257
+msgid "Security"
+msgstr ""
+
+#: src/settings.c:258
+msgid "IPv4"
+msgstr ""
+
+#: src/settings.c:259
+msgid "IPv6"
 msgstr ""
 
 #: src/technology.c:138
@@ -57,30 +141,6 @@ msgstr ""
 msgid "Dis_connect"
 msgstr ""
 
-#: src/connections/ethernet.c:94
-msgid "IPv4 address"
-msgstr ""
-
-#: src/connections/ethernet.c:95
-msgid "IPv4 gateway"
-msgstr ""
-
-#: src/connections/ethernet.c:96
-msgid "IPv6 address"
-msgstr ""
-
-#: src/connections/ethernet.c:97
-msgid "IPv6 gateway"
-msgstr ""
-
-#: src/connections/ethernet.c:98
+#: src/connections/ethernet.c:83
 msgid "MAC address"
-msgstr ""
-
-#: src/connections/wireless.c:52 src/connections/wireless.c:97
-msgid "_Scan"
-msgstr ""
-
-#: src/connections/wireless.c:66
-msgid "Scanning"
 msgstr ""

@@ -22,6 +22,7 @@
 
 #include <gio/gio.h>
 #include <glib.h>
+#include <glib/gi18n.h>
 
 #include "style.h"
 #include "service.h"
@@ -295,4 +296,29 @@ void service_set_properties(struct service *serv, GVariant *properties)
 	while(g_variant_iter_loop(iter, "{sv}", &key, &value))
 		service_set_property(serv, key, value);
 	g_variant_iter_free(iter);
+}
+
+const gchar *service_status_localized(struct service *serv)
+{
+	const gchar *out, *state;
+	GVariant *status = service_get_property(serv, "State", NULL);
+	state = g_variant_get_string(status, NULL);
+	if(!strcmp(state, "idle"))
+		out = _("Idle");
+	else if(!strcmp(state, "failure"))
+		out = _("Failure");
+	else if(!strcmp(state, "association"))
+		out = _("Association");
+	else if(!strcmp(state, "configuration"))
+		out = _("Configuration");
+	else if(!strcmp(state, "ready"))
+		out = _("Ready");
+	else if(!strcmp(state, "disconnected"))
+		out = _("Disconnected");
+	else if(!strcmp(state, "online"))
+		out = _("Online");
+	else
+		out = _("Error");
+	g_variant_unref(status);
+	return out;
 }

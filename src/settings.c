@@ -98,6 +98,8 @@ void settings_free(struct settings *sett)
 
 static void append_variant(GVariantDict *dict, struct settings_content *content)
 {
+	if(!content->key)
+		return;
 	GVariant *variant = content->value(content);
 	if(!variant)
 		return;
@@ -130,6 +132,50 @@ static void append_values(GVariantDict *dict, struct settings_page *page)
 		append_variant(dict, content);
 	}
 	g_list_free(children);
+}
+
+static void add_info_text(struct settings_page *page, struct service *serv,
+		const gchar *key, const gchar *subkey, const gchar *label)
+{
+	GVariant *prop = service_get_property(serv, key, subkey);
+	if(!prop)
+		return;
+	settings_add_text(page, label, g_variant_get_string(prop, NULL));
+	g_variant_unref(prop);
+}
+
+static void add_info_page(struct settings *sett)
+{
+	GVariant *prop;
+	const gchar **arr, **iter;
+	GString *str;
+	struct settings_page *page = settings_add_page(sett, "Info");
+
+	settings_add_switch(page, "AutoConnect", NULL, "Autoconnect", TRUE);
+
+	add_info_text(page, sett->serv, "Name", NULL, _("Name"));
+
+	settings_add_text(page, _("State"),
+			service_status_localized(sett->serv));
+
+	add_info_text(page, sett->serv, "Ethernet", "Address", _("MAC address"));
+	add_info_text(page, sett->serv, "Ethernet", "Interface", _("Interface"));
+	add_info_text(page, sett->serv, "IPv4", "Address", _("IPv4 address"));
+	add_info_text(page, sett->serv, "IPv4", "Gateway", _("IPv4 gateway"));
+	add_info_text(page, sett->serv, "IPv4", "Netmask", _("IPv4 netmask"));
+	add_info_text(page, sett->serv, "IPv6", "Address", _("IPv6 address"));
+	add_info_text(page, sett->serv, "IPv6", "Gateway", _("IPv6 gateway"));
+	add_info_text(page, sett->serv, "IPv6", "Netmask", _("IPv6 netmask"));
+
+	prop = service_get_property(sett->serv, "Nameservers", NULL);
+	arr = g_variant_get_strv(prop, NULL);
+	str = g_string_new(arr[0]);
+	iter = arr + 1;
+	while(*iter)
+		g_string_append_printf(str, ", %s", *iter++);
+	g_free(arr);
+	settings_add_text(page, _("Nameservers"), str->str);
+	g_string_free(str, TRUE);
 }
 
 static void apply_cb(GtkWidget *window, gpointer user_data)
@@ -209,10 +255,10 @@ void settings_init(struct settings *sett)
 	gtk_grid_attach(grid, apply, 1, 1, 1, 1);
 	gtk_container_add(GTK_CONTAINER(sett->window), GTK_WIDGET(grid));
 
-	settings_add_text(settings_add_page(sett, "Name"), "Name", NULL,
-	                  "Name", g_variant_get_string(name_v, NULL));
-	settings_add_switch(settings_add_page(sett, "Properties"),
-			"AutoConnect", NULL, "Autoconnect", TRUE);
+	add_info_page(sett);
+	settings_add_page(sett, _("Security"));
+	settings_add_page(sett, _("IPv4"));
+	settings_add_page(sett, _("IPv6"));
 
 	if(functions[sett->serv->type].init)
 		functions[sett->serv->type].init(sett);

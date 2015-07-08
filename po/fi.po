@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-06 13:31+0300\n"
+"POT-Creation-Date: 2015-07-07 16:52+0300\n"
 "PO-Revision-Date: 2015-06-11 15:15+0300\n"
 "Last-Translator: Jaakko Hannikainen <jaakko.hannikainen@intel.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -30,9 +30,93 @@ msgstr "_OK"
 msgid "_Cancel"
 msgstr "_Peruuta"
 
-#: src/main.c:389
+#: src/main.c:389 src/settings.c:216
 msgid "Network Settings"
 msgstr "Verkkoasetukset"
+
+#: src/service.c:307
+msgid "Idle"
+msgstr "Ei yhdistetty"
+
+#: src/service.c:309
+msgid "Failure"
+msgstr "Virhe"
+
+#: src/service.c:311
+msgid "Association"
+msgstr "Yhdist‰‰"
+
+#: src/service.c:313
+msgid "Configuration"
+msgstr "Asettaa asetuksia"
+
+#: src/service.c:315
+msgid "Ready"
+msgstr "Valmis"
+
+#: src/service.c:317
+msgid "Disconnected"
+msgstr "Yhteys katkaistu"
+
+#: src/service.c:319
+msgid "Online"
+msgstr "Verkossa"
+
+#: src/service.c:321
+msgid "Error"
+msgstr "Virhe"
+
+#: src/settings.c:156
+msgid "Name"
+msgstr "Nimi"
+
+#: src/settings.c:158
+msgid "State"
+msgstr "Tila"
+
+#: src/settings.c:161 src/connections/ethernet.c:79
+msgid "IPv4 address"
+msgstr "IPv4-osoite"
+
+#: src/settings.c:162 src/connections/ethernet.c:80
+msgid "IPv4 gateway"
+msgstr "IPv4-yhdysk‰yt‰v‰"
+
+#: src/settings.c:163
+msgid "IPv4 netmask"
+msgstr "IPv4-aliverkonpeite"
+
+#: src/settings.c:164 src/connections/ethernet.c:81
+msgid "IPv6 address"
+msgstr "IPv6-osoite"
+
+#: src/settings.c:165 src/connections/ethernet.c:82
+msgid "IPv6 gateway"
+msgstr "IPv6-yhdysk‰yt‰v‰"
+
+#: src/settings.c:166
+msgid "IPv6 netmask"
+msgstr "IPv6-aliverkonpeite"
+
+#: src/settings.c:175
+msgid "Nameservers"
+msgstr "Nimipalvelimet"
+
+#: src/settings.c:225
+msgid "_Apply"
+msgstr "_Toteuta"
+
+#: src/settings.c:257
+msgid "Security"
+msgstr "Turvallisuus"
+
+#: src/settings.c:258
+msgid "IPv4"
+msgstr "IPv4"
+
+#: src/settings.c:259
+msgid "IPv6"
+msgstr "IPv6"
 
 #: src/technology.c:138
 msgid "Connected"
@@ -58,30 +142,6 @@ msgstr "Uudelleen_yhdist‰"
 msgid "Dis_connect"
 msgstr "Katkaise _yhteys"
 
-#: src/connections/ethernet.c:94
-msgid "IPv4 address"
-msgstr "IPv4-osoite"
-
-#: src/connections/ethernet.c:95
-msgid "IPv4 gateway"
-msgstr "IPv4-yhdysk‰yt‰v‰"
-
-#: src/connections/ethernet.c:96
-msgid "IPv6 address"
-msgstr "IPv6-osoite"
-
-#: src/connections/ethernet.c:97
-msgid "IPv6 gateway"
-msgstr "IPv6-yhdysk‰yt‰v‰"
-
-#: src/connections/ethernet.c:98
+#: src/connections/ethernet.c:83
 msgid "MAC address"
 msgstr "MAC-osoite"
-
-#: src/connections/wireless.c:52 src/connections/wireless.c:97
-msgid "_Scan"
-msgstr ""
-
-#: src/connections/wireless.c:66
-msgid "Scanning"
-msgstr ""

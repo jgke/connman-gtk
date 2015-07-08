@@ -48,8 +48,7 @@ gboolean settings_content_valid_always(struct settings_content *content);
 GVariant *settings_content_value_null(struct settings_content *content);
 GVariant *settings_content_value_entry(struct settings_content *content);
 
-GtkWidget *settings_add_text(struct settings_page *page, const gchar *key,
-                             const gchar *subkey, const gchar *label,
+GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
                              const gchar *value);
 GtkWidget *settings_add_entry(struct settings_page *page, const gchar *key,
                               const gchar *subkey, const gchar *label,
