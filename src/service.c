@@ -51,11 +51,19 @@ static struct {
 void service_update_property(struct service *serv, const gchar *key,
                              GVariant *value)
 {
-	gchar *hkey = g_strdup(key);
-	g_variant_ref(value);
-	g_hash_table_replace(serv->properties, hkey, value);
-	if(serv->sett)
-		settings_update(serv->sett, key, value);
+	g_hash_table_replace(serv->properties, g_strdup(key),
+	                     g_variant_ref(value));
+	if(serv->sett) {
+		if(strcmp(g_variant_get_type_string(value), "a{sv}")) {
+			settings_update(serv->sett, key, NULL, value);
+			return;
+		}
+		gchar *subkey;
+		GVariantIter *iter = g_variant_iter_new(value);
+		while(g_variant_iter_loop(iter, "{sv}", &subkey, &value))
+			settings_update(serv->sett, key, subkey, value);
+		g_variant_iter_free(iter);
+	}
 }
 
 static void service_proxy_signal(GDBusProxy *proxy, gchar *sender,

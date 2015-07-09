@@ -49,10 +49,12 @@ GVariant *settings_content_value_null(struct settings_content *content);
 GVariant *settings_content_value_entry(struct settings_content *content);
 
 GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
-                             const gchar *value);
+                             const gchar *value, const gchar *key,
+                             const gchar *subkey);
 GtkWidget *settings_add_entry(struct settings_page *page, const gchar *key,
                               const gchar *subkey, const gchar *label,
-                              const gchar *value, settings_field_validator valid);
+                              const gchar *value,
+                              settings_field_validator valid);
 GtkWidget *settings_add_switch(struct settings_page *page, const gchar *key,
                                const gchar *subkey, const gchar *label,
                                gboolean value);

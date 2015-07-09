@@ -26,7 +26,9 @@
 #include "service.h"
 #include "settings.h"
 #include "settings_content.h"
+#include "settings_content_callback.h"
 #include "style.h"
+#include "util.h"
 
 static struct {
 	struct settings *(*create)(void);
@@ -61,6 +63,7 @@ struct settings_page *settings_add_page(struct settings *sett,
 	struct settings_page *page = g_malloc(sizeof(*page));
 
 	page->index = 0;
+	page->sett = sett;
 
 	page->grid = gtk_grid_new();
 	GtkWidget *item = gtk_list_box_row_new();
@@ -91,6 +94,7 @@ struct settings_page *settings_add_page(struct settings *sett,
 void settings_free(struct settings *sett)
 {
 	sett->closed(sett->serv);
+	g_hash_table_unref(sett->callbacks);
 	if(functions[sett->serv->type].free)
 		functions[sett->serv->type].free(sett);
 	else
@@ -136,20 +140,20 @@ static void append_values(GVariantDict *dict, struct settings_page *page)
 }
 
 static void add_info_text(struct settings_page *page, struct service *serv,
-                          const gchar *key, const gchar *subkey, const gchar *label)
+                          const gchar *key, const gchar *subkey,
+                          const gchar *label)
 {
 	GVariant *prop = service_get_property(serv, key, subkey);
 	if(!prop)
 		return;
-	settings_add_text(page, label, g_variant_get_string(prop, NULL));
+	gchar *str = variant_to_str(prop);
+	settings_add_text(page, label, str, key, subkey);
+	g_free(str);
 	g_variant_unref(prop);
 }
 
 static void add_info_page(struct settings *sett)
 {
-	GVariant *prop;
-	const gchar **arr, **iter;
-	GString *str;
 	struct settings_page *page = settings_add_page(sett, "Info");
 
 	settings_add_switch(page, "AutoConnect", NULL, "Autoconnect", TRUE);
@@ -157,7 +161,7 @@ static void add_info_page(struct settings *sett)
 	add_info_text(page, sett->serv, "Name", NULL, _("Name"));
 
 	settings_add_text(page, _("State"),
-	                  service_status_localized(sett->serv));
+	                  service_status_localized(sett->serv), "State", NULL);
 
 	add_info_text(page, sett->serv, "Ethernet", "Address", _("MAC address"));
 	add_info_text(page, sett->serv, "Ethernet", "Interface", _("Interface"));
@@ -167,16 +171,7 @@ static void add_info_page(struct settings *sett)
 	add_info_text(page, sett->serv, "IPv6", "Address", _("IPv6 address"));
 	add_info_text(page, sett->serv, "IPv6", "Gateway", _("IPv6 gateway"));
 	add_info_text(page, sett->serv, "IPv6", "Netmask", _("IPv6 netmask"));
-
-	prop = service_get_property(sett->serv, "Nameservers", NULL);
-	arr = g_variant_get_strv(prop, NULL);
-	str = g_string_new(arr[0]);
-	iter = arr + 1;
-	while(*arr && *iter)
-		g_string_append_printf(str, ", %s", *iter++);
-	g_free(arr);
-	settings_add_text(page, _("Nameservers"), str->str);
-	g_string_free(str, TRUE);
+	add_info_text(page, sett->serv, "Nameservers", NULL, _("Nameservers"));
 }
 
 static void apply_cb(GtkWidget *window, gpointer user_data)
@@ -274,6 +269,7 @@ struct settings *settings_create(struct service *serv,
                                  void (*closed)(struct service *serv))
 {
 	struct settings *sett;
+	GHashTable *t;
 
 	if(functions[serv->type].create)
 		sett = functions[serv->type].create();
@@ -282,12 +278,35 @@ struct settings *settings_create(struct service *serv,
 
 	sett->serv = serv;
 	sett->closed = closed;
+	t = g_hash_table_new_full(g_str_hash, g_str_equal,
+	                          g_free, (GDestroyNotify)g_hash_table_unref);
+	sett->callbacks = t;
 
 	settings_init(sett);
 
 	return sett;
 }
 
-void settings_update(struct settings *sett, const gchar *key, GVariant *value)
+void settings_update(struct settings *sett, const gchar *key,
+                     const gchar *subkey, GVariant *value)
 {
+	GHashTable *t = g_hash_table_lookup(sett->callbacks, key);
+	if(!subkey)
+		subkey = "";
+	if(t && g_hash_table_contains(t, subkey))
+		handle_content_callback(value, g_hash_table_lookup(t, subkey));
+}
+
+void settings_set_callback(struct settings *sett, const gchar *key,
+                           const gchar *subkey, struct content_callback *cb)
+{
+	GHashTable *t;
+	if(!g_hash_table_contains(sett->callbacks, key)) {
+		t = g_hash_table_new_full(g_str_hash, g_str_equal,
+		                          g_free,
+		                          content_callback_free);
+		g_hash_table_insert(sett->callbacks, g_strdup(key), t);
+	} else
+		t = g_hash_table_lookup(sett->callbacks, key);
+	g_hash_table_insert(t, g_strdup(subkey ? subkey : ""), cb);
 }

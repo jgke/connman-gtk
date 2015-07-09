@@ -1,8 +1,8 @@
 uidir = $(datadir)/connman-gtk/
 ui_DATA = stylesheet.css
 bin_PROGRAMS = connman-gtk
-connman_gtk_SOURCES = main.c agent.c style.c technology.c service.c \
-		      settings.c settings_content.c \
+connman_gtk_SOURCES = main.c agent.c style.c technology.c service.c util.c \
+		      settings.c settings_content.c settings_content_callback.c \
 		      connection.c \
 			connections/bluetooth.c \
 			connections/cellular.c \

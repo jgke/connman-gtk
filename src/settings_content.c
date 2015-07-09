@@ -24,6 +24,7 @@
 
 #include "settings.h"
 #include "settings_content.h"
+#include "settings_content_callback.h"
 #include "style.h"
 
 void settings_add_content(struct settings_page *page,
@@ -101,7 +102,8 @@ static void add_left_aligned(GtkGrid *grid, GtkWidget *a, GtkWidget *b)
 }
 
 GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
-                             const gchar *value)
+                             const gchar *value, const gchar *key,
+                             const gchar *subkey)
 {
 	GtkWidget *label_w, *value_w;
 	struct settings_content *content = create_base_content(NULL, NULL);
@@ -111,6 +113,9 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 
 	g_signal_connect(content->content, "destroy",
 	                 G_CALLBACK(free_content), content);
+
+	g_object_set_data(G_OBJECT(content->content), "value", value_w);
+
 
 	STYLE_ADD_CONTEXT(label_w);
 	gtk_style_context_add_class(gtk_widget_get_style_context(label_w),
@@ -132,6 +137,12 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 	add_left_aligned(GTK_GRID(content->content), label_w, value_w);
 
 	settings_add_content(page, content);
+
+	if(key) {
+		struct content_callback *cb;
+		cb = create_text_callback(value_w);
+		settings_set_callback(page->sett, key, subkey, cb);
+	}
 
 	return value_w;
 }

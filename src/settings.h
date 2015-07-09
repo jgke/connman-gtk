@@ -21,14 +21,12 @@
 #ifndef _CONNMAN_GTK_SETTINGS_H
 #define _CONNMAN_GTK_SETTINGS_H
 
+#include <glib.h>
+
 struct settings;
 
 #include "service.h"
-
-struct settings_page {
-	GtkWidget *grid;
-	int index;
-};
+#include "settings_content_callback.h"
 
 struct settings {
 	GtkWidget *window;
@@ -37,11 +35,22 @@ struct settings {
 
 	struct service *serv;
 	void (*closed)(struct service *serv);
+
+	GHashTable *callbacks;
+};
+
+struct settings_page {
+	GtkWidget *grid;
+	struct settings *sett;
+	int index;
 };
 
 struct settings *settings_create(struct service *serv,
                                  void (*closed)(struct service *serv));
-void settings_update(struct settings *sett, const gchar *key, GVariant *value);
+void settings_update(struct settings *sett, const gchar *key,
+                     const gchar *subkey, GVariant *value);
+void settings_set_callback(struct settings *sett, const gchar *key,
+                           const gchar *subkey, struct content_callback *cb);
 struct settings_page *settings_add_page(struct settings *sett,
                                         const gchar *name);
 
