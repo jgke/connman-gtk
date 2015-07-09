@@ -151,8 +151,6 @@ static void add_info_page(struct settings *sett)
 	settings_add_text(page, _("Interface"), "Ethernet", "Interface");
 	settings_add_text(page, _("IPv4 address"), "IPv4", "Address");
 	settings_add_text(page, _("IPv6 address"), "IPv6", "Address");
-	settings_add_text(page, _("IPv6 gateway"), "IPv6", "Gateway");
-	settings_add_text(page, _("IPv6 netmask"), "IPv6", "Netmask");
 	settings_add_text(page, _("Nameservers"), "Nameservers", NULL);
 }
 
@@ -192,9 +190,9 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		ipvs = "IPv6";
 	}
 
-	settings_add_text(page, _("Address"), ipvs, "Address");
-	settings_add_text(page, _("Gateway"), ipvs, "Gateway");
-	settings_add_text(page, _("Netmask"), ipvs, "Netmask");
+	settings_add_text(page, _("Current address"), ipvs, "Address");
+	settings_add_text(page, _("Current gateway"), ipvs, "Gateway");
+	settings_add_text(page, _("Current netmask"), ipvs, "Netmask");
 	settings_add_entry(page, _("Method"), ipvs, "Method",
 			   conf, "Method", settings_content_valid_always);
 	settings_add_entry(page, _("Address"), ipvs, "Address",
