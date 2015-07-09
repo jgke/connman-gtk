@@ -130,7 +130,7 @@ static void append_values(GVariantDict *dict, struct settings_page *page)
 	GList *l;
 	for(l = children; l != NULL; l = l->next) {
 		GtkWidget *child = l->data;
-		if(strcmp(G_OBJECT_TYPE_NAME(child), "GtkGrid"))
+		if(!g_object_get_data(G_OBJECT(child), "content"))
 			continue;
 		struct settings_content *content =
 		        g_object_get_data(G_OBJECT(child), "content");
@@ -139,39 +139,70 @@ static void append_values(GVariantDict *dict, struct settings_page *page)
 	g_list_free(children);
 }
 
-static void add_info_text(struct settings_page *page, struct service *serv,
-                          const gchar *key, const gchar *subkey,
-                          const gchar *label)
-{
-	GVariant *prop = service_get_property(serv, key, subkey);
-	gchar *str = variant_to_str(prop);
-	if(!strcmp(key, "State"))
-		settings_add_text(page, label, status_localized(str),
-				  key, subkey);
-	else
-		settings_add_text(page, label, str, key, subkey);
-	g_free(str);
-	if(prop)
-		g_variant_unref(prop);
-}
-
 static void add_info_page(struct settings *sett)
 {
-	struct settings_page *page = settings_add_page(sett, "Info");
+	struct settings_page *page = settings_add_page(sett, _("Info"));
 
-	settings_add_switch(page, "AutoConnect", NULL, "Autoconnect", TRUE);
+	settings_add_switch(page, _("Autoconnect"), "AutoConnect", NULL);
 
-	add_info_text(page, sett->serv, "Name", NULL, _("Name"));
-	add_info_text(page, sett->serv, "State", NULL,_("State"));
-	add_info_text(page, sett->serv, "Ethernet", "Address", _("MAC address"));
-	add_info_text(page, sett->serv, "Ethernet", "Interface", _("Interface"));
-	add_info_text(page, sett->serv, "IPv4", "Address", _("IPv4 address"));
-	add_info_text(page, sett->serv, "IPv4", "Gateway", _("IPv4 gateway"));
-	add_info_text(page, sett->serv, "IPv4", "Netmask", _("IPv4 netmask"));
-	add_info_text(page, sett->serv, "IPv6", "Address", _("IPv6 address"));
-	add_info_text(page, sett->serv, "IPv6", "Gateway", _("IPv6 gateway"));
-	add_info_text(page, sett->serv, "IPv6", "Netmask", _("IPv6 netmask"));
-	add_info_text(page, sett->serv, "Nameservers", NULL, _("Nameservers"));
+	settings_add_text(page, _("Name"), "Name", NULL);
+	settings_add_text(page, _("State"), "State", NULL);
+	settings_add_text(page, _("MAC address"), "Ethernet", "Address");
+	settings_add_text(page, _("Interface"), "Ethernet", "Interface");
+	settings_add_text(page, _("IPv4 address"), "IPv4", "Address");
+	settings_add_text(page, _("IPv6 address"), "IPv6", "Address");
+	settings_add_text(page, _("IPv6 gateway"), "IPv6", "Gateway");
+	settings_add_text(page, _("IPv6 netmask"), "IPv6", "Netmask");
+	settings_add_text(page, _("Nameservers"), "Nameservers", NULL);
+}
+
+static gboolean valid_ipv4_entry(struct settings_content *content)
+{
+	GVariant *variant = content->value(content);
+	gboolean valid = valid_ipv4(g_variant_get_string(variant, NULL));
+	g_variant_unref(variant);
+	return valid;
+}
+
+static gboolean valid_ipv6_entry(struct settings_content *content)
+{
+	GVariant *variant = content->value(content);
+	gboolean valid = valid_ipv6(g_variant_get_string(variant, NULL));
+	g_variant_unref(variant);
+	return valid;
+}
+
+static void add_ipv_page(struct settings *sett, int ipv)
+{
+	struct settings_page *page;
+	settings_field_validator validator;
+	const char *conf;
+	const char *ipvs;
+
+	if(ipv == 4) {
+		page = settings_add_page(sett, _("IPv4"));
+		validator = valid_ipv4_entry;
+		conf = "IPv4.Configuration";
+		ipvs = "IPv4";
+	}
+	else {
+		page = settings_add_page(sett, _("IPv6"));
+		validator = valid_ipv6_entry;
+		conf = "IPv6.Configuration";
+		ipvs = "IPv6";
+	}
+
+	settings_add_text(page, _("Address"), ipvs, "Address");
+	settings_add_text(page, _("Gateway"), ipvs, "Gateway");
+	settings_add_text(page, _("Netmask"), ipvs, "Netmask");
+	settings_add_entry(page, _("Method"), ipvs, "Method",
+			   conf, "Method", settings_content_valid_always);
+	settings_add_entry(page, _("Address"), ipvs, "Address",
+			   conf, "Address", validator);
+	settings_add_entry(page, _("Netmask"), ipvs, "Netmask",
+			   conf, "Netmask", validator);
+	settings_add_entry(page, _("Gateway"), ipvs, "Gateway",
+			   conf, "Gateway", validator);
 }
 
 static void apply_cb(GtkWidget *window, gpointer user_data)
@@ -252,9 +283,9 @@ void settings_init(struct settings *sett)
 	gtk_container_add(GTK_CONTAINER(sett->window), GTK_WIDGET(grid));
 
 	add_info_page(sett);
+	add_ipv_page(sett, 4);
+	add_ipv_page(sett, 6);
 	settings_add_page(sett, _("Security"));
-	settings_add_page(sett, _("IPv4"));
-	settings_add_page(sett, _("IPv6"));
 
 	if(functions[sett->serv->type].init)
 		functions[sett->serv->type].init(sett);
@@ -311,3 +342,4 @@ void settings_set_callback(struct settings *sett, const gchar *key,
 		t = g_hash_table_lookup(sett->callbacks, key);
 	g_hash_table_insert(t, g_strdup(subkey ? subkey : ""), cb);
 }
+

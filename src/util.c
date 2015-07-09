@@ -18,6 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <arpa/inet.h>
 #include <glib.h>
 #include <glib/gi18n.h>
 #include <string.h>
@@ -50,6 +51,13 @@ gchar *variant_to_str(GVariant *variant)
 		return g_variant_dup_string(variant, NULL);
 }
 
+gboolean variant_to_bool(GVariant *variant)
+{
+	if(!variant)
+		return FALSE;
+	return g_variant_get_boolean(variant);
+}
+
 const gchar *status_localized(const gchar *state)
 {
 	if(!strcmp(state, "idle"))
@@ -68,4 +76,16 @@ const gchar *status_localized(const gchar *state)
 		return _("Online");
 	else
 		return _("Error");
+}
+
+gboolean valid_ipv4(const gchar *address)
+{
+	char str[INET_ADDRSTRLEN];
+	return inet_pton(AF_INET, address, str) == 1;
+}
+
+gboolean valid_ipv6(const gchar *address)
+{
+	char str[INET6_ADDRSTRLEN];
+	return inet_pton(AF_INET6, address, str) == 1;
 }

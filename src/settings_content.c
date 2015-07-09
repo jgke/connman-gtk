@@ -26,6 +26,7 @@
 #include "settings_content.h"
 #include "settings_content_callback.h"
 #include "style.h"
+#include "util.h"
 
 void settings_add_content(struct settings_page *page,
                           struct settings_content *content)
@@ -102,14 +103,18 @@ static void add_left_aligned(GtkGrid *grid, GtkWidget *a, GtkWidget *b)
 }
 
 GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
-                             const gchar *value, const gchar *key,
-                             const gchar *subkey)
+                             const gchar *key, const gchar *subkey)
 {
 	GtkWidget *label_w, *value_w;
+	gchar *value;
 	struct settings_content *content = create_base_content(NULL, NULL);
+
+	value = service_get_property_string(page->sett->serv, key, subkey);
 
 	label_w = gtk_label_new(label);
 	value_w = gtk_label_new(value);
+
+	g_free(value);
 
 	g_signal_connect(content->content, "destroy",
 	                 G_CALLBACK(free_content), content);
@@ -147,12 +152,14 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 	return value_w;
 }
 
-GtkWidget *settings_add_entry(struct settings_page *page, const gchar *key,
-                              const gchar *subkey, const gchar *label,
-                              const gchar *value, settings_field_validator valid)
+GtkWidget *settings_add_entry(struct settings_page *page, const gchar *label,
+			      const gchar *key, const gchar *subkey,
+			      const gchar *ekey, const gchar *esubkey,
+			      settings_field_validator valid)
 {
 	GtkWidget *label_w, *entry;
-	struct settings_content *content = create_base_content(key, subkey);
+	gchar *value;
+	struct settings_content *content = create_base_content(ekey, esubkey);
 	if(valid)
 		content->valid = valid;
 	content->free = g_free;
@@ -160,8 +167,10 @@ GtkWidget *settings_add_entry(struct settings_page *page, const gchar *key,
 
 	label_w = gtk_label_new(label);
 	entry = gtk_entry_new();
-	if(value)
-		gtk_entry_set_text(GTK_ENTRY(entry), value);
+
+	value = service_get_property_string(page->sett->serv, key, subkey);
+	gtk_entry_set_text(GTK_ENTRY(entry), value);
+	g_free(value);
 
 	g_signal_connect(content->content, "destroy",
 	                 G_CALLBACK(free_content), content);
@@ -180,14 +189,16 @@ GtkWidget *settings_add_entry(struct settings_page *page, const gchar *key,
 	return entry;
 }
 
-GtkWidget *settings_add_switch(struct settings_page *page, const gchar *key,
-                               const gchar *subkey, const gchar *label,
-                               gboolean value)
+GtkWidget *settings_add_switch(struct settings_page *page, const gchar *label,
+                               const gchar *key, const gchar *subkey)
 {
 	GtkWidget *label_w, *toggle;
 	struct settings_content *content = create_base_content(key, subkey);
+	gboolean value;
+
 	content->free = g_free;
 	content->value = settings_content_value_switch;
+	value = service_get_property_boolean(page->sett->serv, key, subkey);
 
 	label_w = gtk_label_new(label);
 	toggle = gtk_switch_new();

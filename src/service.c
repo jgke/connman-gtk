@@ -27,6 +27,7 @@
 #include "style.h"
 #include "service.h"
 #include "settings.h"
+#include "util.h"
 #include "connections/ethernet.h"
 #include "connections/wireless.h"
 
@@ -288,6 +289,32 @@ GVariant *service_get_property(struct service *serv, const char *key,
 	variant = g_variant_dict_lookup_value(dict, subkey, NULL);
 	g_variant_dict_unref(dict);
 	return variant;
+}
+
+gchar *service_get_property_string(struct service *serv, const char *key,
+				   const char *subkey)
+{
+	GVariant *prop = service_get_property(serv, key, subkey);
+	gchar *str = variant_to_str(prop);
+	gchar *out;
+	if(!strcmp(key, "State"))
+		out = g_strdup(status_localized(str));
+	else
+		out = g_strdup(str);
+	if(prop)
+		g_variant_unref(prop);
+	g_free(str);
+	return out;
+}
+
+gboolean service_get_property_boolean(struct service *serv, const char *key,
+				      const char *subkey)
+{
+	GVariant *prop = service_get_property(serv, key, subkey);
+	gboolean out = variant_to_bool(prop);
+	if(prop)
+		g_variant_unref(prop);
+	return out;
 }
 
 void service_set_property(struct service *serv, const char *key,
