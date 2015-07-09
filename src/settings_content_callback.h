@@ -35,7 +35,7 @@ struct content_callback {
 
 struct content_callback *create_text_callback(GtkWidget *label);
 void handle_content_callback(GVariant *value, const gchar *key,
-			     const gchar *subkey, struct content_callback *cb);
+                             const gchar *subkey, struct content_callback *cb);
 void content_callback_free(void *cb);
 
 #endif /* _CONNMAN_GTK_SETTINGS_CONTENT_CALLBACK_H */

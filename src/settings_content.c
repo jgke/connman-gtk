@@ -153,9 +153,9 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 }
 
 GtkWidget *settings_add_entry(struct settings_page *page, const gchar *label,
-			      const gchar *key, const gchar *subkey,
-			      const gchar *ekey, const gchar *esubkey,
-			      settings_field_validator valid)
+                              const gchar *key, const gchar *subkey,
+                              const gchar *ekey, const gchar *esubkey,
+                              settings_field_validator valid)
 {
 	GtkWidget *label_w, *entry;
 	gchar *value;

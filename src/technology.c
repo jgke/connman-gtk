@@ -208,16 +208,15 @@ static void connect_button_cb(GtkButton *widget, gpointer user_data)
 
 static void update_connect_button(struct technology_settings *tech)
 {
-	const gchar *state, *button_state;
-	GVariant *state_v;
+	const gchar *button_state;
+	gchar *state;
 	if(!tech->selected) {
 		if(!shutting_down)
 			gtk_widget_set_sensitive(tech->connect_button, FALSE);
 		gtk_widget_set_can_focus(tech->connect_button, FALSE);
 		return;
 	}
-	state_v = service_get_property(tech->selected, "State", NULL);
-	state = g_variant_get_string(state_v, NULL);
+	state = service_get_property_string(tech->selected, "State", NULL);
 
 	gtk_widget_set_sensitive(tech->connect_button, TRUE);
 	gtk_widget_set_can_focus(tech->connect_button, TRUE);
@@ -229,7 +228,7 @@ static void update_connect_button(struct technology_settings *tech)
 		button_state = _("Dis_connect");
 	gtk_button_set_label(GTK_BUTTON(tech->connect_button), button_state);
 
-	g_variant_unref(state_v);
+	g_free(state);
 }
 
 static void service_selected(GtkListBox *box, GtkListBoxRow *row,

@@ -58,6 +58,52 @@ gboolean variant_to_bool(GVariant *variant)
 	return g_variant_get_boolean(variant);
 }
 
+guint64 variant_to_uint(GVariant *variant)
+{
+	if(!variant)
+		return 0;
+	if(g_variant_is_of_type(variant, G_VARIANT_TYPE_BYTE))
+		return g_variant_get_byte(variant);
+	if(g_variant_is_of_type(variant, G_VARIANT_TYPE_UINT16))
+		return g_variant_get_uint16(variant);
+	if(g_variant_is_of_type(variant, G_VARIANT_TYPE_UINT32))
+		return g_variant_get_uint32(variant);
+	if(g_variant_is_of_type(variant, G_VARIANT_TYPE_UINT64))
+		return g_variant_get_uint64(variant);
+	g_warning("Converting signed type to unsigned");
+	if(g_variant_is_of_type(variant, G_VARIANT_TYPE_INT16))
+		return g_variant_get_int16(variant);
+	if(g_variant_is_of_type(variant, G_VARIANT_TYPE_INT32))
+		return g_variant_get_int32(variant);
+	if(g_variant_is_of_type(variant, G_VARIANT_TYPE_INT64))
+		return g_variant_get_int64(variant);
+	return 0;
+}
+
+
+gint64 variant_to_int(GVariant *variant)
+{
+	if(!variant)
+		return 0;
+	if(g_variant_is_of_type(variant, G_VARIANT_TYPE_BYTE))
+		return g_variant_get_byte(variant);
+	if(g_variant_is_of_type(variant, G_VARIANT_TYPE_INT16))
+		return g_variant_get_int16(variant);
+	if(g_variant_is_of_type(variant, G_VARIANT_TYPE_INT32))
+		return g_variant_get_int32(variant);
+	if(g_variant_is_of_type(variant, G_VARIANT_TYPE_INT64))
+		return g_variant_get_int64(variant);
+	if(g_variant_is_of_type(variant, G_VARIANT_TYPE_UINT16))
+		return g_variant_get_uint16(variant);
+	if(g_variant_is_of_type(variant, G_VARIANT_TYPE_UINT32))
+		return g_variant_get_uint32(variant);
+	if(g_variant_is_of_type(variant, G_VARIANT_TYPE_UINT64)) {
+		g_warning("Converting uint64 to int64");
+		return g_variant_get_uint64(variant);
+	}
+	return 0;
+}
+
 const gchar *status_localized(const gchar *state)
 {
 	if(!strcmp(state, "idle"))

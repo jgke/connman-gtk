@@ -182,8 +182,7 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		validator = valid_ipv4_entry;
 		conf = "IPv4.Configuration";
 		ipvs = "IPv4";
-	}
-	else {
+	} else {
 		page = settings_add_page(sett, _("IPv6"));
 		validator = valid_ipv6_entry;
 		conf = "IPv6.Configuration";
@@ -194,13 +193,13 @@ static void add_ipv_page(struct settings *sett, int ipv)
 	settings_add_text(page, _("Current gateway"), ipvs, "Gateway");
 	settings_add_text(page, _("Current netmask"), ipvs, "Netmask");
 	settings_add_entry(page, _("Method"), ipvs, "Method",
-			   conf, "Method", settings_content_valid_always);
+	                   conf, "Method", settings_content_valid_always);
 	settings_add_entry(page, _("Address"), ipvs, "Address",
-			   conf, "Address", validator);
+	                   conf, "Address", validator);
 	settings_add_entry(page, _("Netmask"), ipvs, "Netmask",
-			   conf, "Netmask", validator);
+	                   conf, "Netmask", validator);
 	settings_add_entry(page, _("Gateway"), ipvs, "Gateway",
-			   conf, "Gateway", validator);
+	                   conf, "Gateway", validator);
 }
 
 static void apply_cb(GtkWidget *window, gpointer user_data)
@@ -233,18 +232,20 @@ static gboolean delete_event(GtkWidget *window, GdkEvent *event,
 
 void settings_init(struct settings *sett)
 {
-	GVariant *name_v;
+	gchar *name;
 	gchar *title;
 	GtkWidget *frame, *apply;
 	GtkGrid *grid = GTK_GRID(gtk_grid_new());
 
 	sett->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	name_v = service_get_property(sett->serv, "Name", NULL);
-	title = g_strdup_printf("%s - %s", _("Network Settings"),
-	                        g_variant_get_string(name_v, NULL));
+	name = service_get_property_string(sett->serv, "Name", NULL);
+	title = g_strdup_printf("%s - %s", _("Network Settings"), name);
 	gtk_window_set_title(GTK_WINDOW(sett->window), title);
 	gtk_window_set_default_size(GTK_WINDOW(sett->window), SETTINGS_WIDTH,
 	                            SETTINGS_HEIGHT);
+
+	g_free(title);
+	g_free(name);
 
 	sett->list = gtk_list_box_new();
 	sett->notebook = gtk_notebook_new();
@@ -289,9 +290,6 @@ void settings_init(struct settings *sett)
 		functions[sett->serv->type].init(sett);
 
 	gtk_widget_show_all(sett->window);
-
-	g_free(title);
-	g_variant_unref(name_v);
 }
 
 struct settings *settings_create(struct service *serv,
@@ -324,7 +322,7 @@ void settings_update(struct settings *sett, const gchar *key,
 		subkey = "";
 	if(t && g_hash_table_contains(t, subkey))
 		handle_content_callback(value, key, subkey,
-					g_hash_table_lookup(t, subkey));
+		                        g_hash_table_lookup(t, subkey));
 }
 
 void settings_set_callback(struct settings *sett, const gchar *key,

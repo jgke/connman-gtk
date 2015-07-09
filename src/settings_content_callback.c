@@ -35,7 +35,7 @@ struct content_callback *create_text_callback(GtkWidget *label)
 }
 
 void handle_content_callback(GVariant *value, const gchar *key,
-			     const gchar *subkey, struct content_callback *cb)
+                             const gchar *subkey, struct content_callback *cb)
 {
 	switch(cb->type) {
 	case CONTENT_CALLBACK_TYPE_TEXT: {
@@ -43,7 +43,7 @@ void handle_content_callback(GVariant *value, const gchar *key,
 		gchar *str = variant_to_str(value);
 		if(!strcmp(key, "State"))
 			gtk_label_set_text(GTK_LABEL(label),
-					   status_localized(str));
+			                   status_localized(str));
 		else
 			gtk_label_set_text(GTK_LABEL(label), str);
 		g_free(str);

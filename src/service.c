@@ -253,18 +253,17 @@ static void service_toggle_connection_cb(GObject *source, GAsyncResult *res,
 
 void service_toggle_connection(struct service *serv)
 {
-	GVariant *state_v;
-	const gchar *state, *function;
+	const gchar *function;
+	gchar *state;
 
-	state_v = service_get_property(serv, "State", NULL);
-	state = g_variant_get_string(state_v, NULL);
+	state = service_get_property_string(serv, "State", NULL);
 
 	if(!strcmp(state, "idle") || !strcmp(state, "failure"))
 		function = "Connect";
 	else
 		function = "Disconnect";
 
-	g_variant_unref(state_v);
+	g_free(state);
 
 	g_dbus_proxy_call(serv->proxy, function, NULL,
 	                  G_DBUS_CALL_FLAGS_NONE, -1, NULL,
@@ -292,7 +291,7 @@ GVariant *service_get_property(struct service *serv, const char *key,
 }
 
 gchar *service_get_property_string(struct service *serv, const char *key,
-				   const char *subkey)
+                                   const char *subkey)
 {
 	GVariant *prop = service_get_property(serv, key, subkey);
 	gchar *str = variant_to_str(prop);
@@ -308,10 +307,20 @@ gchar *service_get_property_string(struct service *serv, const char *key,
 }
 
 gboolean service_get_property_boolean(struct service *serv, const char *key,
-				      const char *subkey)
+                                      const char *subkey)
 {
 	GVariant *prop = service_get_property(serv, key, subkey);
 	gboolean out = variant_to_bool(prop);
+	if(prop)
+		g_variant_unref(prop);
+	return out;
+}
+
+int service_get_property_int(struct service *serv, const char *key,
+                             const char *subkey)
+{
+	GVariant *prop = service_get_property(serv, key, subkey);
+	int out = variant_to_int(prop);
 	if(prop)
 		g_variant_unref(prop);
 	return out;
@@ -355,9 +364,10 @@ void service_set_properties(struct service *serv, GVariant *properties)
 
 const gchar *service_status_localized(struct service *serv)
 {
-	const gchar *out, *state;
-	GVariant *status = service_get_property(serv, "State", NULL);
-	state = g_variant_get_string(status, NULL);
+	const gchar *out;
+	gchar *state;
+
+	state = service_get_property_string(serv, "State", NULL);
 	if(!strcmp(state, "idle"))
 		out = _("Idle");
 	else if(!strcmp(state, "failure"))
@@ -374,6 +384,6 @@ const gchar *service_status_localized(struct service *serv)
 		out = _("Online");
 	else
 		out = _("Error");
-	g_variant_unref(status);
+	g_free(state);
 	return out;
 }

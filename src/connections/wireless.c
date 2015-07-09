@@ -144,16 +144,16 @@ void service_wireless_update(struct service *serv)
 	struct wireless_service *item = (struct wireless_service *)serv;
 
 	GVariant *variant;
+	gchar *name;
+	int strength;
 
-	variant = service_get_property(serv, "Name", NULL);
-	if(variant) {
-		const gchar *value;
-		value = g_variant_get_string(variant, NULL);
-		gtk_label_set_text(GTK_LABEL(serv->title), value);
-		g_variant_unref(variant);
+	name = service_get_property_string(serv, "Name", NULL);
+	gtk_label_set_text(GTK_LABEL(serv->title), name);
+	if(strlen(name))
 		gtk_widget_show(serv->item);
-	} else
+	else
 		gtk_widget_hide(serv->item);
+	g_free(name);
 
 	variant = service_get_property(serv, "Security", NULL);
 	if(variant) {
@@ -184,16 +184,11 @@ void service_wireless_update(struct service *serv)
 		else
 			gtk_widget_show(item->security);
 		g_variant_unref(variant);
-	}
+	} else
+		gtk_widget_hide(item->security);
 
-
-	variant = service_get_property(serv, "Strength", NULL);
-	if(variant) {
-		unsigned char value;
-		value = g_variant_get_byte(variant);
-		gtk_image_set_from_icon_name(GTK_IMAGE(item->signal),
-		                             SIGNAL_TO_ICON("wireless", value),
-		                             GTK_ICON_SIZE_MENU);
-		g_variant_unref(variant);
-	}
+	strength = service_get_property_int(serv, "Strength", NULL);
+	gtk_image_set_from_icon_name(GTK_IMAGE(item->signal),
+	                             SIGNAL_TO_ICON("wireless", strength),
+	                             GTK_ICON_SIZE_MENU);
 }

@@ -104,28 +104,22 @@ void service_ethernet_free(struct service *serv)
 	g_free(item);
 }
 
-static void ethernet_set_property(struct service *serv, GtkWidget *label,
-                                  const gchar *key, const gchar *subkey)
+static void set_property(struct service *serv, GtkWidget *label,
+                         const gchar *key, const gchar *subkey)
 {
-	GVariant *variant;
-	const gchar *value;
-
-	variant = service_get_property(serv, key, subkey);
-	if(variant) {
-		value = g_variant_get_string(variant, NULL);
-		gtk_label_set_text(GTK_LABEL(label), value);
-		g_variant_unref(variant);
-	}
+	gchar *value = service_get_property_string(serv, key, subkey);
+	gtk_label_set_text(GTK_LABEL(label), value);
+	g_free(value);
 }
 
 void service_ethernet_update(struct service *serv)
 {
 	struct ethernet_service *item = (struct ethernet_service *)serv;
 
-	ethernet_set_property(serv, item->ipv4, "IPv4", "Address");
-	ethernet_set_property(serv, item->ipv4gateway, "IPv4", "Gateway");
-	ethernet_set_property(serv, item->ipv6, "IPv6", "Address");
-	ethernet_set_property(serv, item->ipv6gateway, "IPv6", "Gateway");
-	ethernet_set_property(serv, serv->title, "Ethernet", "Interface");
-	ethernet_set_property(serv, item->mac, "Ethernet", "Address");
+	set_property(serv, item->ipv4, "IPv4", "Address");
+	set_property(serv, item->ipv4gateway, "IPv4", "Gateway");
+	set_property(serv, item->ipv6, "IPv6", "Address");
+	set_property(serv, item->ipv6gateway, "IPv6", "Gateway");
+	set_property(serv, serv->title, "Ethernet", "Interface");
+	set_property(serv, item->mac, "Ethernet", "Address");
 }
