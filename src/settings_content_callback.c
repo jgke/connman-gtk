@@ -20,6 +20,7 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
+#include <string.h>
 
 #include "settings_content.h"
 #include "settings_content_callback.h"
@@ -33,13 +34,18 @@ struct content_callback *create_text_callback(GtkWidget *label)
 	return cb;
 }
 
-void handle_content_callback(GVariant *value, struct content_callback *cb)
+void handle_content_callback(GVariant *value, const gchar *key,
+			     const gchar *subkey, struct content_callback *cb)
 {
 	switch(cb->type) {
 	case CONTENT_CALLBACK_TYPE_TEXT: {
 		GtkWidget *label = cb->data;
 		gchar *str = variant_to_str(value);
-		gtk_label_set_text(GTK_LABEL(label), str);
+		if(!strcmp(key, "State"))
+			gtk_label_set_text(GTK_LABEL(label),
+					   status_localized(str));
+		else
+			gtk_label_set_text(GTK_LABEL(label), str);
 		g_free(str);
 		return;
 	}

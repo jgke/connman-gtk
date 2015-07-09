@@ -144,12 +144,15 @@ static void add_info_text(struct settings_page *page, struct service *serv,
                           const gchar *label)
 {
 	GVariant *prop = service_get_property(serv, key, subkey);
-	if(!prop)
-		return;
 	gchar *str = variant_to_str(prop);
-	settings_add_text(page, label, str, key, subkey);
+	if(!strcmp(key, "State"))
+		settings_add_text(page, label, status_localized(str),
+				  key, subkey);
+	else
+		settings_add_text(page, label, str, key, subkey);
 	g_free(str);
-	g_variant_unref(prop);
+	if(prop)
+		g_variant_unref(prop);
 }
 
 static void add_info_page(struct settings *sett)
@@ -159,10 +162,7 @@ static void add_info_page(struct settings *sett)
 	settings_add_switch(page, "AutoConnect", NULL, "Autoconnect", TRUE);
 
 	add_info_text(page, sett->serv, "Name", NULL, _("Name"));
-
-	settings_add_text(page, _("State"),
-	                  service_status_localized(sett->serv), "State", NULL);
-
+	add_info_text(page, sett->serv, "State", NULL,_("State"));
 	add_info_text(page, sett->serv, "Ethernet", "Address", _("MAC address"));
 	add_info_text(page, sett->serv, "Ethernet", "Interface", _("Interface"));
 	add_info_text(page, sett->serv, "IPv4", "Address", _("IPv4 address"));
@@ -294,7 +294,8 @@ void settings_update(struct settings *sett, const gchar *key,
 	if(!subkey)
 		subkey = "";
 	if(t && g_hash_table_contains(t, subkey))
-		handle_content_callback(value, g_hash_table_lookup(t, subkey));
+		handle_content_callback(value, key, subkey,
+					g_hash_table_lookup(t, subkey));
 }
 
 void settings_set_callback(struct settings *sett, const gchar *key,

@@ -23,5 +23,6 @@
 
 gchar *variant_str_array_to_str(GVariant *variant);
 gchar *variant_to_str(GVariant *variant);
+const gchar *status_localized(const gchar *status);
 
 #endif /* _CONNMAN_GTK_UTIL_H */

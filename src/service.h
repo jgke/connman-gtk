@@ -64,6 +64,5 @@ GVariant *service_get_property(struct service *serv, const char *key,
 void service_set_property(struct service *serv, const char *key,
                           GVariant *value);
 void service_set_properties(struct service *serv, GVariant *properties);
-const gchar *service_status_localized(struct service *serv);
 
 #endif /* _CONNMAN_GTK_SERVICE_H */

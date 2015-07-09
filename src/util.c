@@ -19,6 +19,7 @@
  */
 
 #include <glib.h>
+#include <glib/gi18n.h>
 #include <string.h>
 
 #include "util.h"
@@ -41,8 +42,30 @@ gchar *variant_str_array_to_str(GVariant *variant)
 
 gchar *variant_to_str(GVariant *variant)
 {
+	if(!variant)
+		return g_strdup("");
 	if(!strcmp(g_variant_get_type_string(variant), "as"))
 		return variant_str_array_to_str(variant);
 	else
 		return g_variant_dup_string(variant, NULL);
+}
+
+const gchar *status_localized(const gchar *state)
+{
+	if(!strcmp(state, "idle"))
+		return _("Idle");
+	else if(!strcmp(state, "failure"))
+		return _("Failure");
+	else if(!strcmp(state, "association"))
+		return _("Association");
+	else if(!strcmp(state, "configuration"))
+		return _("Configuration");
+	else if(!strcmp(state, "ready"))
+		return _("Ready");
+	else if(!strcmp(state, "disconnected"))
+		return _("Disconnected");
+	else if(!strcmp(state, "online"))
+		return _("Online");
+	else
+		return _("Error");
 }
