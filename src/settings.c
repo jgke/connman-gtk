@@ -204,6 +204,10 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		ipvs = "IPv6";
 	}
 	char *cur = service_get_property_string(sett->serv, ipvs, "Method");
+	if(!strlen(cur)) {
+		g_free(cur);
+		return;
+	}
 	page = add_page_to_settings(sett, local);
 	box = settings_add_combo_box(page, _("Method"), conf, "Method",
 	                             conf, "Method");
