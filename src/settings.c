@@ -45,36 +45,46 @@ void free_page(GtkWidget *widget, gpointer user_data)
 	g_free(page);
 }
 
-struct settings_page *settings_add_page(struct settings *sett,
-                                        const gchar *name)
+struct settings_page *settings_create_page(GtkWidget *notebook,
+                const gchar *name)
 {
 	struct settings_page *page = g_malloc(sizeof(*page));
 
 	page->index = 0;
-	page->sett = sett;
 
 	page->grid = gtk_grid_new();
+
+	g_signal_connect(page->grid, "destroy",
+	                 G_CALLBACK(free_page), page);
+
+	gtk_widget_set_margin_start(page->grid, MARGIN_LARGE);
+
+	gtk_widget_show_all(page->grid);
+
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), page->grid,
+	                         NULL);
+
+	return page;
+}
+
+static struct settings_page *add_page_to_settings(struct settings *sett,
+                const gchar *name)
+{
+	struct settings_page *page = settings_create_page(sett->notebook, name);
+	page->sett = sett;
+
 	GtkWidget *item = gtk_list_box_row_new();
 	GtkWidget *label = gtk_label_new(name);
 
 	g_object_set_data(G_OBJECT(item), "content", page->grid);
 
-	g_signal_connect(page->grid, "destroy",
-	                 G_CALLBACK(free_page), page);
-
 	STYLE_ADD_MARGIN(label, MARGIN_SMALL);
-	gtk_widget_set_margin_start(page->grid, MARGIN_LARGE);
 	gtk_widget_set_margin_start(label, MARGIN_LARGE);
 
 	gtk_widget_set_halign(label, GTK_ALIGN_START);
 
 	gtk_container_add(GTK_CONTAINER(item), label);
 	gtk_container_add(GTK_CONTAINER(sett->list), item);
-
-	gtk_widget_show_all(page->grid);
-
-	gtk_notebook_append_page(GTK_NOTEBOOK(sett->notebook), page->grid,
-	                         NULL);
 
 	return page;
 }
@@ -129,7 +139,7 @@ static void append_values(GVariantDict *dict, GtkWidget *grid)
 
 static void add_info_page(struct settings *sett)
 {
-	struct settings_page *page = settings_add_page(sett, _("Info"));
+	struct settings_page *page = add_page_to_settings(sett, _("Info"));
 
 	settings_add_switch(page, _("Autoconnect"), "AutoConnect", NULL);
 
@@ -166,12 +176,12 @@ static void add_ipv_page(struct settings *sett, int ipv)
 	const char *ipvs;
 
 	if(ipv == 4) {
-		page = settings_add_page(sett, _("IPv4"));
+		page = add_page_to_settings(sett, _("IPv4"));
 		validator = valid_ipv4_entry;
 		conf = "IPv4.Configuration";
 		ipvs = "IPv4";
 	} else {
-		page = settings_add_page(sett, _("IPv6"));
+		page = add_page_to_settings(sett, _("IPv6"));
 		validator = valid_ipv6_entry;
 		conf = "IPv6.Configuration";
 		ipvs = "IPv6";
@@ -271,7 +281,7 @@ void settings_init(struct settings *sett)
 	add_info_page(sett);
 	add_ipv_page(sett, 4);
 	add_ipv_page(sett, 6);
-	settings_add_page(sett, _("Security"));
+	add_page_to_settings(sett, _("Security"));
 
 	if(functions[sett->serv->type].init)
 		functions[sett->serv->type].init(sett);

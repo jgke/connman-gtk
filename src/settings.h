@@ -51,7 +51,5 @@ void settings_update(struct settings *sett, const gchar *key,
                      const gchar *subkey, GVariant *value);
 void settings_set_callback(struct settings *sett, const gchar *key,
                            const gchar *subkey, struct content_callback *cb);
-struct settings_page *settings_add_page(struct settings *sett,
-                                        const gchar *name);
 
 #endif /* _CONNMAN_GTK_SETTINGS_H */
