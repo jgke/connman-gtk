@@ -39,14 +39,13 @@ static struct {
 	{}
 };
 
-void free_page(GtkWidget *widget, gpointer user_data)
+static void free_page(GtkWidget *widget, gpointer user_data)
 {
 	struct settings_page *page = user_data;
 	g_free(page);
 }
 
-struct settings_page *settings_create_page(GtkWidget *notebook,
-                const gchar *name)
+static struct settings_page *create_page(GtkWidget *notebook, const gchar *name)
 {
 	struct settings_page *page = g_malloc(sizeof(*page));
 
@@ -70,7 +69,7 @@ struct settings_page *settings_create_page(GtkWidget *notebook,
 static struct settings_page *add_page_to_settings(struct settings *sett,
                 const gchar *name)
 {
-	struct settings_page *page = settings_create_page(sett->notebook, name);
+	struct settings_page *page = create_page(sett->notebook, name);
 	page->sett = sett;
 
 	GtkWidget *item = gtk_list_box_row_new();
@@ -89,7 +88,7 @@ static struct settings_page *add_page_to_settings(struct settings *sett,
 	return page;
 }
 
-void settings_free(struct settings *sett)
+static void free_settings(struct settings *sett)
 {
 	sett->closed(sett->serv);
 	g_hash_table_unref(sett->callbacks);
@@ -223,11 +222,11 @@ static void apply_cb(GtkWidget *window, gpointer user_data)
 static gboolean delete_event(GtkWidget *window, GdkEvent *event,
                              gpointer user_data)
 {
-	settings_free(user_data);
+	free_settings(user_data);
 	return FALSE;
 }
 
-void settings_init(struct settings *sett)
+static void init_settings(struct settings *sett)
 {
 	gchar *name;
 	gchar *title;
@@ -306,7 +305,7 @@ struct settings *settings_create(struct service *serv,
 	                          g_free, (GDestroyNotify)g_hash_table_unref);
 	sett->callbacks = t;
 
-	settings_init(sett);
+	init_settings(sett);
 
 	return sett;
 }
