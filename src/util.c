@@ -135,3 +135,14 @@ gboolean valid_ipv6(const gchar *address)
 	char str[INET6_ADDRSTRLEN];
 	return inet_pton(AF_INET6, address, str) == 1;
 }
+
+void list_item_selected(GtkListBox *box, GtkListBoxRow *row,
+                        gpointer data)
+{
+	if(!G_IS_OBJECT(row))
+		return;
+	GtkWidget *notebook = data;
+	GtkWidget *content = g_object_get_data(G_OBJECT(row), "content");
+	gint num = gtk_notebook_page_num(GTK_NOTEBOOK(notebook), content);
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), num);
+}

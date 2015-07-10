@@ -39,18 +39,6 @@ static struct {
 	{}
 };
 
-static void page_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data)
-{
-	if(!G_IS_OBJECT(row))
-		return;
-	struct settings *sett = data;
-	struct settings_page *page = g_object_get_data(G_OBJECT(row), "content");
-	GtkWidget *content = page->grid;
-	gint num = gtk_notebook_page_num(GTK_NOTEBOOK(sett->notebook),
-	                                 content);
-	gtk_notebook_set_current_page(GTK_NOTEBOOK(sett->notebook), num);
-}
-
 void free_page(GtkWidget *widget, gpointer user_data)
 {
 	struct settings_page *page = user_data;
@@ -69,7 +57,7 @@ struct settings_page *settings_add_page(struct settings *sett,
 	GtkWidget *item = gtk_list_box_row_new();
 	GtkWidget *label = gtk_label_new(name);
 
-	g_object_set_data(G_OBJECT(item), "content", page);
+	g_object_set_data(G_OBJECT(item), "content", page->grid);
 
 	g_signal_connect(page->grid, "destroy",
 	                 G_CALLBACK(free_page), page);
@@ -124,9 +112,9 @@ end:
 	g_variant_dict_insert_value(dict, content->key, variant);
 }
 
-static void append_values(GVariantDict *dict, struct settings_page *page)
+static void append_values(GVariantDict *dict, GtkWidget *grid)
 {
-	GList *children = gtk_container_get_children(GTK_CONTAINER(page->grid));
+	GList *children = gtk_container_get_children(GTK_CONTAINER(grid));
 	GList *l;
 	for(l = children; l != NULL; l = l->next) {
 		GtkWidget *child = l->data;
@@ -212,9 +200,8 @@ static void apply_cb(GtkWidget *window, gpointer user_data)
 	GList *l;
 	for(l = children; l != NULL; l = l->next) {
 		GtkWidget *child = l->data;
-		struct settings_page *page = g_object_get_data(G_OBJECT(child),
-		                             "content");
-		append_values(dict, page);
+		GtkWidget *grid = g_object_get_data(G_OBJECT(child), "content");
+		append_values(dict, grid);
 	}
 	g_list_free(children);
 	out = g_variant_dict_end(dict);
@@ -259,7 +246,7 @@ void settings_init(struct settings *sett)
 	g_signal_connect(sett->window, "delete-event", G_CALLBACK(delete_event),
 	                 sett);
 	g_signal_connect(sett->list, "row-selected",
-	                 G_CALLBACK(page_selected), sett);
+	                 G_CALLBACK(list_item_selected), sett->notebook);
 	g_signal_connect(apply, "clicked",
 	                 G_CALLBACK(apply_cb), sett);
 

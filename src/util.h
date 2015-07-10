@@ -22,6 +22,7 @@
 #define _CONNMAN_GTK_UTIL_H
 
 #include <glib.h>
+#include <gtk/gtk.h>
 
 gchar *variant_str_array_to_str(GVariant *variant);
 gchar *variant_to_str(GVariant *variant);
@@ -31,5 +32,6 @@ gint64 variant_to_int(GVariant *variant);
 const gchar *status_localized(const gchar *status);
 gboolean valid_ipv4(const gchar *address);
 gboolean valid_ipv6(const gchar *address);
+void list_item_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data);
 
 #endif /* _CONNMAN_GTK_UTIL_H */

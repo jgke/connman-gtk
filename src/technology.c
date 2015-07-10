@@ -80,7 +80,8 @@ static struct technology_list_item *create_list_item(struct technology *tech,
 	g_object_ref(item->icon);
 	g_object_ref(item->label);
 
-	g_object_set_data(G_OBJECT(item->item), "technology", tech);
+	g_object_set_data(G_OBJECT(item->item), "content",
+	                  tech->settings->grid);
 
 	STYLE_ADD_MARGIN(grid, MARGIN_SMALL);
 	gtk_widget_set_margin_start(item->label, MARGIN_SMALL);
@@ -299,7 +300,6 @@ struct technology_settings *create_technology_settings(struct technology *tech,
 	g_object_ref(item->connect_button);
 	g_object_ref(item->filler);
 
-	g_object_set_data(G_OBJECT(item->grid), "technology", tech);
 	item->powersig = g_signal_connect(item->power_switch, "notify::active",
 	                                  G_CALLBACK(toggle_power), item);
 	gtk_list_box_set_selection_mode(GTK_LIST_BOX(item->services),
@@ -477,9 +477,9 @@ void technology_init(struct technology *tech, GVariant *properties_v,
 
 	tech->services = g_hash_table_new_full(g_str_hash, g_str_equal,
 	                                       g_free, NULL);
-	tech->list_item = create_list_item(tech, name);
 	tech->settings = create_technology_settings(tech, properties_v,
 	                 proxy);
+	tech->list_item = create_list_item(tech, name);
 	technology_services_updated(tech);
 	tech->type = connection_type_from_string(type);
 	g_object_set_data(G_OBJECT(tech->list_item->item), "technology-type",

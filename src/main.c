@@ -30,6 +30,7 @@
 #include "technology.h"
 #include "interfaces.h"
 #include "style.h"
+#include "util.h"
 
 GtkWidget *list, *notebook, *main_window;
 GHashTable *technology_types, *services;
@@ -47,17 +48,6 @@ gint technology_list_sort_cb(GtkListBoxRow *row1, GtkListBoxRow *row2,
 	return type1 - type2;
 }
 
-static void technology_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data)
-{
-	if(!G_IS_OBJECT(row))
-		return;
-	struct technology *tech = g_object_get_data(G_OBJECT(row),
-	                          "technology");
-	gint num = gtk_notebook_page_num(GTK_NOTEBOOK(notebook),
-	                                 tech->settings->grid);
-	gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), num);
-}
-
 static void create_content(void)
 {
 	GtkWidget *frame, *grid;
@@ -69,15 +59,15 @@ static void create_content(void)
 
 	frame = gtk_frame_new(NULL);
 	list = gtk_list_box_new();
+	notebook = gtk_notebook_new();
 	gtk_list_box_set_selection_mode(GTK_LIST_BOX(list),
 	                                GTK_SELECTION_BROWSE);
 	gtk_list_box_set_sort_func(GTK_LIST_BOX(list), technology_list_sort_cb,
 	                           NULL, NULL);
-	g_signal_connect(list, "row-selected", G_CALLBACK(technology_selected),
-	                 NULL);
+	g_signal_connect(list, "row-selected", G_CALLBACK(list_item_selected),
+	                 notebook);
 	gtk_widget_set_size_request(list, LIST_WIDTH, -1);
 
-	notebook = gtk_notebook_new();
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), FALSE);
 	gtk_notebook_set_show_border(GTK_NOTEBOOK(notebook), FALSE);
 	gtk_widget_set_hexpand(notebook, TRUE);
