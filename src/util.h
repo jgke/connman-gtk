@@ -33,5 +33,6 @@ const gchar *status_localized(const gchar *status);
 gboolean valid_ipv4(const gchar *address);
 gboolean valid_ipv6(const gchar *address);
 void list_item_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data);
+void combo_box_changed(GtkComboBox *widget, gpointer data);
 
 #endif /* _CONNMAN_GTK_UTIL_H */

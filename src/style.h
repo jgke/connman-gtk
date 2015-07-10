@@ -55,5 +55,6 @@
 extern GtkCssProvider *css_provider;
 
 void style_init();
+void label_align_text_left(GtkLabel *label);
 
 #endif /* _CONNMAN_GTK_STYLE_H */

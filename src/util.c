@@ -136,6 +136,12 @@ gboolean valid_ipv6(const gchar *address)
 	return inet_pton(AF_INET6, address, str) == 1;
 }
 
+static void item_selected(GtkWidget *notebook, GtkWidget *content)
+{
+	gint num = gtk_notebook_page_num(GTK_NOTEBOOK(notebook), content);
+	gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), num);
+}
+
 void list_item_selected(GtkListBox *box, GtkListBoxRow *row,
                         gpointer data)
 {
@@ -143,6 +149,17 @@ void list_item_selected(GtkListBox *box, GtkListBoxRow *row,
 		return;
 	GtkWidget *notebook = data;
 	GtkWidget *content = g_object_get_data(G_OBJECT(row), "content");
-	gint num = gtk_notebook_page_num(GTK_NOTEBOOK(notebook), content);
-	gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), num);
+	item_selected(notebook, content);
+}
+
+void combo_box_changed(GtkComboBox *box, gpointer data)
+{
+	GtkWidget *notebook = data;
+	GtkWidget *content;
+	GHashTable *table = g_object_get_data(G_OBJECT(box), "items");
+	GtkComboBoxText *b = GTK_COMBO_BOX_TEXT(box);
+	gchar *str = gtk_combo_box_text_get_active_text(b);
+	content = g_hash_table_lookup(table, str);
+	item_selected(notebook, content);
+	g_free(str);
 }

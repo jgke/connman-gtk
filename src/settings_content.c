@@ -67,6 +67,18 @@ void free_content(GtkWidget *widget, gpointer user_data)
 	content->free(content);
 }
 
+static GtkWidget *create_label(const gchar *text)
+{
+	GtkWidget *label;
+	label = gtk_label_new(text);
+
+	STYLE_ADD_CONTEXT(label);
+	gtk_style_context_add_class(gtk_widget_get_style_context(label),
+	                            "dim-label");
+	gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
+	return label;
+}
+
 static struct settings_content *create_base_content(const gchar *key,
                 const gchar *subkey)
 {
@@ -79,6 +91,9 @@ static struct settings_content *create_base_content(const gchar *key,
 	content->subkey = subkey;
 
 	g_object_set_data(G_OBJECT(content->content), "content", content);
+
+	g_signal_connect(content->content, "destroy",
+	                 G_CALLBACK(free_content), content);
 
 	gtk_widget_set_margin_bottom(content->content, MARGIN_SMALL);
 
@@ -111,33 +126,15 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 
 	value = service_get_property_string(page->sett->serv, key, subkey);
 
-	label_w = gtk_label_new(label);
+	label_w = create_label(label);
 	value_w = gtk_label_new(value);
 
 	g_free(value);
 
-	g_signal_connect(content->content, "destroy",
-	                 G_CALLBACK(free_content), content);
-
 	g_object_set_data(G_OBJECT(content->content), "value", value_w);
 
-
-	STYLE_ADD_CONTEXT(label_w);
-	gtk_style_context_add_class(gtk_widget_get_style_context(label_w),
-	                            "dim-label");
-
 	gtk_widget_set_hexpand(content->content, TRUE);
-	gtk_label_set_line_wrap(GTK_LABEL(value_w), TRUE);
-	gtk_label_set_justify(GTK_LABEL(value_w), GTK_JUSTIFY_LEFT);
-#if (GTK_MAJOR_VERSION > 3) || (GTK_MINOR_VERSION >= 16)
-	if(gtk_get_major_version() > 3 || gtk_get_minor_version() >= 16)
-		gtk_label_set_xalign(GTK_LABEL(value_w), 0);
-	else
-		gtk_misc_set_alignment(GTK_MISC(value_w), 0, 0.5);
-#else
-	/* deprecated at 3.14, but above only implemented at 3.16 */
-	gtk_misc_set_alignment(GTK_MISC(value_w), 0, 0.5);
-#endif
+	label_align_text_left(GTK_LABEL(value_w));
 
 	add_left_aligned(GTK_GRID(content->content), label_w, value_w);
 
@@ -165,20 +162,13 @@ GtkWidget *settings_add_entry(struct settings_page *page, const gchar *label,
 	content->free = g_free;
 	content->value = settings_content_value_entry;
 
-	label_w = gtk_label_new(label);
+	label_w = create_label(label);
 	entry = gtk_entry_new();
 
 	value = service_get_property_string(page->sett->serv, key, subkey);
 	gtk_entry_set_text(GTK_ENTRY(entry), value);
 	g_free(value);
-
-	g_signal_connect(content->content, "destroy",
-	                 G_CALLBACK(free_content), content);
 	g_object_set_data(G_OBJECT(content->content), "entry", entry);
-
-	STYLE_ADD_CONTEXT(label_w);
-	gtk_style_context_add_class(gtk_widget_get_style_context(label_w),
-	                            "dim-label");
 
 	add_left_aligned(GTK_GRID(content->content), label_w, entry);
 
@@ -196,22 +186,15 @@ GtkWidget *settings_add_switch(struct settings_page *page, const gchar *label,
 	struct settings_content *content = create_base_content(key, subkey);
 	gboolean value;
 
-	content->free = g_free;
 	content->value = settings_content_value_switch;
 	value = service_get_property_boolean(page->sett->serv, key, subkey);
 
-	label_w = gtk_label_new(label);
+	label_w = create_label(label);
 	toggle = gtk_switch_new();
 
 	gtk_switch_set_active(GTK_SWITCH(toggle), value);
 
-	g_signal_connect(content->content, "destroy",
-	                 G_CALLBACK(free_content), content);
 	g_object_set_data(G_OBJECT(content->content), "toggle", toggle);
-
-	STYLE_ADD_CONTEXT(label_w);
-	gtk_style_context_add_class(gtk_widget_get_style_context(label_w),
-	                            "dim-label");
 
 	add_left_aligned(GTK_GRID(content->content), label_w, toggle);
 
@@ -220,4 +203,54 @@ GtkWidget *settings_add_switch(struct settings_page *page, const gchar *label,
 	settings_add_content(page, content);
 
 	return toggle;
+}
+
+static void free_combo_box(void *data)
+{
+	struct settings_content *content = data;
+	GtkWidget *box = g_object_get_data(G_OBJECT(content->content), "box");
+	g_hash_table_unref(g_object_get_data(G_OBJECT(box), "items"));
+	g_free(content);
+}
+
+GtkWidget *settings_add_combo_box(struct settings_page *page,
+                                  const gchar *label, const gchar *key,
+                                  const gchar *subkey, const gchar *ekey,
+                                  const gchar *esubkey)
+{
+	struct settings_content *content;
+	GtkWidget *label_w, *notebook, *box;
+	GHashTable *items;
+
+	content = create_base_content(key, subkey);
+	items = g_hash_table_new_full(g_str_hash, g_str_equal,
+	                              g_free, NULL);
+
+	content->free = free_combo_box;
+
+	notebook = gtk_notebook_new();
+	box = gtk_combo_box_text_new();
+	label_w = create_label(label);
+
+	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), FALSE);
+	gtk_notebook_set_show_border(GTK_NOTEBOOK(notebook), FALSE);
+	gtk_widget_set_hexpand(notebook, TRUE);
+	gtk_widget_set_vexpand(notebook, FALSE);
+	gtk_grid_set_row_spacing(GTK_GRID(content->content), MARGIN_LARGE);
+
+	g_object_set_data(G_OBJECT(box), "notebook", notebook);
+	g_object_set_data(G_OBJECT(box), "items", items);
+	g_object_set_data(G_OBJECT(content->content), "box", box);
+
+	g_signal_connect(box, "changed", G_CALLBACK(combo_box_changed),
+	                 notebook);
+
+	add_left_aligned(GTK_GRID(content->content), label_w, box);
+	gtk_grid_attach(GTK_GRID(content->content), notebook, 0, 1, 2, 1);
+
+	gtk_widget_show_all(content->content);
+
+	settings_add_content(page, content);
+
+	return box;
 }

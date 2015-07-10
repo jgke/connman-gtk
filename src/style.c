@@ -38,3 +38,17 @@ void style_init()
 		g_error_free(error);
 	}
 }
+
+
+void label_align_text_left(GtkLabel *label)
+{
+	gtk_label_set_line_wrap(label, TRUE);
+	gtk_label_set_justify(label, GTK_JUSTIFY_LEFT);
+#if (GTK_MAJOR_VERSION > 3) || (GTK_MINOR_VERSION >= 16)
+	if(gtk_get_major_version() > 3 || gtk_get_minor_version() >= 16)
+		gtk_label_set_xalign(label, 0);
+	else
+#endif
+		/* deprecated at 3.14, but above only implemented at 3.16 */
+		gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+}

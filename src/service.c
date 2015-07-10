@@ -293,6 +293,8 @@ GVariant *service_get_property(struct service *serv, const char *key,
 gchar *service_get_property_string(struct service *serv, const char *key,
                                    const char *subkey)
 {
+	if(!serv || !key)
+		return g_strdup("");
 	GVariant *prop = service_get_property(serv, key, subkey);
 	gchar *str = variant_to_str(prop);
 	gchar *out;
@@ -309,6 +311,8 @@ gchar *service_get_property_string(struct service *serv, const char *key,
 gboolean service_get_property_boolean(struct service *serv, const char *key,
                                       const char *subkey)
 {
+	if(!serv || !key)
+		return FALSE;
 	GVariant *prop = service_get_property(serv, key, subkey);
 	gboolean out = variant_to_bool(prop);
 	if(prop)
@@ -319,6 +323,8 @@ gboolean service_get_property_boolean(struct service *serv, const char *key,
 int service_get_property_int(struct service *serv, const char *key,
                              const char *subkey)
 {
+	if(!serv || !key)
+		return 0;
 	GVariant *prop = service_get_property(serv, key, subkey);
 	int out = variant_to_int(prop);
 	if(prop)

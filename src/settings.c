@@ -50,19 +50,13 @@ static struct settings_page *create_page(GtkWidget *notebook, const gchar *name)
 	struct settings_page *page = g_malloc(sizeof(*page));
 
 	page->index = 0;
-
 	page->grid = gtk_grid_new();
 
 	g_signal_connect(page->grid, "destroy",
 	                 G_CALLBACK(free_page), page);
-
 	gtk_widget_set_margin_start(page->grid, MARGIN_LARGE);
-
 	gtk_widget_show_all(page->grid);
-
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), page->grid,
-	                         NULL);
-
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), page->grid, NULL);
 	return page;
 }
 
@@ -85,6 +79,25 @@ static struct settings_page *add_page_to_settings(struct settings *sett,
 	gtk_container_add(GTK_CONTAINER(item), label);
 	gtk_container_add(GTK_CONTAINER(sett->list), item);
 
+	gtk_widget_show_all(item);
+
+	return page;
+}
+
+static struct settings_page *add_page_to_combo_box(struct settings *sett,
+                GtkWidget *box,
+                const gchar *id,
+                const gchar *name,
+                gboolean active)
+{
+	GtkWidget *notebook = g_object_get_data(G_OBJECT(box), "notebook");
+	GHashTable *items = g_object_get_data(G_OBJECT(box), "items");
+	struct settings_page *page = create_page(notebook, name);
+	page->sett = sett;
+	g_hash_table_insert(items, g_strdup(name), page->grid);
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), id, name);
+	if(active)
+		gtk_combo_box_set_active_id(GTK_COMBO_BOX(box), id);
 	return page;
 }
 
@@ -171,32 +184,58 @@ static void add_ipv_page(struct settings *sett, int ipv)
 {
 	struct settings_page *page;
 	settings_field_validator validator;
+	const char *local;
 	const char *conf;
 	const char *ipvs;
+	GtkWidget *box;
+	struct settings_page *none;
+	struct settings_page *dhcp;
+	struct settings_page *manual;
 
 	if(ipv == 4) {
-		page = add_page_to_settings(sett, _("IPv4"));
+		local = _("IPv4");
 		validator = valid_ipv4_entry;
 		conf = "IPv4.Configuration";
 		ipvs = "IPv4";
 	} else {
-		page = add_page_to_settings(sett, _("IPv6"));
+		local = _("IPv6");
 		validator = valid_ipv6_entry;
 		conf = "IPv6.Configuration";
 		ipvs = "IPv6";
 	}
+	char *cur = service_get_property_string(sett->serv, ipvs, "Method");
+	page = add_page_to_settings(sett, local);
+	box = settings_add_combo_box(page, _("Method"), conf, "Method",
+	                             conf, "Method");
 
-	settings_add_text(page, _("Current address"), ipvs, "Address");
-	settings_add_text(page, _("Current gateway"), ipvs, "Gateway");
-	settings_add_text(page, _("Current netmask"), ipvs, "Netmask");
-	settings_add_entry(page, _("Method"), ipvs, "Method",
-	                   conf, "Method", settings_content_valid_always);
-	settings_add_entry(page, _("Address"), ipvs, "Address",
+	none = add_page_to_combo_box(sett, box, "none", _("None"),
+	                             !strlen(cur) || !strcmp("none", cur));
+	dhcp = add_page_to_combo_box(sett, box, "dhcp", _("Automatic"),
+	                             !strcmp("dhcp", cur));
+	manual = add_page_to_combo_box(sett, box, "manual", _("Manual"),
+	                               !strcmp("manual", cur));
+	g_free(cur);
+
+
+	settings_add_text(none, NULL, NULL, NULL);
+
+	settings_add_text(dhcp, _("Address"), ipvs, "Address");
+	settings_add_text(dhcp, _("Gateway"), ipvs, "Gateway");
+	if(ipv == 4)
+		settings_add_text(dhcp, _("Netmask"), ipvs, "Netmask");
+	else
+		settings_add_text(dhcp, _("Prefix"), ipvs, "Prefix");
+
+	settings_add_entry(manual, _("Address"), ipvs, "Address",
 	                   conf, "Address", validator);
-	settings_add_entry(page, _("Netmask"), ipvs, "Netmask",
-	                   conf, "Netmask", validator);
-	settings_add_entry(page, _("Gateway"), ipvs, "Gateway",
+	settings_add_entry(manual, _("Gateway"), ipvs, "Gateway",
 	                   conf, "Gateway", validator);
+	if(ipv == 4)
+		settings_add_entry(manual, _("Netmask"), ipvs, "Netmask",
+		                   conf, "Netmask", validator);
+	else
+		settings_add_entry(manual, _("Prefix"), ipvs, "Prefix",
+		                   conf, "Prefix", validator);
 }
 
 static void apply_cb(GtkWidget *window, gpointer user_data)

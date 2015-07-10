@@ -55,6 +55,10 @@ GtkWidget *settings_add_entry(struct settings_page *page, const gchar *label,
                               settings_field_validator valid);
 GtkWidget *settings_add_switch(struct settings_page *page, const gchar *label,
                                const gchar *key, const gchar *subkey);
+GtkWidget *settings_add_combo_box(struct settings_page *page,
+                                  const gchar *label, const gchar *key,
+                                  const gchar *subkey, const gchar *ekey,
+                                  const gchar *esubkey);
 
 void free_content(GtkWidget *widget, gpointer user_data);
 
