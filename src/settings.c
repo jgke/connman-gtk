@@ -298,7 +298,6 @@ static void init_settings(struct settings *sett)
 	add_info_page(sett);
 	add_ipv_page(sett, 4);
 	add_ipv_page(sett, 6);
-	add_page_to_settings(sett, _("Security"));
 
 	if(functions[sett->serv->type].init)
 		functions[sett->serv->type].init(sett);
