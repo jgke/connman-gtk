@@ -35,4 +35,10 @@ gboolean valid_ipv6(const gchar *address);
 void list_item_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data);
 void combo_box_changed(GtkComboBox *widget, gpointer data);
 
+void *hash_table_get_dual_key(GHashTable *table, const gchar *key,
+			      const gchar *subkey);
+void hash_table_set_dual_key(GHashTable *table, const gchar *key,
+			     const gchar *subkey, void *value);
+GVariant *dual_hash_table_to_variant(GHashTable *table);
+
 #endif /* _CONNMAN_GTK_UTIL_H */

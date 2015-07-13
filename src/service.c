@@ -52,19 +52,37 @@ static struct {
 void service_update_property(struct service *serv, const gchar *key,
                              GVariant *value)
 {
-	g_hash_table_replace(serv->properties, g_strdup(key),
-	                     g_variant_ref(value));
-	if(serv->sett) {
-		if(strcmp(g_variant_get_type_string(value), "a{sv}")) {
+	if(strcmp(g_variant_get_type_string(value), "a{sv}")) {
+		hash_table_set_dual_key(serv->properties, key, NULL,
+					g_variant_ref(value));
+		if(serv->sett)
 			settings_update(serv->sett, key, NULL, value);
-			return;
-		}
+	}
+	else {
 		gchar *subkey;
 		GVariantIter *iter = g_variant_iter_new(value);
-		while(g_variant_iter_loop(iter, "{sv}", &subkey, &value))
-			settings_update(serv->sett, key, subkey, value);
+		while(g_variant_iter_loop(iter, "{sv}", &subkey, &value)) {
+			hash_table_set_dual_key(serv->properties, key, subkey,
+						g_variant_ref(value));
+			if(serv->sett)
+				settings_update(serv->sett, key, subkey, value);
+		}
 		g_variant_iter_free(iter);
 	}
+}
+
+void service_update(struct service *serv, GVariant *properties)
+{
+	GVariantIter *iter;
+	gchar *key;
+	GVariant *value;
+
+	iter = g_variant_iter_new(properties);
+	while(g_variant_iter_loop(iter, "{sv}", &key, &value))
+		service_update_property(serv, key, value);
+	g_variant_iter_free(iter);
+	if(functions[serv->type].update)
+		functions[serv->type].update(serv);
 }
 
 static void service_proxy_signal(GDBusProxy *proxy, gchar *sender,
@@ -103,30 +121,17 @@ static void settings_button_cb(GtkButton *button, gpointer user_data)
 void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
                   GVariant *properties)
 {
-	GVariantIter *iter;
-	gchar *key;
-	GVariant *value;
 	GtkGrid *item_grid;
-	const gchar *title = NULL;
 
 	serv->proxy = proxy;
 	serv->path = g_strdup(path);
 	serv->properties = g_hash_table_new_full(g_str_hash, g_str_equal,
-	                   g_free, (GDestroyNotify)g_variant_unref);
-
-	iter = g_variant_iter_new(properties);
-	while(g_variant_iter_loop(iter, "{sv}", &key, &value)) {
-		gchar *hkey = g_strdup(key);
-		g_variant_ref(value);
-		g_hash_table_insert(serv->properties, hkey, value);
-		if(!strcmp(key, "Name"))
-			title = g_variant_get_string(value, NULL);
-	}
-	g_variant_iter_free(iter);
+	                   g_free, (GDestroyNotify)g_hash_table_unref);
+	serv->sett = NULL;
 
 	serv->item = gtk_list_box_row_new();
 	serv->header = gtk_grid_new();
-	serv->title = gtk_label_new(title);
+	serv->title = gtk_label_new(NULL);
 	serv->contents = gtk_grid_new();
 	serv->settings_button = gtk_button_new_from_icon_name(
 	                                "emblem-system-symbolic",
@@ -198,21 +203,9 @@ struct service *service_create(struct technology *tech, GDBusProxy *proxy,
 	if(functions[type].init)
 		functions[type].init(serv, proxy, path, properties);
 
+	service_update(serv, properties);
+
 	return serv;
-}
-
-void service_update(struct service *serv, GVariant *properties)
-{
-	GVariantIter *iter;
-	gchar *key;
-	GVariant *value;
-
-	iter = g_variant_iter_new(properties);
-	while(g_variant_iter_loop(iter, "{sv}", &key, &value))
-		service_update_property(serv, key, value);
-	g_variant_iter_free(iter);
-	if(functions[serv->type].update)
-		functions[serv->type].update(serv);
 }
 
 void service_free(struct service *serv)
@@ -274,19 +267,11 @@ GVariant *service_get_property(struct service *serv, const char *key,
                                const char *subkey)
 {
 	GVariant *variant;
-	GVariantDict *dict;
 
-	variant = g_hash_table_lookup(serv->properties, key);
+	variant = hash_table_get_dual_key(serv->properties, key, subkey);
 	if(!variant)
 		return NULL;
-	if(!subkey) {
-		g_variant_ref(variant);
-		return variant;
-	}
-
-	dict = g_variant_dict_new(variant);
-	variant = g_variant_dict_lookup_value(dict, subkey, NULL);
-	g_variant_dict_unref(dict);
+	g_variant_ref(variant);
 	return variant;
 }
 

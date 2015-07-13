@@ -163,3 +163,62 @@ void combo_box_changed(GtkComboBox *box, gpointer data)
 	item_selected(notebook, content);
 	g_free(str);
 }
+
+void *hash_table_get_dual_key(GHashTable *table, const gchar *key,
+			      const gchar *subkey)
+{
+	GHashTable *t = g_hash_table_lookup(table, key);
+	if(!t)
+		return NULL;
+	if(!subkey)
+		subkey = "";
+	return g_hash_table_lookup(t, subkey);
+}
+
+void hash_table_set_dual_key(GHashTable *table, const gchar *key,
+			     const gchar *subkey, void *value)
+{
+	GHashTable *t;
+	t = g_hash_table_lookup(table, key);
+	if(!t) {
+		t = g_hash_table_new_full(g_str_hash, g_str_equal,
+					  g_free,
+					  (GDestroyNotify)g_variant_unref);
+		g_hash_table_insert(table, g_strdup(key), t);
+	}
+	if(!subkey)
+		subkey = "";
+	g_hash_table_insert(t, g_strdup(subkey), value);
+}
+
+static void append_to_variant_inner(gpointer subkey, gpointer value,
+				    gpointer user_data)
+{
+	g_variant_dict_insert_value(user_data, subkey, value);
+}
+
+static void append_to_variant(gpointer key, gpointer value, gpointer user_data)
+{
+	GVariantDict *out = user_data;
+	GVariantDict *inner;
+	GHashTable *table = value;
+	GVariant *var = g_hash_table_lookup(table, "");
+	if(var) {
+		g_variant_dict_insert_value(out, key, var);
+		return;
+	}
+	inner = g_variant_dict_new(NULL);
+	g_hash_table_foreach(table, append_to_variant_inner, inner);
+	var = g_variant_dict_end(inner);
+	g_variant_dict_unref(inner);
+	g_variant_dict_insert_value(out, key, var);
+}
+
+GVariant *dual_hash_table_to_variant(GHashTable *table)
+{
+	GVariantDict *dict = g_variant_dict_new(NULL);
+	g_hash_table_foreach(table, append_to_variant, dict);
+	GVariant *out = g_variant_dict_end(dict);
+	g_variant_dict_unref(dict);
+	return out;
+}
