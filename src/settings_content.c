@@ -201,7 +201,12 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 	label_w = create_label(label);
 	entry = gtk_entry_new();
 
-	value = service_get_property_string(page->sett->serv, key, subkey);
+	value = service_get_property_string(page->sett->serv, ekey, esubkey);
+	if(!strlen(value)) {
+		g_free(value);
+		value = service_get_property_string(page->sett->serv,
+						    key, subkey);
+	}
 	gtk_entry_set_text(GTK_ENTRY(entry), value);
 	g_free(value);
 	g_object_set_data(G_OBJECT(content->content), "entry", entry);
