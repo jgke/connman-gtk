@@ -117,7 +117,7 @@ static void add_info_page(struct settings *sett)
 	struct settings_page *page = add_page_to_settings(sett, _("Info"));
 
 	settings_add_switch(sett, page, always_write, _("Autoconnect"),
-			    "AutoConnect", NULL);
+	                    "AutoConnect", NULL);
 
 	settings_add_text(page, _("Name"), "Name", NULL);
 	settings_add_text(page, _("State"), "State", NULL);
@@ -174,7 +174,7 @@ static void add_ipv_page(struct settings *sett, int ipv)
 	}
 	page = add_page_to_settings(sett, local);
 	box = settings_add_combo_box(sett, page, always_write, _("Method"),
-				     conf, "Method", conf, "Method");
+	                             conf, "Method", conf, "Method");
 
 	none = add_page_to_combo_box(sett, box, "off", _("None"),
 	                             !strlen(cur) || !strcmp("none", cur));
@@ -195,21 +195,21 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		settings_add_text(dhcp, _("Prefix"), ipvs, "Prefix");
 
 	settings_add_entry(sett, manual, write_if_selected, _("Address"), ipvs,
-			   "Address", conf, "Address", validator);
+	                   "Address", conf, "Address", validator);
 	settings_add_entry(sett, manual, write_if_selected, _("Gateway"), ipvs,
-			   "Gateway", conf, "Gateway", validator);
+	                   "Gateway", conf, "Gateway", validator);
 	if(ipv == 4)
 		settings_add_entry(sett, manual, write_if_selected,
-				   _("Netmask"), ipvs, "Netmask", conf,
-				   "Netmask", validator);
+		                   _("Netmask"), ipvs, "Netmask", conf,
+		                   "Netmask", validator);
 	else
 		settings_add_entry(sett, manual, write_if_selected,
-				   _("Prefix"), ipvs, "Prefix", conf,
-				   "Prefix", validator);
+		                   _("Prefix"), ipvs, "Prefix", conf,
+		                   "Prefix", validator);
 }
 
 static void append_dict_inner(const gchar *key, const gchar *subkey,
-			      gpointer value, gpointer user_data)
+                              gpointer value, gpointer user_data)
 {
 	DualHashTable *dict = user_data;
 	struct settings_content *content = value;
@@ -219,7 +219,7 @@ static void append_dict_inner(const gchar *key, const gchar *subkey,
 	if(!variant)
 		return;
 	hash_table_set_dual_key(dict, content->key, content->subkey,
-				g_variant_ref(variant));
+	                        g_variant_ref(variant));
 
 }
 
@@ -227,7 +227,7 @@ static void apply_cb(GtkWidget *window, gpointer user_data)
 {
 	struct settings *sett = user_data;
 	DualHashTable *table =
-		dual_hash_table_new((GDestroyNotify)g_variant_unref);
+	        dual_hash_table_new((GDestroyNotify)g_variant_unref);
 	GVariant *out;
 
 	dual_hash_table_foreach(sett->contents, append_dict_inner, table);

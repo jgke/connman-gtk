@@ -54,16 +54,15 @@ void service_update_property(struct service *serv, const gchar *key,
 {
 	if(strcmp(g_variant_get_type_string(value), "a{sv}")) {
 		hash_table_set_dual_key(serv->properties, key, NULL,
-					g_variant_ref(value));
+		                        g_variant_ref(value));
 		if(serv->sett)
 			settings_update(serv->sett, key, NULL, value);
-	}
-	else {
+	} else {
 		gchar *subkey;
 		GVariantIter *iter = g_variant_iter_new(value);
 		while(g_variant_iter_loop(iter, "{sv}", &subkey, &value)) {
 			hash_table_set_dual_key(serv->properties, key, subkey,
-						g_variant_ref(value));
+			                        g_variant_ref(value));
 			if(serv->sett)
 				settings_update(serv->sett, key, subkey, value);
 		}
@@ -225,11 +224,11 @@ void service_free(struct service *serv)
 static void service_toggle_connection_cb(GObject *source, GAsyncResult *res,
                 gpointer user_data)
 {
+	const gchar *ia = "GDBus.Error:net.connman.Error.InvalidArguments";
 	GError *error = NULL;
 	GVariant *out;
 	out = g_dbus_proxy_call_finish((GDBusProxy *)user_data, res, &error);
 	if(error) {
-		const gchar *ia = "GDBus.Error:net.connman.Error.InvalidArguments";
 		/*
 		 * InvalidArguments is thrown when user cancels the dialog,
 		 * so ignore it

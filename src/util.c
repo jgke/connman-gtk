@@ -179,7 +179,7 @@ DualHashTable *dual_hash_table_new(GDestroyNotify free_value)
 	DualHashTable *dt = g_malloc(sizeof(*dt));
 	GDestroyNotify free_func = (GDestroyNotify)g_hash_table_unref;
 	GHashTable *table = g_hash_table_new_full(g_str_hash, g_str_equal,
-						  g_free, free_func);
+	                    g_free, free_func);
 	dt->table = table;
 	dt->free_value = free_value;
 	dt->refcount = 1;
@@ -201,7 +201,7 @@ void dual_hash_table_unref(DualHashTable *table)
 }
 
 void *hash_table_get_dual_key(DualHashTable *dtable, const gchar *key,
-			      const gchar *subkey)
+                              const gchar *subkey)
 {
 	GHashTable *table = dtable->table;
 	GHashTable *t = g_hash_table_lookup(table, key);
@@ -213,14 +213,14 @@ void *hash_table_get_dual_key(DualHashTable *dtable, const gchar *key,
 }
 
 void hash_table_set_dual_key(DualHashTable *dtable, const gchar *key,
-			     const gchar *subkey, void *value)
+                             const gchar *subkey, void *value)
 {
 	GHashTable *table = dtable->table;
 	GHashTable *t;
 	t = g_hash_table_lookup(table, key);
 	if(!t) {
 		t = g_hash_table_new_full(g_str_hash, g_str_equal,
-					  g_free, dtable->free_value);
+		                          g_free, dtable->free_value);
 		g_hash_table_insert(table, g_strdup(key), t);
 	}
 	if(!subkey)
@@ -250,14 +250,14 @@ static void iter_cb(gpointer key, gpointer value, gpointer user_data)
 }
 
 void dual_hash_table_foreach(DualHashTable *table, DualHashTableIter cb,
-			     gpointer user_data)
+                             gpointer user_data)
 {
 	struct table_cb_data data = {cb, user_data};
 	g_hash_table_foreach(table->table, iter_cb, &data);
 }
 
 static void append_to_variant(const gchar *key, const gchar *subkey,
-			      gpointer value, gpointer user_data)
+                              gpointer value, gpointer user_data)
 {
 	GVariant *inner_v;
 	GVariantDict *inner;

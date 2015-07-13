@@ -381,7 +381,8 @@ static void connman_disappeared(GDBusConnection *connection, const gchar *name,
 	agent_release();
 }
 
-static void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_data)
+static void dbus_connected(GObject *source, GAsyncResult *res,
+			   gpointer user_data)
 {
 	(void)source;
 	(void)user_data;
@@ -397,8 +398,9 @@ static void dbus_connected(GObject *source, GAsyncResult *res, gpointer user_dat
 	}
 
 	g_bus_watch_name_on_connection(connection, "net.connman",
-	                               G_BUS_NAME_WATCHER_FLAGS_NONE, connman_appeared,
-	                               connman_disappeared, NULL, NULL);
+	                               G_BUS_NAME_WATCHER_FLAGS_NONE,
+				       connman_appeared, connman_disappeared,
+				       NULL, NULL);
 }
 
 static gboolean delete_event(GtkApplication *app, GdkEvent *event,

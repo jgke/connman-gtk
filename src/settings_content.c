@@ -40,7 +40,8 @@ gboolean always_write(struct settings_content *content)
 
 gboolean write_if_selected(struct settings_content *content)
 {
-	return  !!g_object_get_data(G_OBJECT(gtk_widget_get_parent(content->content)), "selected");
+	GtkWidget *parent = gtk_widget_get_parent(content->content);
+	return  !!g_object_get_data(G_OBJECT(parent), "selected");
 }
 
 static gboolean content_valid_always(struct settings_content *content)
@@ -106,9 +107,9 @@ static GtkWidget *create_label(const gchar *text)
 }
 
 static struct settings_content *create_base_content(struct settings *sett,
-						    settings_writable writable,
-						    const gchar *key,
-						    const gchar *subkey)
+                settings_writable writable,
+                const gchar *key,
+                const gchar *subkey)
 {
 	struct settings_content *content = g_malloc(sizeof(*content));
 	content->content = gtk_grid_new();
@@ -182,7 +183,7 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 }
 
 GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
-			      settings_writable writable, const gchar *label,
+                              settings_writable writable, const gchar *label,
                               const gchar *key, const gchar *subkey,
                               const gchar *ekey, const gchar *esubkey,
                               settings_field_validator valid)
@@ -216,8 +217,8 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 }
 
 GtkWidget *settings_add_switch(struct settings *sett,
-			       struct settings_page *page,
-			       settings_writable writable, const gchar *label,
+                               struct settings_page *page,
+                               settings_writable writable, const gchar *label,
                                const gchar *key, const gchar *subkey)
 {
 	GtkWidget *label_w, *toggle;
@@ -254,11 +255,11 @@ static void free_combo_box(void *data)
 }
 
 GtkWidget *settings_add_combo_box(struct settings *sett,
-				  struct settings_page *page,
-				  settings_writable writable,
-				  const gchar *label,
-				  const gchar *key, const gchar *subkey,
-				  const gchar *ekey, const gchar *esubkey)
+                                  struct settings_page *page,
+                                  settings_writable writable,
+                                  const gchar *label,
+                                  const gchar *key, const gchar *subkey,
+                                  const gchar *ekey, const gchar *esubkey)
 {
 	struct settings_content *content;
 	GtkWidget *label_w, *notebook, *box;

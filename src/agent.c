@@ -106,13 +106,14 @@ static GPtrArray *generate_entries(GVariant *args)
 
 void request_input(GDBusMethodInvocation *invocation, GVariant *parameters)
 {
+	GtkDialog *dialog;
 	GtkWidget *grid = gtk_grid_new();
 	GPtrArray *entries;
 	int i;
+	int flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
 	GtkWidget *window = gtk_dialog_new_with_buttons(
 	                            _("Authentication required"),
-	                            GTK_WINDOW(main_window),
-	                            GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
+	                            GTK_WINDOW(main_window), flags,
 	                            _("_OK"), GTK_RESPONSE_ACCEPT,
 	                            _("_Cancel"), GTK_RESPONSE_CANCEL, NULL);
 	entries = generate_entries(parameters);
@@ -122,18 +123,23 @@ void request_input(GDBusMethodInvocation *invocation, GVariant *parameters)
 		gtk_grid_attach(GTK_GRID(grid), entry->entry, 1, i, 1, 1);
 	}
 	gtk_widget_show_all(grid);
-	gtk_container_add(GTK_CONTAINER(
-	                          gtk_dialog_get_content_area(GTK_DIALOG(window))),
+	dialog = GTK_DIALOG(window);
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(dialog)),
 	                  grid);
 	i = gtk_dialog_run(GTK_DIALOG(window));
 	if(i == GTK_RESPONSE_ACCEPT) {
 		GVariantDict *dict = g_variant_dict_new(NULL);
 		GVariant *out_v, *out;
 		for(i = 0; i < entries->len; i++) {
-			struct token_entry *entry = g_ptr_array_index(entries, i);
-			GtkEntryBuffer *buf = gtk_entry_get_buffer(GTK_ENTRY(entry->entry));
-			const gchar *key = gtk_label_get_text(GTK_LABEL(entry->label));
-			const gchar *value = gtk_entry_buffer_get_text(buf);
+			struct token_entry *entry;
+			GtkEntryBuffer *buf;
+			const gchar *key;
+			const gchar *value;
+
+			entry = g_ptr_array_index(entries, i);
+			buf = gtk_entry_get_buffer(GTK_ENTRY(entry->entry));
+			key = gtk_label_get_text(GTK_LABEL(entry->label));
+			value = gtk_entry_buffer_get_text(buf);
 			g_variant_dict_insert(dict, key, "s", value);
 		}
 		g_variant_dict_insert(dict, "foo", "s", "bar");
