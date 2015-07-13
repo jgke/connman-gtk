@@ -105,55 +105,19 @@ static void free_settings(struct settings *sett)
 {
 	sett->closed(sett->serv);
 	dual_hash_table_unref(sett->callbacks);
+	dual_hash_table_unref(sett->contents);
 	if(functions[sett->serv->type].free)
 		functions[sett->serv->type].free(sett);
 	else
 		g_free(sett);
 }
 
-static void append_variant(GVariantDict *dict, struct settings_content *content)
-{
-	if(!content->key)
-		return;
-	GVariant *variant = content->value(content);
-	if(!variant)
-		return;
-	if(!content->subkey)
-		goto end;
-	GVariant *subdict_v;
-	subdict_v = g_variant_dict_lookup_value(dict, content->key, NULL);
-	if(!subdict_v)
-		subdict_v = g_variant_new("a{sv}", NULL);
-	GVariantDict *subdict = g_variant_dict_new(subdict_v);
-	g_variant_unref(subdict_v);
-
-	g_variant_dict_insert_value(subdict, content->subkey, variant);
-	variant = g_variant_dict_end(subdict);
-	g_variant_dict_unref(subdict);
-end:
-	g_variant_dict_insert_value(dict, content->key, variant);
-}
-
-static void append_values(GVariantDict *dict, GtkWidget *grid)
-{
-	GList *children = gtk_container_get_children(GTK_CONTAINER(grid));
-	GList *l;
-	for(l = children; l != NULL; l = l->next) {
-		GtkWidget *child = l->data;
-		if(!g_object_get_data(G_OBJECT(child), "content"))
-			continue;
-		struct settings_content *content =
-		        g_object_get_data(G_OBJECT(child), "content");
-		append_variant(dict, content);
-	}
-	g_list_free(children);
-}
-
 static void add_info_page(struct settings *sett)
 {
 	struct settings_page *page = add_page_to_settings(sett, _("Info"));
 
-	settings_add_switch(page, _("Autoconnect"), "AutoConnect", NULL);
+	settings_add_switch(sett, page, always_write, _("Autoconnect"),
+			    "AutoConnect", NULL);
 
 	settings_add_text(page, _("Name"), "Name", NULL);
 	settings_add_text(page, _("State"), "State", NULL);
@@ -209,10 +173,10 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		return;
 	}
 	page = add_page_to_settings(sett, local);
-	box = settings_add_combo_box(page, _("Method"), conf, "Method",
-	                             conf, "Method");
+	box = settings_add_combo_box(sett, page, always_write, _("Method"),
+				     conf, "Method", conf, "Method");
 
-	none = add_page_to_combo_box(sett, box, "none", _("None"),
+	none = add_page_to_combo_box(sett, box, "off", _("None"),
 	                             !strlen(cur) || !strcmp("none", cur));
 	dhcp = add_page_to_combo_box(sett, box, "dhcp", _("Automatic"),
 	                             !strcmp("dhcp", cur));
@@ -230,36 +194,47 @@ static void add_ipv_page(struct settings *sett, int ipv)
 	else
 		settings_add_text(dhcp, _("Prefix"), ipvs, "Prefix");
 
-	settings_add_entry(manual, _("Address"), ipvs, "Address",
-	                   conf, "Address", validator);
-	settings_add_entry(manual, _("Gateway"), ipvs, "Gateway",
-	                   conf, "Gateway", validator);
+	settings_add_entry(sett, manual, write_if_selected, _("Address"), ipvs,
+			   "Address", conf, "Address", validator);
+	settings_add_entry(sett, manual, write_if_selected, _("Gateway"), ipvs,
+			   "Gateway", conf, "Gateway", validator);
 	if(ipv == 4)
-		settings_add_entry(manual, _("Netmask"), ipvs, "Netmask",
-		                   conf, "Netmask", validator);
+		settings_add_entry(sett, manual, write_if_selected,
+				   _("Netmask"), ipvs, "Netmask", conf,
+				   "Netmask", validator);
 	else
-		settings_add_entry(manual, _("Prefix"), ipvs, "Prefix",
-		                   conf, "Prefix", validator);
+		settings_add_entry(sett, manual, write_if_selected,
+				   _("Prefix"), ipvs, "Prefix", conf,
+				   "Prefix", validator);
+}
+
+static void append_dict_inner(const gchar *key, const gchar *subkey,
+			      gpointer value, gpointer user_data)
+{
+	DualHashTable *dict = user_data;
+	struct settings_content *content = value;
+	if(!content->writable || !content->writable(content))
+		return;
+	GVariant *variant = content->value(content);
+	if(!variant)
+		return;
+	hash_table_set_dual_key(dict, content->key, content->subkey,
+				g_variant_ref(variant));
+
 }
 
 static void apply_cb(GtkWidget *window, gpointer user_data)
 {
 	struct settings *sett = user_data;
-	GtkWidget *list = sett->list;
-	GVariantDict *dict = g_variant_dict_new(NULL);
+	DualHashTable *table =
+		dual_hash_table_new((GDestroyNotify)g_variant_unref);
 	GVariant *out;
-	GList *children = gtk_container_get_children(GTK_CONTAINER(list));
-	GList *l;
-	for(l = children; l != NULL; l = l->next) {
-		GtkWidget *child = l->data;
-		GtkWidget *grid = g_object_get_data(G_OBJECT(child), "content");
-		append_values(dict, grid);
-	}
-	g_list_free(children);
-	out = g_variant_dict_end(dict);
+
+	dual_hash_table_foreach(sett->contents, append_dict_inner, table);
+	out = dual_hash_table_to_variant(table);
 	service_set_properties(sett->serv, out);
 	g_variant_unref(out);
-	g_variant_dict_unref(dict);
+	dual_hash_table_unref(table);
 }
 
 static gboolean delete_event(GtkWidget *window, GdkEvent *event,
@@ -343,8 +318,8 @@ struct settings *settings_create(struct service *serv,
 
 	sett->serv = serv;
 	sett->closed = closed;
-	sett->callbacks =
-		dual_hash_table_new((GDestroyNotify)g_hash_table_unref);
+	sett->callbacks = dual_hash_table_new(content_callback_free);
+	sett->contents = dual_hash_table_new(NULL);
 
 	init_settings(sett);
 

@@ -36,6 +36,8 @@ void list_item_selected(GtkListBox *box, GtkListBoxRow *row, gpointer data);
 void combo_box_changed(GtkComboBox *widget, gpointer data);
 
 typedef struct DualHashTable_t DualHashTable;
+typedef void(*DualHashTableIter)(const gchar *key, const gchar *subkey,
+				 gpointer value, gpointer user_data);
 DualHashTable *dual_hash_table_new(GDestroyNotify free_value);
 DualHashTable *dual_hash_table_ref(DualHashTable *table);
 void dual_hash_table_unref(DualHashTable *table);
@@ -43,6 +45,8 @@ void *hash_table_get_dual_key(DualHashTable *table, const gchar *key,
 			      const gchar *subkey);
 void hash_table_set_dual_key(DualHashTable *table, const gchar *key,
 			     const gchar *subkey, void *value);
+void dual_hash_table_foreach(DualHashTable *table, DualHashTableIter cb,
+			     gpointer user_data);
 GVariant *dual_hash_table_to_variant(DualHashTable *table);
 
 #endif /* _CONNMAN_GTK_UTIL_H */

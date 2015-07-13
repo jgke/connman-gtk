@@ -139,6 +139,8 @@ static void item_selected(GtkWidget *notebook, GtkWidget *content)
 {
 	gint num = gtk_notebook_page_num(GTK_NOTEBOOK(notebook), content);
 	gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), num);
+	g_object_set_data(G_OBJECT(notebook), "selected", content);
+	g_object_set_data(G_OBJECT(content), "selected", content);
 }
 
 void list_item_selected(GtkListBox *box, GtkListBoxRow *row,
@@ -155,6 +157,9 @@ void combo_box_changed(GtkComboBox *box, gpointer data)
 {
 	GtkWidget *notebook = data;
 	GtkWidget *content;
+	content = g_object_get_data(G_OBJECT(notebook), "selected");
+	if(content)
+		g_object_set_data(G_OBJECT(content), "selected", NULL);
 	GHashTable *table = g_object_get_data(G_OBJECT(box), "items");
 	GtkComboBoxText *b = GTK_COMBO_BOX_TEXT(box);
 	gchar *str = gtk_combo_box_text_get_active_text(b);
@@ -223,34 +228,58 @@ void hash_table_set_dual_key(DualHashTable *dtable, const gchar *key,
 	g_hash_table_insert(t, g_strdup(subkey), value);
 }
 
-static void append_to_variant_inner(gpointer subkey, gpointer value,
-				    gpointer user_data)
+struct table_cb_data {
+	DualHashTableIter cb;
+	gpointer user_data;
+	const gchar *key;
+};
+
+static void iter_cb_cb(gpointer subkey, gpointer value, gpointer user_data)
 {
-	g_variant_dict_insert_value(user_data, subkey, value);
+	struct table_cb_data *data = user_data;
+	if(!strcmp(subkey, ""))
+		subkey = NULL;
+	data->cb(data->key, subkey, value, data->user_data);
 }
 
-static void append_to_variant(gpointer key, gpointer value, gpointer user_data)
+static void iter_cb(gpointer key, gpointer value, gpointer user_data)
 {
-	GVariantDict *out = user_data;
+	struct table_cb_data *data = user_data;
+	data->key = key;
+	g_hash_table_foreach(value, iter_cb_cb, data);
+}
+
+void dual_hash_table_foreach(DualHashTable *table, DualHashTableIter cb,
+			     gpointer user_data)
+{
+	struct table_cb_data data = {cb, user_data};
+	g_hash_table_foreach(table->table, iter_cb, &data);
+}
+
+static void append_to_variant(const gchar *key, const gchar *subkey,
+			      gpointer value, gpointer user_data)
+{
+	GVariant *inner_v;
 	GVariantDict *inner;
-	GHashTable *table = value;
-	GVariant *var = g_hash_table_lookup(table, "");
-	if(var) {
-		g_variant_dict_insert_value(out, key, var);
+	if(!subkey) {
+		g_variant_dict_insert_value(user_data, key, value);
 		return;
 	}
-	inner = g_variant_dict_new(NULL);
-	g_hash_table_foreach(table, append_to_variant_inner, inner);
-	var = g_variant_dict_end(inner);
-	g_variant_dict_unref(inner);
-	g_variant_dict_insert_value(out, key, var);
+	inner_v = g_variant_dict_lookup_value(user_data, key, NULL);
+	if(!inner_v)
+		inner = g_variant_dict_new(NULL);
+	else
+		inner = g_variant_dict_new(inner_v);
+	g_variant_dict_insert_value(inner, subkey, value);
+	g_variant_unref(inner_v);
+	inner_v = g_variant_dict_end(inner);
+	g_variant_dict_insert_value(user_data, key, inner_v);
 }
 
 GVariant *dual_hash_table_to_variant(DualHashTable *dtable)
 {
-	GHashTable *table = dtable->table;
 	GVariantDict *dict = g_variant_dict_new(NULL);
-	g_hash_table_foreach(table, append_to_variant, dict);
+	dual_hash_table_foreach(dtable, append_to_variant, dict);
 	GVariant *out = g_variant_dict_end(dict);
 	g_variant_dict_unref(dict);
 	return out;

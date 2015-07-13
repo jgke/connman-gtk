@@ -38,6 +38,7 @@ struct settings {
 	void (*closed)(struct service *serv);
 
 	DualHashTable *callbacks;
+	DualHashTable *contents;
 };
 
 struct settings_page {

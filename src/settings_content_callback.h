@@ -26,6 +26,7 @@
 enum content_callback_type {
 	CONTENT_CALLBACK_TYPE_UNKNOWN,
 	CONTENT_CALLBACK_TYPE_TEXT,
+	CONTENT_CALLBACK_TYPE_LIST,
 };
 
 struct content_callback {
@@ -34,6 +35,7 @@ struct content_callback {
 };
 
 struct content_callback *create_text_callback(GtkWidget *label);
+struct content_callback *create_list_callback(GtkWidget *list);
 void handle_content_callback(GVariant *value, const gchar *key,
                              const gchar *subkey, struct content_callback *cb);
 void content_callback_free(void *cb);

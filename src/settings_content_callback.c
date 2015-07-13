@@ -34,6 +34,14 @@ struct content_callback *create_text_callback(GtkWidget *label)
 	return cb;
 }
 
+struct content_callback *create_list_callback(GtkWidget *list)
+{
+	struct content_callback *cb = g_malloc(sizeof(*cb));
+	cb->type = CONTENT_CALLBACK_TYPE_LIST;
+	cb->data = list;
+	return cb;
+}
+
 void handle_content_callback(GVariant *value, const gchar *key,
                              const gchar *subkey, struct content_callback *cb)
 {
@@ -47,6 +55,13 @@ void handle_content_callback(GVariant *value, const gchar *key,
 		else
 			gtk_label_set_text(GTK_LABEL(label), str);
 		g_free(str);
+		break;
+	}
+	case CONTENT_CALLBACK_TYPE_LIST: {
+		GtkWidget *list = cb->data;
+		gchar *str = variant_to_str(value);
+		gtk_combo_box_set_active_id(GTK_COMBO_BOX(list), str);
+		g_free(str);
 		return;
 	}
 	default:
@@ -59,6 +74,7 @@ void content_callback_free(void *cb_v)
 	struct content_callback *cb = cb_v;
 	switch(cb->type) {
 	case CONTENT_CALLBACK_TYPE_TEXT:
+	case CONTENT_CALLBACK_TYPE_LIST:
 		break;
 	default:
 		g_warning("Unknown callback type");

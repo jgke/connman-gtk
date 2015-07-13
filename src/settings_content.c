@@ -28,6 +28,31 @@
 #include "style.h"
 #include "util.h"
 
+gboolean never_write(struct settings_content *content)
+{
+	return FALSE;
+}
+
+gboolean always_write(struct settings_content *content)
+{
+	return TRUE;
+}
+
+gboolean write_if_selected(struct settings_content *content)
+{
+	return  !!g_object_get_data(G_OBJECT(content->content), "selected");
+}
+
+static gboolean content_valid_always(struct settings_content *content)
+{
+	return TRUE;
+}
+
+static GVariant *content_value_null(struct settings_content *content)
+{
+	return NULL;
+}
+
 void settings_add_content(struct settings_page *page,
                           struct settings_content *content)
 {
@@ -36,29 +61,30 @@ void settings_add_content(struct settings_page *page,
 	page->index++;
 }
 
-gboolean settings_content_valid_always(struct settings_content *content)
-{
-	return TRUE;
-}
-
-GVariant *settings_content_value_null(struct settings_content *content)
-{
-	return NULL;
-}
-
-GVariant *settings_content_value_entry(struct settings_content *content)
+static GVariant *content_value_entry(struct settings_content *content)
 {
 	GtkWidget *entry = g_object_get_data(G_OBJECT(content->content),
 	                                     "entry");
 	const gchar *str = gtk_entry_get_text(GTK_ENTRY(entry));
-	return g_variant_new("s", str);
+	GVariant *var = g_variant_new("s", str);
+	return var;
 }
 
-GVariant *settings_content_value_switch(struct settings_content *content)
+static GVariant *content_value_switch(struct settings_content *content)
 {
 	GtkWidget *toggle = g_object_get_data(G_OBJECT(content->content),
 	                                      "toggle");
-	return g_variant_new("b", gtk_switch_get_active(GTK_SWITCH(toggle)));
+	gboolean active = gtk_switch_get_active(GTK_SWITCH(toggle));
+	GVariant *var = g_variant_new("b", active);
+	return var;
+}
+
+static GVariant *content_value_list(struct settings_content *content)
+{
+	GtkWidget *list = g_object_get_data(G_OBJECT(content->content), "box");
+	GtkComboBox *box = GTK_COMBO_BOX(list);
+	GVariant *var = g_variant_new("s", gtk_combo_box_get_active_id(box));
+	return var;
 }
 
 void free_content(GtkWidget *widget, gpointer user_data)
@@ -79,14 +105,18 @@ static GtkWidget *create_label(const gchar *text)
 	return label;
 }
 
-static struct settings_content *create_base_content(const gchar *key,
-                const gchar *subkey)
+static struct settings_content *create_base_content(struct settings *sett,
+						    settings_writable writable,
+						    const gchar *key,
+						    const gchar *subkey)
 {
 	struct settings_content *content = g_malloc(sizeof(*content));
 	content->content = gtk_grid_new();
-	content->valid = settings_content_valid_always;
-	content->value = settings_content_value_null;
+	content->valid = content_valid_always;
+	content->value = content_value_null;
 	content->free = g_free;
+	content->sett = sett;
+	content->writable = writable;
 	content->key = key;
 	content->subkey = subkey;
 
@@ -122,7 +152,9 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 {
 	GtkWidget *label_w, *value_w;
 	gchar *value;
-	struct settings_content *content = create_base_content(NULL, NULL);
+	struct settings_content *content;
+
+	content = create_base_content(NULL, never_write, NULL, NULL);
 
 	value = service_get_property_string(page->sett->serv, key, subkey);
 
@@ -149,18 +181,21 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 	return value_w;
 }
 
-GtkWidget *settings_add_entry(struct settings_page *page, const gchar *label,
+GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
+			      settings_writable writable, const gchar *label,
                               const gchar *key, const gchar *subkey,
                               const gchar *ekey, const gchar *esubkey,
                               settings_field_validator valid)
 {
 	GtkWidget *label_w, *entry;
 	gchar *value;
-	struct settings_content *content = create_base_content(ekey, esubkey);
+	struct settings_content *content;
+
+	content = create_base_content(sett, writable, ekey, esubkey);
 	if(valid)
 		content->valid = valid;
 	content->free = g_free;
-	content->value = settings_content_value_entry;
+	content->value = content_value_entry;
 
 	label_w = create_label(label);
 	entry = gtk_entry_new();
@@ -175,18 +210,22 @@ GtkWidget *settings_add_entry(struct settings_page *page, const gchar *label,
 	gtk_widget_show_all(content->content);
 
 	settings_add_content(page, content);
+	hash_table_set_dual_key(sett->contents, key, subkey, content);
 
 	return entry;
 }
 
-GtkWidget *settings_add_switch(struct settings_page *page, const gchar *label,
+GtkWidget *settings_add_switch(struct settings *sett,
+			       struct settings_page *page,
+			       settings_writable writable, const gchar *label,
                                const gchar *key, const gchar *subkey)
 {
 	GtkWidget *label_w, *toggle;
-	struct settings_content *content = create_base_content(key, subkey);
+	struct settings_content *content;
 	gboolean value;
 
-	content->value = settings_content_value_switch;
+	content = create_base_content(sett, writable, key, subkey);
+	content->value = content_value_switch;
 	value = service_get_property_boolean(page->sett->serv, key, subkey);
 
 	label_w = create_label(label);
@@ -201,6 +240,7 @@ GtkWidget *settings_add_switch(struct settings_page *page, const gchar *label,
 	gtk_widget_show_all(content->content);
 
 	settings_add_content(page, content);
+	hash_table_set_dual_key(sett->contents, key, subkey, content);
 
 	return toggle;
 }
@@ -213,20 +253,23 @@ static void free_combo_box(void *data)
 	g_free(content);
 }
 
-GtkWidget *settings_add_combo_box(struct settings_page *page,
-                                  const gchar *label, const gchar *key,
-                                  const gchar *subkey, const gchar *ekey,
-                                  const gchar *esubkey)
+GtkWidget *settings_add_combo_box(struct settings *sett,
+				  struct settings_page *page,
+				  settings_writable writable,
+				  const gchar *label,
+				  const gchar *key, const gchar *subkey,
+				  const gchar *ekey, const gchar *esubkey)
 {
 	struct settings_content *content;
 	GtkWidget *label_w, *notebook, *box;
 	GHashTable *items;
 
-	content = create_base_content(key, subkey);
+	content = create_base_content(sett, writable, key, subkey);
 	items = g_hash_table_new_full(g_str_hash, g_str_equal,
 	                              g_free, NULL);
 
 	content->free = free_combo_box;
+	content->value = content_value_list;
 
 	notebook = gtk_notebook_new();
 	box = gtk_combo_box_text_new();
@@ -251,6 +294,13 @@ GtkWidget *settings_add_combo_box(struct settings_page *page,
 	gtk_widget_show_all(content->content);
 
 	settings_add_content(page, content);
+	hash_table_set_dual_key(sett->contents, key, subkey, content);
+
+	if(key) {
+		struct content_callback *cb;
+		cb = create_list_callback(box);
+		settings_set_callback(page->sett, key, subkey, cb);
+	}
 
 	return box;
 }
