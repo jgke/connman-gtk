@@ -324,8 +324,9 @@ void service_set_property(struct service *serv, const char *key,
 	GError *error = NULL;
 
 	GVariant *old = service_get_property(serv, key, NULL);
-	gboolean equal = g_variant_equal(old, value);
-	g_variant_unref(old);
+	gboolean equal = old == value || (old && g_variant_equal(old, value));
+	if(old)
+		g_variant_unref(old);
 	if(equal)
 		return;
 

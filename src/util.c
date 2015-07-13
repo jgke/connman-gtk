@@ -271,7 +271,6 @@ static void append_to_variant(const gchar *key, const gchar *subkey,
 	else
 		inner = g_variant_dict_new(inner_v);
 	g_variant_dict_insert_value(inner, subkey, value);
-	g_variant_unref(inner_v);
 	inner_v = g_variant_dict_end(inner);
 	g_variant_dict_insert_value(user_data, key, inner_v);
 }

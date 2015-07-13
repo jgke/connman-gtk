@@ -213,7 +213,7 @@ static void append_dict_inner(const gchar *key, const gchar *subkey,
 {
 	DualHashTable *dict = user_data;
 	struct settings_content *content = value;
-	if(!content->writable || !content->writable(content))
+	if(!content->writable(content))
 		return;
 	GVariant *variant = content->value(content);
 	if(!variant)

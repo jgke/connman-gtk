@@ -40,7 +40,7 @@ gboolean always_write(struct settings_content *content)
 
 gboolean write_if_selected(struct settings_content *content)
 {
-	return  !!g_object_get_data(G_OBJECT(content->content), "selected");
+	return  !!g_object_get_data(G_OBJECT(gtk_widget_get_parent(content->content)), "selected");
 }
 
 static gboolean content_valid_always(struct settings_content *content)
@@ -210,7 +210,7 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 	gtk_widget_show_all(content->content);
 
 	settings_add_content(page, content);
-	hash_table_set_dual_key(sett->contents, key, subkey, content);
+	hash_table_set_dual_key(sett->contents, ekey, esubkey, content);
 
 	return entry;
 }
@@ -294,7 +294,7 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
 	gtk_widget_show_all(content->content);
 
 	settings_add_content(page, content);
-	hash_table_set_dual_key(sett->contents, key, subkey, content);
+	hash_table_set_dual_key(sett->contents, ekey, esubkey, content);
 
 	if(key) {
 		struct content_callback *cb;
