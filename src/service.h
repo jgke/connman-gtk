@@ -27,15 +27,15 @@
 
 #include "connection.h"
 #include "technology.h"
-
 #include "settings.h"
+#include "util.h"
 
 struct service {
 	enum connection_type type;
 	struct technology *tech;
 	GDBusProxy *proxy;
 	gchar *path;
-	GHashTable *properties;
+	DualHashTable *properties;
 	GtkWidget *item;
 	GtkWidget *header;
 	GtkWidget *title;

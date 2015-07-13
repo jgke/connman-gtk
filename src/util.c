@@ -80,7 +80,6 @@ guint64 variant_to_uint(GVariant *variant)
 	return 0;
 }
 
-
 gint64 variant_to_int(GVariant *variant)
 {
 	if(!variant)
@@ -164,9 +163,42 @@ void combo_box_changed(GtkComboBox *box, gpointer data)
 	g_free(str);
 }
 
-void *hash_table_get_dual_key(GHashTable *table, const gchar *key,
+struct DualHashTable_t {
+	GHashTable *table;
+	GDestroyNotify free_value;
+	gint refcount;
+};
+
+DualHashTable *dual_hash_table_new(GDestroyNotify free_value)
+{
+	DualHashTable *dt = g_malloc(sizeof(*dt));
+	GDestroyNotify free_func = (GDestroyNotify)g_hash_table_unref;
+	GHashTable *table = g_hash_table_new_full(g_str_hash, g_str_equal,
+						  g_free, free_func);
+	dt->table = table;
+	dt->free_value = free_value;
+	dt->refcount = 1;
+	return dt;
+}
+
+DualHashTable *dual_hash_table_ref(DualHashTable *table)
+{
+	g_atomic_int_inc(&table->refcount);
+	g_hash_table_ref(table->table);
+	return table;
+}
+
+void dual_hash_table_unref(DualHashTable *table)
+{
+	g_hash_table_unref(table->table);
+	if(g_atomic_int_dec_and_test(&table->refcount))
+		g_free(table);
+}
+
+void *hash_table_get_dual_key(DualHashTable *dtable, const gchar *key,
 			      const gchar *subkey)
 {
+	GHashTable *table = dtable->table;
 	GHashTable *t = g_hash_table_lookup(table, key);
 	if(!t)
 		return NULL;
@@ -175,15 +207,15 @@ void *hash_table_get_dual_key(GHashTable *table, const gchar *key,
 	return g_hash_table_lookup(t, subkey);
 }
 
-void hash_table_set_dual_key(GHashTable *table, const gchar *key,
+void hash_table_set_dual_key(DualHashTable *dtable, const gchar *key,
 			     const gchar *subkey, void *value)
 {
+	GHashTable *table = dtable->table;
 	GHashTable *t;
 	t = g_hash_table_lookup(table, key);
 	if(!t) {
 		t = g_hash_table_new_full(g_str_hash, g_str_equal,
-					  g_free,
-					  (GDestroyNotify)g_variant_unref);
+					  g_free, dtable->free_value);
 		g_hash_table_insert(table, g_strdup(key), t);
 	}
 	if(!subkey)
@@ -214,8 +246,9 @@ static void append_to_variant(gpointer key, gpointer value, gpointer user_data)
 	g_variant_dict_insert_value(out, key, var);
 }
 
-GVariant *dual_hash_table_to_variant(GHashTable *table)
+GVariant *dual_hash_table_to_variant(DualHashTable *dtable)
 {
+	GHashTable *table = dtable->table;
 	GVariantDict *dict = g_variant_dict_new(NULL);
 	g_hash_table_foreach(table, append_to_variant, dict);
 	GVariant *out = g_variant_dict_end(dict);

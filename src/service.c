@@ -125,8 +125,7 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 
 	serv->proxy = proxy;
 	serv->path = g_strdup(path);
-	serv->properties = g_hash_table_new_full(g_str_hash, g_str_equal,
-	                   g_free, (GDestroyNotify)g_hash_table_unref);
+	serv->properties = dual_hash_table_new((GDestroyNotify)g_variant_unref);
 	serv->sett = NULL;
 
 	serv->item = gtk_list_box_row_new();
@@ -215,7 +214,7 @@ void service_free(struct service *serv)
 	g_object_unref(serv->proxy);
 	g_object_unref(serv->item);
 	g_free(serv->path);
-	g_hash_table_unref(serv->properties);
+	dual_hash_table_unref(serv->properties);
 	gtk_widget_destroy(serv->item);
 	if(functions[serv->type].free)
 		functions[serv->type].free(serv);
