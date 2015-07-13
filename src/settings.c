@@ -104,7 +104,7 @@ static struct settings_page *add_page_to_combo_box(struct settings *sett,
 static void free_settings(struct settings *sett)
 {
 	sett->closed(sett->serv);
-	g_hash_table_unref(sett->callbacks);
+	dual_hash_table_unref(sett->callbacks);
 	if(functions[sett->serv->type].free)
 		functions[sett->serv->type].free(sett);
 	else
@@ -335,7 +335,6 @@ struct settings *settings_create(struct service *serv,
                                  void (*closed)(struct service *serv))
 {
 	struct settings *sett;
-	GHashTable *t;
 
 	if(functions[serv->type].create)
 		sett = functions[serv->type].create();
@@ -344,9 +343,8 @@ struct settings *settings_create(struct service *serv,
 
 	sett->serv = serv;
 	sett->closed = closed;
-	t = g_hash_table_new_full(g_str_hash, g_str_equal,
-	                          g_free, (GDestroyNotify)g_hash_table_unref);
-	sett->callbacks = t;
+	sett->callbacks =
+		dual_hash_table_new((GDestroyNotify)g_hash_table_unref);
 
 	init_settings(sett);
 
@@ -356,25 +354,16 @@ struct settings *settings_create(struct service *serv,
 void settings_update(struct settings *sett, const gchar *key,
                      const gchar *subkey, GVariant *value)
 {
-	GHashTable *t = g_hash_table_lookup(sett->callbacks, key);
-	if(!subkey)
-		subkey = "";
-	if(t && g_hash_table_contains(t, subkey))
-		handle_content_callback(value, key, subkey,
-		                        g_hash_table_lookup(t, subkey));
+	struct content_callback *cb;
+
+	cb = hash_table_get_dual_key(sett->callbacks, key, subkey);
+	if(cb)
+		handle_content_callback(value, key, subkey, cb);
 }
 
 void settings_set_callback(struct settings *sett, const gchar *key,
                            const gchar *subkey, struct content_callback *cb)
 {
-	GHashTable *t;
-	if(!g_hash_table_contains(sett->callbacks, key)) {
-		t = g_hash_table_new_full(g_str_hash, g_str_equal,
-		                          g_free,
-		                          content_callback_free);
-		g_hash_table_insert(sett->callbacks, g_strdup(key), t);
-	} else
-		t = g_hash_table_lookup(sett->callbacks, key);
-	g_hash_table_insert(t, g_strdup(subkey ? subkey : ""), cb);
+	hash_table_set_dual_key(sett->callbacks, key, subkey, cb);
 }
 

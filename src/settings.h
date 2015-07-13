@@ -27,6 +27,7 @@ struct settings;
 
 #include "service.h"
 #include "settings_content_callback.h"
+#include "util.h"
 
 struct settings {
 	GtkWidget *window;
@@ -36,7 +37,7 @@ struct settings {
 	struct service *serv;
 	void (*closed)(struct service *serv);
 
-	GHashTable *callbacks;
+	DualHashTable *callbacks;
 };
 
 struct settings_page {
