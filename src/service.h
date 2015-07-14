@@ -61,6 +61,8 @@ void service_toggle_connection(struct service *serv);
 
 GVariant *service_get_property(struct service *serv, const char *key,
                                const char *subkey);
+gchar *service_get_property_string_raw(struct service *serv, const char *key,
+				       const char *subkey);
 gchar *service_get_property_string(struct service *serv, const char *key,
                                    const char *subkey);
 gchar **service_get_property_strv(struct service *serv, const char *key,

@@ -217,7 +217,7 @@ static void update_connect_button(struct technology_settings *tech)
 		gtk_widget_set_can_focus(tech->connect_button, FALSE);
 		return;
 	}
-	state = service_get_property_string(tech->selected, "State", NULL);
+	state = service_get_property_string_raw(tech->selected, "State", NULL);
 
 	gtk_widget_set_sensitive(tech->connect_button, TRUE);
 	gtk_widget_set_can_focus(tech->connect_button, TRUE);

@@ -247,7 +247,7 @@ void service_toggle_connection(struct service *serv)
 	const gchar *function;
 	gchar *state;
 
-	state = service_get_property_string(serv, "State", NULL);
+	state = service_get_property_string_raw(serv, "State", NULL);
 
 	if(!strcmp(state, "idle") || !strcmp(state, "failure"))
 		function = "Connect";
@@ -273,20 +273,25 @@ GVariant *service_get_property(struct service *serv, const char *key,
 	return variant;
 }
 
-gchar *service_get_property_string(struct service *serv, const char *key,
-                                   const char *subkey)
+gchar *service_get_property_string_raw(struct service *serv, const char *key,
+				       const char *subkey)
 {
 	if(!serv || !key)
 		return g_strdup("");
 	GVariant *prop = service_get_property(serv, key, subkey);
 	gchar *str = variant_to_str(prop);
-	gchar *out;
-	if(!strcmp(key, "State"))
-		out = g_strdup(status_localized(str));
-	else
-		out = g_strdup(str);
 	if(prop)
 		g_variant_unref(prop);
+	return str;
+}
+
+gchar *service_get_property_string(struct service *serv, const char *key,
+                                   const char *subkey)
+{
+	gchar *str = service_get_property_string_raw(serv, key, subkey);
+	if(strcmp(key, "State"))
+		return str;
+	gchar *out = g_strdup(status_localized(str));
 	g_free(str);
 	return out;
 }
