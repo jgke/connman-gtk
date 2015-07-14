@@ -126,6 +126,8 @@ static void add_info_page(struct settings *sett)
 	settings_add_text(page, _("IPv4 address"), "IPv4", "Address");
 	settings_add_text(page, _("IPv6 address"), "IPv6", "Address");
 	settings_add_text(page, _("Nameservers"), "Nameservers", NULL);
+
+	settings_add_entry_list(sett, page, never_write, "Test", NULL, NULL, NULL, NULL);
 }
 
 static gboolean valid_ipv4_entry(struct settings_content *content)

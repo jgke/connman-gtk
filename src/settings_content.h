@@ -67,6 +67,12 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
                                   const gchar *label,
                                   const gchar *key, const gchar *subkey,
                                   const gchar *ekey, const gchar *esubkey);
+GtkWidget *settings_add_entry_list(struct settings *sett,
+                                   struct settings_page *page,
+                                   settings_writable writable,
+                                   const gchar *label,
+                                   const gchar *key, const gchar *subkey,
+                                   const gchar *ekey, const gchar *esubkey);
 
 void free_content(GtkWidget *widget, gpointer user_data);
 

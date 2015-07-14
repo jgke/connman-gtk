@@ -42,6 +42,14 @@ struct content_callback *create_list_callback(GtkWidget *list)
 	return cb;
 }
 
+struct content_callback *create_entry_list_callback(GtkWidget *list)
+{
+	struct content_callback *cb = g_malloc(sizeof(*cb));
+	cb->type = CONTENT_CALLBACK_TYPE_ENTRY_LIST;
+	cb->data = list;
+	return cb;
+}
+
 void handle_content_callback(GVariant *value, const gchar *key,
                              const gchar *subkey, struct content_callback *cb)
 {
@@ -64,6 +72,10 @@ void handle_content_callback(GVariant *value, const gchar *key,
 		g_free(str);
 		return;
 	}
+	case CONTENT_CALLBACK_TYPE_ENTRY_LIST: {
+		//TODO
+		return;
+	}
 	default:
 		g_warning("Unknown callback type");
 	}
@@ -75,6 +87,7 @@ void content_callback_free(void *cb_v)
 	switch(cb->type) {
 	case CONTENT_CALLBACK_TYPE_TEXT:
 	case CONTENT_CALLBACK_TYPE_LIST:
+	case CONTENT_CALLBACK_TYPE_ENTRY_LIST:
 		break;
 	default:
 		g_warning("Unknown callback type");

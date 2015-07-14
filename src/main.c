@@ -382,7 +382,7 @@ static void connman_disappeared(GDBusConnection *connection, const gchar *name,
 }
 
 static void dbus_connected(GObject *source, GAsyncResult *res,
-			   gpointer user_data)
+                           gpointer user_data)
 {
 	(void)source;
 	(void)user_data;
@@ -399,8 +399,8 @@ static void dbus_connected(GObject *source, GAsyncResult *res,
 
 	g_bus_watch_name_on_connection(connection, "net.connman",
 	                               G_BUS_NAME_WATCHER_FLAGS_NONE,
-				       connman_appeared, connman_disappeared,
-				       NULL, NULL);
+	                               connman_appeared, connman_disappeared,
+	                               NULL, NULL);
 }
 
 static gboolean delete_event(GtkApplication *app, GdkEvent *event,

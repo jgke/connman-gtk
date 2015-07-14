@@ -88,6 +88,12 @@ static GVariant *content_value_list(struct settings_content *content)
 	return var;
 }
 
+static GVariant *content_value_entry_list(struct settings_content *content)
+{
+	//TODO
+	return NULL;
+}
+
 void free_content(GtkWidget *widget, gpointer user_data)
 {
 	struct settings_content *content = user_data;
@@ -205,7 +211,7 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 	if(!strlen(value)) {
 		g_free(value);
 		value = service_get_property_string(page->sett->serv,
-						    key, subkey);
+		                                    key, subkey);
 	}
 	gtk_entry_set_text(GTK_ENTRY(entry), value);
 	g_free(value);
@@ -306,6 +312,113 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
 		struct content_callback *cb;
 		cb = create_list_callback(box);
 		settings_set_callback(page->sett, key, subkey, cb);
+	}
+
+	return box;
+}
+
+static void free_entry_list(void *data)
+{
+	struct settings_content *content = data;
+	GPtrArray *list = g_object_get_data(G_OBJECT(content->content), "list");
+	g_ptr_array_unref(list);
+	g_free(content);
+}
+
+void destroy_entry(GtkButton *button, gpointer user_data)
+{
+	gtk_widget_destroy(GTK_WIDGET(user_data));
+}
+
+void add_entry_to_list(GtkButton *button, gpointer user_data)
+{
+	GtkWidget *list = user_data;
+	GtkWidget *entry = gtk_entry_new();
+	GtkWidget *rem = gtk_button_new_from_icon_name("list-remove-symbolic",
+	                 GTK_ICON_SIZE_MENU);
+	GtkWidget *remgrid = gtk_grid_new();
+	GtkWidget *grid = gtk_grid_new();
+	GtkWidget *row = gtk_list_box_row_new();
+
+	g_signal_connect(rem, "clicked", G_CALLBACK(destroy_entry), row);
+
+	STYLE_ADD_MARGIN(entry, MARGIN_SMALL);
+	gtk_widget_set_hexpand(entry, TRUE);
+	gtk_widget_set_vexpand(rem, FALSE);
+	gtk_widget_set_halign(rem, GTK_ALIGN_END);
+	gtk_widget_set_valign(rem, GTK_ALIGN_CENTER);
+	gtk_widget_set_valign(remgrid, GTK_ALIGN_CENTER);
+
+	gtk_grid_attach(GTK_GRID(grid), entry, 0, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(remgrid), rem, 0, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), remgrid, 1, 0, 1, 1);
+	gtk_container_add(GTK_CONTAINER(row), grid);
+	gtk_widget_show_all(row);
+	gtk_container_add(GTK_CONTAINER(list), row);
+}
+
+GtkWidget *settings_add_entry_list(struct settings *sett,
+                                   struct settings_page *page,
+                                   settings_writable writable,
+                                   const gchar *label,
+                                   const gchar *key, const gchar *subkey,
+                                   const gchar *ekey, const gchar *esubkey)
+{
+	struct settings_content *content;
+	GPtrArray *list;
+	GtkWidget *box, *label_w, *toolbar, *frame, *button, *buttonbox;
+	GtkToolItem *item, *buttonitem;
+
+	content = create_base_content(sett, writable, ekey, esubkey);
+	list = g_ptr_array_new();
+	box = gtk_list_box_new();
+	label_w = create_label(label);
+	toolbar = gtk_toolbar_new();
+	frame = gtk_frame_new(NULL);
+	button = gtk_button_new_from_icon_name("list-add-symbolic",
+	                                       GTK_ICON_SIZE_MENU);
+	/* needs to be a box and not a grid for inline-toolbar css */
+	buttonbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	item = gtk_separator_tool_item_new();
+	buttonitem = gtk_tool_item_new();
+
+	content->free = free_entry_list;
+	content->value = content_value_entry_list;
+
+	g_object_set_data(G_OBJECT(content->content), "list", list);
+	g_signal_connect(button, "clicked", G_CALLBACK(add_entry_to_list), box);
+
+	gtk_style_context_add_class(gtk_widget_get_style_context(toolbar),
+	                            GTK_STYLE_CLASS_INLINE_TOOLBAR);
+
+	gtk_tool_item_set_expand(item, TRUE);
+	gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(item), FALSE);
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
+	gtk_toolbar_set_icon_size(GTK_TOOLBAR(toolbar), GTK_ICON_SIZE_MENU);
+
+	gtk_widget_set_halign(label_w, GTK_ALIGN_START);
+	gtk_widget_set_halign(button, GTK_ALIGN_END);
+	gtk_list_box_set_selection_mode(GTK_LIST_BOX(box), GTK_SELECTION_NONE);
+
+	add_entry_to_list(NULL, box);
+
+	gtk_container_add(GTK_CONTAINER(buttonbox), button);
+	gtk_container_add(GTK_CONTAINER(buttonitem), buttonbox);
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(item), 0);
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), buttonitem, 1);
+	gtk_container_add(GTK_CONTAINER(frame), box);
+	gtk_grid_attach(GTK_GRID(content->content), label_w, 0, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(content->content), frame, 0, 1, 1, 1);
+	gtk_grid_attach(GTK_GRID(content->content), toolbar, 0, 2, 1, 1);
+
+	gtk_widget_show_all(content->content);
+
+	settings_add_content(page, content);
+
+	if(key) {
+		struct content_callback *cb;
+		cb = create_entry_list_callback(box);
+		settings_set_callback(page->sett, ekey, esubkey, cb);
 	}
 
 	return box;
