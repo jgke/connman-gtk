@@ -322,10 +322,25 @@ void service_set_property(struct service *serv, const char *key,
 	GVariant *parameters;
 	GError *error = NULL;
 
-	GVariant *old = service_get_property(serv, key, NULL);
-	gboolean equal = old == value || (old && g_variant_equal(old, value));
-	if(old)
-		g_variant_unref(old);
+	GVariant *old;
+	gboolean equal = FALSE;
+	if(strcmp(g_variant_get_type_string(value), "a{sv}")) {
+		old = service_get_property(serv, key, NULL);
+		equal = !old || g_variant_equal(old, value);
+		if(old)
+			g_variant_unref(old);
+	} else {
+		gchar *subkey;
+		GVariant *svalue;
+		GVariantIter *iter = g_variant_iter_new(value);
+		while(g_variant_iter_loop(iter, "{sv}", &subkey, &svalue)) {
+			old = service_get_property(serv, key, subkey);
+			equal = equal || !old || g_variant_equal(old, svalue);
+			if(old)
+				g_variant_unref(old);
+		}
+		g_variant_iter_free(iter);
+	}
 	if(equal)
 		return;
 
