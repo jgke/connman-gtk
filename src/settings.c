@@ -126,8 +126,6 @@ static void add_info_page(struct settings *sett)
 	settings_add_text(page, _("IPv4 address"), "IPv4", "Address");
 	settings_add_text(page, _("IPv6 address"), "IPv6", "Address");
 	settings_add_text(page, _("Nameservers"), "Nameservers", NULL);
-
-	settings_add_entry_list(sett, page, never_write, "Test", NULL, NULL, NULL, NULL);
 }
 
 static gboolean valid_ipv4_entry(struct settings_content *content)
@@ -176,7 +174,7 @@ static void add_ipv_page(struct settings *sett, int ipv)
 	}
 	page = add_page_to_settings(sett, local);
 	box = settings_add_combo_box(sett, page, always_write, _("Method"),
-	                             conf, "Method", conf, "Method");
+	                             ipvs, "Method", conf, "Method");
 
 	none = add_page_to_combo_box(sett, box, "off", _("None"),
 	                             !strlen(cur) || !strcmp("none", cur));
@@ -208,6 +206,57 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		settings_add_entry(sett, manual, write_if_selected,
 		                   _("Prefix"), ipvs, "Prefix", conf,
 		                   "Prefix", validator);
+}
+
+static void add_server_page(struct settings *sett)
+{
+	struct settings_page *page;
+
+	page = add_page_to_settings(sett, _("Nameservers"));
+	settings_add_entry_list(sett, page, always_write, _("Nameservers"),
+				"Nameservers", NULL,
+				"Nameservers.Configuration", NULL);
+
+	page = add_page_to_settings(sett, _("Timeservers"));
+	settings_add_entry_list(sett, page, always_write, _("Timeservers"),
+				"Timeservers", NULL,
+				"Timeservers.Configuration", NULL);
+
+	page = add_page_to_settings(sett, _("Domains"));
+	settings_add_entry_list(sett, page, always_write, _("Domains"),
+				"Domains", NULL,
+				"Domains.Configuration", NULL);
+}
+
+static void add_proxy_page(struct settings *sett)
+{
+	struct settings_page *page = add_page_to_settings(sett, _("Proxy"));
+	struct settings_page *direct, *automatic, *manual;
+	GtkWidget *box;
+
+	const gchar *conf = "Proxy.Configuration";
+	gchar *cur = service_get_property_string(sett->serv, "Proxy", "Method");
+
+	box = settings_add_combo_box(sett, page, always_write, _("Method"),
+	                             "Proxy", "Method", conf, "Method");
+
+	direct = add_page_to_combo_box(sett, box, "direct", _("Direct"),
+	                             !strlen(cur) || !strcmp("direct", cur));
+	automatic = add_page_to_combo_box(sett, box, "auto", _("Automatic"),
+	                             !strcmp("auto", cur));
+	manual = add_page_to_combo_box(sett, box, "manual", _("Manual"),
+	                               !strcmp("manual", cur));
+	g_free(cur);
+
+	settings_add_text(direct, NULL, NULL, NULL);
+
+	settings_add_entry(sett, automatic, write_if_selected, _("URL"),
+			   "Proxy", "URL", conf, "URL", always_valid);
+
+	settings_add_entry_list(sett, manual, write_if_selected, _("Servers"),
+				"Proxy", "Servers", conf, "Servers");
+	settings_add_entry_list(sett, manual, write_if_selected, _("Excludes"),
+				"Proxy", "Excludes", conf, "Excludes");
 }
 
 static void append_dict_inner(const gchar *key, const gchar *subkey,
@@ -300,6 +349,8 @@ static void init_settings(struct settings *sett)
 	add_info_page(sett);
 	add_ipv_page(sett, 4);
 	add_ipv_page(sett, 6);
+	add_server_page(sett);
+	add_proxy_page(sett);
 
 	if(functions[sett->serv->type].init)
 		functions[sett->serv->type].init(sett);

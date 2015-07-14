@@ -44,7 +44,7 @@ gboolean write_if_selected(struct settings_content *content)
 	return  !!g_object_get_data(G_OBJECT(parent), "selected");
 }
 
-static gboolean content_valid_always(struct settings_content *content)
+gboolean always_valid(struct settings_content *content)
 {
 	return TRUE;
 }
@@ -90,8 +90,21 @@ static GVariant *content_value_list(struct settings_content *content)
 
 static GVariant *content_value_entry_list(struct settings_content *content)
 {
-	//TODO
-	return NULL;
+	GtkWidget *list = g_object_get_data(G_OBJECT(content->content), "list");
+	GList *children = gtk_container_get_children(GTK_CONTAINER(list));
+	GPtrArray *array = g_ptr_array_new();
+	GList *l;
+	for(l = children; l != NULL; l = l->next) {
+		GtkWidget *child = l->data;
+		GtkWidget *entry = g_object_get_data(G_OBJECT(child), "entry");
+		const gchar *text = gtk_entry_get_text(GTK_ENTRY(entry));
+		g_ptr_array_insert(array, -1, (gchar *)text);
+	}
+	g_list_free(children);
+	GVariant *var = g_variant_new_strv((const gchar * const *)array->pdata,
+	                                   array->len);
+	g_ptr_array_free(array, TRUE);
+	return var;
 }
 
 void free_content(GtkWidget *widget, gpointer user_data)
@@ -119,7 +132,7 @@ static struct settings_content *create_base_content(struct settings *sett,
 {
 	struct settings_content *content = g_malloc(sizeof(*content));
 	content->content = gtk_grid_new();
-	content->valid = content_valid_always;
+	content->valid = always_valid;
 	content->value = content_value_null;
 	content->free = g_free;
 	content->sett = sett;
@@ -276,7 +289,7 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
 	GtkWidget *label_w, *notebook, *box;
 	GHashTable *items;
 
-	content = create_base_content(sett, writable, key, subkey);
+	content = create_base_content(sett, writable, ekey, esubkey);
 	items = g_hash_table_new_full(g_str_hash, g_str_equal,
 	                              g_free, NULL);
 
@@ -317,22 +330,13 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
 	return box;
 }
 
-static void free_entry_list(void *data)
-{
-	struct settings_content *content = data;
-	GPtrArray *list = g_object_get_data(G_OBJECT(content->content), "list");
-	g_ptr_array_unref(list);
-	g_free(content);
-}
-
 void destroy_entry(GtkButton *button, gpointer user_data)
 {
 	gtk_widget_destroy(GTK_WIDGET(user_data));
 }
 
-void add_entry_to_list(GtkButton *button, gpointer user_data)
+void add_entry_to_list_value(GtkWidget *list, const gchar *value)
 {
-	GtkWidget *list = user_data;
 	GtkWidget *entry = gtk_entry_new();
 	GtkWidget *rem = gtk_button_new_from_icon_name("list-remove-symbolic",
 	                 GTK_ICON_SIZE_MENU);
@@ -341,9 +345,14 @@ void add_entry_to_list(GtkButton *button, gpointer user_data)
 	GtkWidget *row = gtk_list_box_row_new();
 
 	g_signal_connect(rem, "clicked", G_CALLBACK(destroy_entry), row);
+	g_object_set_data(G_OBJECT(row), "entry", entry);
+
+	if(value)
+		gtk_entry_set_text(GTK_ENTRY(entry), value);
 
 	STYLE_ADD_MARGIN(entry, MARGIN_SMALL);
 	gtk_widget_set_hexpand(entry, TRUE);
+	gtk_widget_set_hexpand(row, TRUE);
 	gtk_widget_set_vexpand(rem, FALSE);
 	gtk_widget_set_halign(rem, GTK_ALIGN_END);
 	gtk_widget_set_valign(rem, GTK_ALIGN_CENTER);
@@ -357,6 +366,12 @@ void add_entry_to_list(GtkButton *button, gpointer user_data)
 	gtk_container_add(GTK_CONTAINER(list), row);
 }
 
+void add_entry_to_list(GtkButton *button, gpointer user_data)
+{
+	GtkWidget *list = user_data;
+	add_entry_to_list_value(list, NULL);
+}
+
 GtkWidget *settings_add_entry_list(struct settings *sett,
                                    struct settings_page *page,
                                    settings_writable writable,
@@ -365,12 +380,12 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
                                    const gchar *ekey, const gchar *esubkey)
 {
 	struct settings_content *content;
-	GPtrArray *list;
+	gchar **values;
+	gchar **iter;
 	GtkWidget *box, *label_w, *toolbar, *frame, *button, *buttonbox;
 	GtkToolItem *item, *buttonitem;
 
 	content = create_base_content(sett, writable, ekey, esubkey);
-	list = g_ptr_array_new();
 	box = gtk_list_box_new();
 	label_w = create_label(label);
 	toolbar = gtk_toolbar_new();
@@ -382,25 +397,29 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	item = gtk_separator_tool_item_new();
 	buttonitem = gtk_tool_item_new();
 
-	content->free = free_entry_list;
 	content->value = content_value_entry_list;
 
-	g_object_set_data(G_OBJECT(content->content), "list", list);
+	g_object_set_data(G_OBJECT(content->content), "list", box);
 	g_signal_connect(button, "clicked", G_CALLBACK(add_entry_to_list), box);
+
+	values = service_get_property_strv(sett->serv, key, subkey);
+	for(iter = values; *iter; iter++)
+		add_entry_to_list_value(box, *iter);
+	g_strfreev(values);
 
 	gtk_style_context_add_class(gtk_widget_get_style_context(toolbar),
 	                            GTK_STYLE_CLASS_INLINE_TOOLBAR);
-
 	gtk_tool_item_set_expand(item, TRUE);
 	gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(item), FALSE);
 	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
 	gtk_toolbar_set_icon_size(GTK_TOOLBAR(toolbar), GTK_ICON_SIZE_MENU);
 
+	gtk_widget_set_margin_start(content->content, MARGIN_LARGE);
+	gtk_widget_set_margin_bottom(label_w, MARGIN_MEDIUM);
+	gtk_widget_set_hexpand(toolbar, TRUE);
 	gtk_widget_set_halign(label_w, GTK_ALIGN_START);
 	gtk_widget_set_halign(button, GTK_ALIGN_END);
 	gtk_list_box_set_selection_mode(GTK_LIST_BOX(box), GTK_SELECTION_NONE);
-
-	add_entry_to_list(NULL, box);
 
 	gtk_container_add(GTK_CONTAINER(buttonbox), button);
 	gtk_container_add(GTK_CONTAINER(buttonitem), buttonbox);
@@ -414,8 +433,9 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	gtk_widget_show_all(content->content);
 
 	settings_add_content(page, content);
+	hash_table_set_dual_key(sett->contents, ekey, esubkey, content);
 
-	if(key) {
+	if(ekey) {
 		struct content_callback *cb;
 		cb = create_entry_list_callback(box);
 		settings_set_callback(page->sett, ekey, esubkey, cb);

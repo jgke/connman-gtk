@@ -46,6 +46,7 @@ struct settings_content {
 gboolean never_write(struct settings_content *content);
 gboolean always_write(struct settings_content *content);
 gboolean write_if_selected(struct settings_content *content);
+gboolean always_valid(struct settings_content *content);
 
 void settings_add_content(struct settings_page *page,
                           struct settings_content *content);

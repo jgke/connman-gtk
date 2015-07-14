@@ -291,6 +291,20 @@ gchar *service_get_property_string(struct service *serv, const char *key,
 	return out;
 }
 
+gchar **service_get_property_strv(struct service *serv, const char *key,
+                                   const char *subkey)
+{
+	if(!serv || !key)
+		return g_malloc0(sizeof(gchar *));
+	GVariant *prop = service_get_property(serv, key, subkey);
+	if(!prop)
+		return g_malloc0(sizeof(gchar *));
+	gchar **out = variant_to_strv(prop);
+	if(prop)
+		g_variant_unref(prop);
+	return out;
+}
+
 gboolean service_get_property_boolean(struct service *serv, const char *key,
                                       const char *subkey)
 {
@@ -323,10 +337,10 @@ void service_set_property(struct service *serv, const char *key,
 	GError *error = NULL;
 
 	GVariant *old;
-	gboolean equal = FALSE;
+	gboolean equal = TRUE;
 	if(strcmp(g_variant_get_type_string(value), "a{sv}")) {
 		old = service_get_property(serv, key, NULL);
-		equal = !old || g_variant_equal(old, value);
+		equal = old && g_variant_equal(old, value);
 		if(old)
 			g_variant_unref(old);
 	} else {
@@ -335,7 +349,7 @@ void service_set_property(struct service *serv, const char *key,
 		GVariantIter *iter = g_variant_iter_new(value);
 		while(g_variant_iter_loop(iter, "{sv}", &subkey, &svalue)) {
 			old = service_get_property(serv, key, subkey);
-			equal = equal || !old || g_variant_equal(old, svalue);
+			equal = equal && old && g_variant_equal(old, svalue);
 			if(old)
 				g_variant_unref(old);
 		}

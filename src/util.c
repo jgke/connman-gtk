@@ -41,6 +41,13 @@ gchar *variant_str_array_to_str(GVariant *variant)
 	return out;
 }
 
+gchar **variant_to_strv(GVariant *variant)
+{
+	if(!variant)
+		return g_malloc(sizeof(gchar *));
+	return g_variant_dup_strv(variant, NULL);
+}
+
 gchar *variant_to_str(GVariant *variant)
 {
 	if(!variant)

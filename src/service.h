@@ -63,6 +63,8 @@ GVariant *service_get_property(struct service *serv, const char *key,
                                const char *subkey);
 gchar *service_get_property_string(struct service *serv, const char *key,
                                    const char *subkey);
+gchar **service_get_property_strv(struct service *serv, const char *key,
+				  const char *subkey);
 gboolean service_get_property_boolean(struct service *serv, const char *key,
                                       const char *subkey);
 int service_get_property_int(struct service *serv, const char *key,

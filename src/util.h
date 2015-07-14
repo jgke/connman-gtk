@@ -25,6 +25,7 @@
 #include <gtk/gtk.h>
 
 gchar *variant_str_array_to_str(GVariant *variant);
+gchar **variant_to_strv(GVariant *variant);
 gchar *variant_to_str(GVariant *variant);
 gboolean variant_to_bool(GVariant *variant);
 guint64 variant_to_uint(GVariant *variant);
