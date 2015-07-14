@@ -330,12 +330,30 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
 	return box;
 }
 
-void destroy_entry(GtkButton *button, gpointer user_data)
+static void update_button_visibility(GtkWidget *list)
 {
-	gtk_widget_destroy(GTK_WIDGET(user_data));
+	int count = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(list), "count"));
+	GList *children = gtk_container_get_children(GTK_CONTAINER(list));
+	GList *l;
+	for(l = children; l != NULL; l = l->next) {
+		GtkWidget *child = l->data;
+		GtkWidget *rem = g_object_get_data(G_OBJECT(child), "button");
+		gtk_widget_set_sensitive(rem, count != 1);
+	}
+	g_list_free(children);
 }
 
-void add_entry_to_list_value(GtkWidget *list, const gchar *value)
+static void destroy_entry(GtkButton *button, gpointer user_data)
+{
+	GtkWidget *box = gtk_widget_get_parent(GTK_WIDGET(user_data));
+	int count = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(box), "count"));
+	count--;
+	g_object_set_data(G_OBJECT(box), "count", GINT_TO_POINTER(count));
+	gtk_widget_destroy(GTK_WIDGET(user_data));
+	update_button_visibility(box);
+}
+
+static void add_entry_to_list_value(GtkWidget *list, const gchar *value)
 {
 	GtkWidget *entry = gtk_entry_new();
 	GtkWidget *rem = gtk_button_new_from_icon_name("list-remove-symbolic",
@@ -346,6 +364,7 @@ void add_entry_to_list_value(GtkWidget *list, const gchar *value)
 
 	g_signal_connect(rem, "clicked", G_CALLBACK(destroy_entry), row);
 	g_object_set_data(G_OBJECT(row), "entry", entry);
+	g_object_set_data(G_OBJECT(row), "button", rem);
 
 	if(value)
 		gtk_entry_set_text(GTK_ENTRY(entry), value);
@@ -364,9 +383,14 @@ void add_entry_to_list_value(GtkWidget *list, const gchar *value)
 	gtk_container_add(GTK_CONTAINER(row), grid);
 	gtk_widget_show_all(row);
 	gtk_container_add(GTK_CONTAINER(list), row);
+
+	int count = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(list), "count"));
+	count++;
+	g_object_set_data(G_OBJECT(list), "count", GINT_TO_POINTER(count));
+	update_button_visibility(list);
 }
 
-void add_entry_to_list(GtkButton *button, gpointer user_data)
+static void add_entry_to_list(GtkButton *button, gpointer user_data)
 {
 	GtkWidget *list = user_data;
 	add_entry_to_list_value(list, NULL);
@@ -400,9 +424,12 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	content->value = content_value_entry_list;
 
 	g_object_set_data(G_OBJECT(content->content), "list", box);
+	g_object_set_data(G_OBJECT(box), "count", GINT_TO_POINTER(0));
 	g_signal_connect(button, "clicked", G_CALLBACK(add_entry_to_list), box);
 
 	values = service_get_property_strv(sett->serv, key, subkey);
+	if(!*values)
+		add_entry_to_list_value(box, NULL);
 	for(iter = values; *iter; iter++)
 		add_entry_to_list_value(box, *iter);
 	g_strfreev(values);
