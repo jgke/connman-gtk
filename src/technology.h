@@ -81,5 +81,7 @@ void technology_update_service(struct technology *item, struct service *serv,
                                GVariant *properties);
 void technology_remove_service(struct technology *item, const gchar *path);
 void technology_free(struct technology *item);
+void technology_set_property(struct technology *item, const gchar *key,
+			     GVariant *value);
 
 #endif /* _CONNMAN_GTK_TECHNOLOGY_H */

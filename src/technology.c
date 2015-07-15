@@ -110,22 +110,11 @@ static gboolean toggle_power(GtkSwitch *widget, GParamSpec *pspec,
                              gpointer user_data)
 {
 	struct technology_settings *item = user_data;
-	GVariant *ret;
-	GError *error = NULL;
 	gboolean state = gtk_switch_get_active(widget);
 
-	ret = g_dbus_proxy_call_sync(item->proxy, "SetProperty",
-	                             g_variant_new("(sv)", "Powered",
-	                                             g_variant_new("b", state)),
-	                             G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
-	if(error) {
-		g_warning("failed to toggle technology state: %s",
-		          error->message);
-		g_error_free(error);
-		return TRUE;
-	}
-	g_variant_unref(ret);
-	return FALSE;
+	technology_set_property(item->technology, "Powered",
+				g_variant_new("b", state));
+	return TRUE;
 }
 
 static void update_status(struct technology_settings *item)
@@ -515,4 +504,22 @@ struct technology *technology_create(GDBusProxy *proxy, const gchar *path,
 		functions[type].init(item, properties, proxy);
 
 	return item;
+}
+
+void technology_set_property(struct technology *tech, const gchar *key,
+			     GVariant *value)
+{
+	GVariant *ret;
+	GError *error = NULL;
+
+	ret = g_dbus_proxy_call_sync(tech->settings->proxy, "SetProperty",
+	                             g_variant_new("(sv)", key, value),
+	                             G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+	if(error) {
+		g_warning("failed to set technology property %s: %s",
+		          key, error->message);
+		g_error_free(error);
+		return;
+	}
+	g_variant_unref(ret);
 }
