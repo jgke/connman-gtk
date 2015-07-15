@@ -44,10 +44,6 @@ static struct {
 	void (*free)(struct technology *tech);
 	void (*services_updated)(struct technology *tech);
 	void (*property_changed)(struct technology *tech, const gchar *name);
-	void (*add_service)(struct technology *tech, struct service *serv);
-	void (*update_service)(struct technology *tech, struct service *serv,
-	                       GVariant *properties);
-	void (*remove_service)(struct technology *tech, const gchar *path);
 } functions[CONNECTION_TYPE_COUNT] = {
 	{},
 	{technology_ethernet_init},
@@ -403,8 +399,6 @@ void technology_services_updated(struct technology *item)
 
 void technology_add_service(struct technology *item, struct service *serv)
 {
-	if(functions[item->type].add_service)
-		functions[item->type].add_service(item, serv);
 	gtk_container_add(GTK_CONTAINER(item->settings->services), serv->item);
 	g_hash_table_insert(item->services, g_strdup(serv->path), serv);
 	technology_services_updated(item);
@@ -413,8 +407,6 @@ void technology_add_service(struct technology *item, struct service *serv)
 void technology_update_service(struct technology *item, struct service *serv,
                                GVariant *properties)
 {
-	if(functions[item->type].update_service)
-		functions[item->type].update_service(item, serv, properties);
 	service_update(serv, properties);
 	if(item->settings->selected == serv);
 	update_connect_button(item->settings);
@@ -423,8 +415,6 @@ void technology_update_service(struct technology *item, struct service *serv,
 
 void technology_remove_service(struct technology *item, const gchar *path)
 {
-	if(functions[item->type].remove_service)
-		functions[item->type].remove_service(item, path);
 	if(item->settings->selected == g_hash_table_lookup(item->services,
 	                path)) {
 		item->settings->selected = NULL;
