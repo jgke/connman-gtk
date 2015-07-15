@@ -155,6 +155,7 @@ static void add_ipv_page(struct settings *sett, int ipv)
 	struct settings_page *none;
 	struct settings_page *dhcp;
 	struct settings_page *manual;
+	GtkWidget *ipv6_privacy;
 
 	if(ipv == 4) {
 		local = _("IPv4");
@@ -170,20 +171,27 @@ static void add_ipv_page(struct settings *sett, int ipv)
 	char *cur = service_get_property_string(sett->serv, ipvs, "Method");
 	if(!strlen(cur)) {
 		g_free(cur);
-		return;
+		cur = service_get_property_string(sett->serv, conf, "Method");
+		if(!strlen(cur)) {
+			g_free(cur);
+			return;
+		}
 	}
 	page = add_page_to_settings(sett, local);
 	box = settings_add_combo_box(sett, page, always_write, _("Method"),
 	                             ipvs, "Method", conf, "Method");
 
-	none = add_page_to_combo_box(sett, box, "off", _("None"),
-	                             !strlen(cur) || !strcmp("none", cur));
-	dhcp = add_page_to_combo_box(sett, box, "dhcp", _("Automatic"),
-	                             !strcmp("dhcp", cur));
+	none = add_page_to_combo_box(sett, box, "off", _("None"), TRUE);
+
+	if(ipv == 4)
+		dhcp = add_page_to_combo_box(sett, box, "dhcp", _("Automatic"),
+					     !strcmp("dhcp", cur));
+	else
+		dhcp = add_page_to_combo_box(sett, box, "auto", _("Automatic"),
+					     !strcmp("auto", cur));
 	manual = add_page_to_combo_box(sett, box, "manual", _("Manual"),
 	                               !strcmp("manual", cur));
 	g_free(cur);
-
 
 	settings_add_text(none, NULL, NULL, NULL);
 
@@ -191,8 +199,6 @@ static void add_ipv_page(struct settings *sett, int ipv)
 	settings_add_text(dhcp, _("Gateway"), ipvs, "Gateway");
 	if(ipv == 4)
 		settings_add_text(dhcp, _("Netmask"), ipvs, "Netmask");
-	else
-		settings_add_text(dhcp, _("Prefix"), ipvs, "Prefix");
 
 	settings_add_entry(sett, manual, write_if_selected, _("Address"), ipvs,
 	                   "Address", conf, "Address", validator);
@@ -202,10 +208,22 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		settings_add_entry(sett, manual, write_if_selected,
 		                   _("Netmask"), ipvs, "Netmask", conf,
 		                   "Netmask", validator);
-	else
-		settings_add_entry(sett, manual, write_if_selected,
-		                   _("Prefix"), ipvs, "Prefix", conf,
-		                   "Prefix", validator);
+	else {
+		ipv6_privacy = settings_add_combo_box(sett, dhcp,
+						      always_write,
+						      _("Privacy"), ipvs,
+						      "Privacy", conf,
+						      "Privacy");
+
+		cur = service_get_property_string(sett->serv, ipvs, "Privacy");
+		add_page_to_combo_box(sett, ipv6_privacy, "disabled",
+				      _("Disabled"), TRUE);
+		add_page_to_combo_box(sett, ipv6_privacy, "enabled",
+				      _("Enabled"), !strcmp("enabled", cur));
+		add_page_to_combo_box(sett, ipv6_privacy, "prefered",
+				      _("Prefered"), !strcmp("prefered", cur));
+		g_free(cur);
+	}
 }
 
 static void add_server_page(struct settings *sett)

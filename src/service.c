@@ -289,6 +289,8 @@ gchar *service_get_property_string(struct service *serv, const char *key,
                                    const char *subkey)
 {
 	gchar *str = service_get_property_string_raw(serv, key, subkey);
+	if(!serv || !key)
+		return str;
 	if(strcmp(key, "State"))
 		return str;
 	gchar *out = g_strdup(status_localized(str));
