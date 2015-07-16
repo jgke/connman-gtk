@@ -192,6 +192,31 @@ static void connect_button_cb(GtkButton *widget, gpointer user_data)
 		service_toggle_connection(tech->selected);
 }
 
+static void tether_button_cb(GtkButton *widget, gpointer user_data)
+{
+	struct technology_settings *tech = user_data;
+	GVariant *state_v = g_hash_table_lookup(tech->properties, "Tethering");
+	gboolean state = variant_to_bool(state_v);
+	if(tech->technology->type != CONNECTION_TYPE_WIRELESS) {
+		technology_set_property(tech->technology, "Tethering",
+					g_variant_new("b", !state));
+	}
+	else
+		technology_wireless_tether(tech->technology);
+}
+
+static void update_tethering(struct technology_settings *tech)
+{
+
+	GVariant *state_v = g_hash_table_lookup(tech->properties, "Tethering");
+	gboolean state = variant_to_bool(state_v);
+	GtkButton *button = GTK_BUTTON(tech->tethering);
+	if(state)
+		gtk_button_set_label(button, _("Disable _tethering"));
+	else
+		gtk_button_set_label(button, _("Enable _tethering"));
+}
+
 static void update_connect_button(struct technology_settings *tech)
 {
 	const gchar *button_state;
@@ -273,6 +298,7 @@ struct technology_settings *create_technology_settings(struct technology *tech,
 	powerbox = gtk_grid_new();
 	frame = gtk_frame_new(NULL);
 	scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+	item->tethering = gtk_button_new_with_mnemonic(_("Enable _Tethering"));
 
 	g_object_ref(item->grid);
 	g_object_ref(item->icon);
@@ -284,6 +310,7 @@ struct technology_settings *create_technology_settings(struct technology *tech,
 	g_object_ref(item->buttons);
 	g_object_ref(item->connect_button);
 	g_object_ref(item->filler);
+	g_object_ref(item->tethering);
 
 	item->powersig = g_signal_connect(item->power_switch, "notify::active",
 	                                  G_CALLBACK(toggle_power), item);
@@ -295,6 +322,8 @@ struct technology_settings *create_technology_settings(struct technology *tech,
 	                 G_CALLBACK(service_selected), item);
 	g_signal_connect(item->connect_button, "clicked",
 	                 G_CALLBACK(connect_button_cb), item);
+	g_signal_connect(item->tethering, "clicked",
+			 G_CALLBACK(tether_button_cb), item);
 
 	gtk_widget_set_margin_start(item->grid, MARGIN_LARGE);
 	gtk_widget_set_margin_end(item->grid, MARGIN_LARGE);
@@ -325,15 +354,17 @@ struct technology_settings *create_technology_settings(struct technology *tech,
 	gtk_widget_set_valign(powerbox, GTK_ALIGN_CENTER);
 	gtk_widget_set_halign(powerbox, GTK_ALIGN_END);
 	gtk_widget_set_valign(item->buttons, GTK_ALIGN_END);
+	gtk_widget_set_halign(item->tethering, GTK_ALIGN_START);
 	gtk_widget_set_halign(item->connect_button, GTK_ALIGN_END);
 
-	gtk_container_add(GTK_CONTAINER(powerbox), item->power_switch);
+	gtk_grid_attach(GTK_GRID(powerbox), item->power_switch, 0, 0, 1, 1);
 	gtk_container_add(GTK_CONTAINER(scrolled_window), item->services);
 	gtk_container_add(GTK_CONTAINER(frame), scrolled_window);
 	gtk_grid_attach(GTK_GRID(item->contents), frame, 0, 0, 1, 1);
-	gtk_grid_attach(GTK_GRID(item->buttons), item->filler, 0, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(item->buttons), item->tethering, 0, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(item->buttons), item->filler, 1, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(item->buttons), item->connect_button,
-	                1, 0, 1, 1);
+	                2, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(item->grid), item->icon, 0, 0, 1, 2);
 	gtk_grid_attach(GTK_GRID(item->grid), item->title,1, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(item->grid), item->status, 1, 1, 1, 1);
@@ -374,11 +405,13 @@ void free_technology_settings(struct technology_settings *item)
 
 void technology_property_changed(struct technology *item, const gchar *key)
 {
-	if(!strcmp(key, "Powered")) {
+	if(!strcmp(key, "Powered"))
 		update_power(item->settings);
-	} else if(!strcmp(key, "Connected")) {
+	else if(!strcmp(key, "Connected"))
 		update_status(item->settings);
-	}
+	else if(!strcmp(key, "Tethering"))
+		update_tethering(item->settings);
+
 	if(functions[item->type].property_changed)
 		functions[item->type].property_changed(item, key);
 }

@@ -94,6 +94,11 @@ void technology_wireless_init(struct technology *tech, GVariant *properties,
 	                                      scan_cb, item);
 }
 
+void technology_wireless_tether(struct technology *tech)
+{
+
+}
+
 struct service *service_wireless_create(void)
 {
 	struct wireless_service *serv = g_malloc(sizeof(*serv));
