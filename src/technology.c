@@ -197,7 +197,7 @@ static void tether_button_cb(GtkButton *widget, gpointer user_data)
 	struct technology_settings *tech = user_data;
 	GVariant *state_v = g_hash_table_lookup(tech->properties, "Tethering");
 	gboolean state = variant_to_bool(state_v);
-	if(tech->technology->type != CONNECTION_TYPE_WIRELESS) {
+	if(tech->technology->type != CONNECTION_TYPE_WIRELESS || state) {
 		technology_set_property(tech->technology, "Tethering",
 					g_variant_new("b", !state));
 	}
@@ -377,6 +377,7 @@ struct technology_settings *create_technology_settings(struct technology *tech,
 	update_connect_button(item);
 	update_status(item);
 	update_power(item);
+	update_tethering(item);
 	return item;
 }
 

@@ -23,6 +23,7 @@
 #include <gtk/gtk.h>
 #include <string.h>
 
+#include "main.h"
 #include "style.h"
 #include "technology.h"
 #include "wireless.h"
@@ -56,7 +57,10 @@ static void scan_cb_cb(GObject *source, GAsyncResult *res, gpointer user_data)
 static gboolean scan_cb(gpointer user_data)
 {
 	struct wireless_technology *tech = user_data;
-	if(!gtk_switch_get_active(GTK_SWITCH(tech->parent.settings->power_switch)))
+	GHashTable *properties = tech->parent.settings->properties;
+	if(!variant_to_bool(g_hash_table_lookup(properties, "Powered")))
+		return TRUE;
+	if(!variant_to_bool(g_hash_table_lookup(properties, "Tethering")))
 		return TRUE;
 
 	g_dbus_proxy_call(tech->parent.settings->proxy, "Scan", NULL,
@@ -96,7 +100,55 @@ void technology_wireless_init(struct technology *tech, GVariant *properties,
 
 void technology_wireless_tether(struct technology *tech)
 {
+	const gchar *title;
+	const gchar *ssid, *pass;
+	int flags, status;
+	GtkWidget *window, *area;
+	GtkWidget *grid = gtk_grid_new();
+	GtkWidget *ssid_l = gtk_label_new(_("SSID"));
+	GtkWidget *ssid_e = gtk_entry_new();
+	GtkWidget *passphrase_l = gtk_label_new(_("Passphrase"));
+	GtkWidget *passphrase_e = gtk_entry_new();
 
+	STYLE_ADD_MARGIN(ssid_l, MARGIN_LARGE);
+	STYLE_ADD_MARGIN(ssid_e, MARGIN_LARGE);
+	gtk_widget_set_margin_bottom(ssid_l, 0);
+	gtk_widget_set_margin_bottom(ssid_e, 0);
+	STYLE_ADD_MARGIN(passphrase_l, MARGIN_LARGE);
+	STYLE_ADD_MARGIN(passphrase_e, MARGIN_LARGE);
+
+	gtk_grid_attach(GTK_GRID(grid), ssid_l, 0, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), ssid_e, 1, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), passphrase_l, 0, 1, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), passphrase_e, 1, 1, 1, 1);
+	gtk_widget_show_all(grid);
+
+
+	title = _("Set Access Point SSID and passphrase");
+	flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
+	window = gtk_dialog_new_with_buttons(title, GTK_WINDOW(main_window),
+					     flags,
+					     _("_OK"), GTK_RESPONSE_ACCEPT,
+					     _("_Cancel"), GTK_RESPONSE_CANCEL,
+					     NULL);
+
+	area = gtk_dialog_get_content_area(GTK_DIALOG(window));
+	gtk_container_add(GTK_CONTAINER(area), grid);
+	status = gtk_dialog_run(GTK_DIALOG(window));
+
+	if(status != GTK_RESPONSE_ACCEPT)
+		goto out;
+	ssid = gtk_entry_get_text(GTK_ENTRY(ssid_e));
+	pass = gtk_entry_get_text(GTK_ENTRY(passphrase_e));
+	printf("%s %s\n", ssid, pass);
+	technology_set_property(tech, "TetheringIdentifier",
+				g_variant_new("s", ssid));
+	technology_set_property(tech, "TetheringPassphrase",
+				g_variant_new("s", pass));
+	technology_set_property(tech, "Tethering",
+				g_variant_new("b", TRUE));
+out:
+	gtk_widget_destroy(window);
 }
 
 struct service *service_wireless_create(void)
