@@ -207,17 +207,24 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		settings_add_text(dhcp, _("Prefix length"), ipvs,
 				  "PrefixLength");
 
-	settings_add_entry(sett, manual, write_if_selected, _("Address"), ipvs,
-	                   "Address", conf, "Address", validator);
-	settings_add_entry(sett, manual, write_if_selected, _("Gateway"), ipvs,
-	                   "Gateway", conf, "Gateway", validator);
-	if(ipv == 4)
+	settings_add_text(manual, _("Address"), NULL, NULL);
+	settings_add_entry(sett, manual, write_if_selected,
+			   NULL, ipvs, "Address", conf,
+			   "Address", validator);
+	settings_add_text(manual, _("Gateway"), NULL, NULL);
+	settings_add_entry(sett, manual, write_if_selected,
+			   NULL, ipvs, "Gateway", conf,
+			   "Gateway", validator);
+	if(ipv == 4) {
+		settings_add_text(manual, _("Netmask"), NULL, NULL);
 		settings_add_entry(sett, manual, write_if_selected,
-		                   _("Netmask"), ipvs, "Netmask", conf,
-		                   "Netmask", validator);
+				   NULL, ipvs, "Netmask", conf,
+				   "Netmask", validator);
+	}
 	else {
+		settings_add_text(manual, _("Prefix length"), NULL, NULL);
 		settings_add_entry(sett, manual, write_if_selected,
-				   _("Prefix length"), ipvs, "PrefixLength",
+				   NULL, ipvs, "PrefixLength",
 				   conf, "PrefixLength", always_valid);
 		ipv6_privacy = settings_add_combo_box(sett, dhcp,
 						      always_write,

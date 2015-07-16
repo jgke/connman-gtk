@@ -137,19 +137,24 @@ static struct settings_content *create_base_content(struct settings *sett,
 
 static void add_left_aligned(GtkGrid *grid, GtkWidget *a, GtkWidget *b, int y)
 {
-	gtk_widget_set_margin_start(a, MARGIN_LARGE);
-	gtk_widget_set_margin_end(a, MARGIN_SMALL);
 	gtk_widget_set_margin_start(b, MARGIN_SMALL);
-	gtk_widget_set_margin_bottom(a, MARGIN_SMALL);
 	gtk_widget_set_margin_bottom(b, MARGIN_SMALL);
-
-	gtk_widget_set_halign(a, GTK_ALIGN_START);
 	gtk_widget_set_halign(b, GTK_ALIGN_START);
-	gtk_widget_set_hexpand(a, TRUE);
 	gtk_widget_set_hexpand(b, TRUE);
 
-	gtk_grid_attach(grid, a, 0, y, 1, 1);
-	gtk_grid_attach(grid, b, 1, y, 1, 1);
+	if(a) {
+		gtk_widget_set_margin_start(a, MARGIN_LARGE);
+		gtk_widget_set_margin_end(a, MARGIN_SMALL);
+		gtk_widget_set_margin_bottom(a, MARGIN_SMALL);
+		gtk_widget_set_halign(a, GTK_ALIGN_START);
+		gtk_widget_set_hexpand(a, TRUE);
+		gtk_grid_attach(grid, a, 0, y, 1, 1);
+		gtk_grid_attach(grid, b, 1, y, 1, 1);
+	}
+	else {
+		gtk_widget_set_margin_start(b, MARGIN_LARGE);
+		gtk_grid_attach(grid, b, 0, y, 2, 1);
+	}
 }
 
 GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
@@ -201,7 +206,10 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 	content->free = g_free;
 	content->value = content_value_entry;
 
-	label_w = create_label(label);
+	if(label)
+		label_w = create_label(label);
+	else
+		label_w = NULL;
 	entry = gtk_entry_new();
 
 	value = service_get_property_string(page->sett->serv, ekey, esubkey);
