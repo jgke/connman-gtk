@@ -199,6 +199,9 @@ static void add_ipv_page(struct settings *sett, int ipv)
 	settings_add_text(dhcp, _("Gateway"), ipvs, "Gateway");
 	if(ipv == 4)
 		settings_add_text(dhcp, _("Netmask"), ipvs, "Netmask");
+	else
+		settings_add_text(dhcp, _("Prefix length"), ipvs,
+				  "PrefixLength");
 
 	settings_add_entry(sett, manual, write_if_selected, _("Address"), ipvs,
 	                   "Address", conf, "Address", validator);
@@ -209,6 +212,9 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		                   _("Netmask"), ipvs, "Netmask", conf,
 		                   "Netmask", validator);
 	else {
+		settings_add_entry(sett, manual, write_if_selected,
+				   _("Prefix length"), ipvs, "PrefixLength",
+				   conf, "PrefixLength", always_valid);
 		ipv6_privacy = settings_add_combo_box(sett, dhcp,
 						      always_write,
 						      _("Privacy"), ipvs,
@@ -287,8 +293,14 @@ static void append_dict_inner(const gchar *key, const gchar *subkey,
 	GVariant *variant = content->value(content);
 	if(!variant)
 		return;
+	if(key && subkey && !strcmp(key, "IPv6.Configuration") &&
+				!strcmp(subkey, "PrefixLength")) {
+		const gchar *str = g_variant_get_string(variant, NULL);
+		guint64 val = g_ascii_strtoll(str, NULL, 10);
+		variant = g_variant_new("y", (gchar)val);
+	}
 	hash_table_set_dual_key(dict, content->key, content->subkey,
-	                        g_variant_ref(variant));
+				g_variant_ref(variant));
 
 }
 
@@ -301,6 +313,7 @@ static void apply_cb(GtkWidget *window, gpointer user_data)
 
 	dual_hash_table_foreach(sett->contents, append_dict_inner, table);
 	out = dual_hash_table_to_variant(table);
+	printf("%s\n", g_variant_print(out, TRUE));
 	service_set_properties(sett->serv, out);
 	g_variant_unref(out);
 	dual_hash_table_unref(table);
@@ -402,8 +415,19 @@ void settings_update(struct settings *sett, const gchar *key,
 	struct content_callback *cb;
 
 	cb = hash_table_get_dual_key(sett->callbacks, key, subkey);
-	if(cb)
+	if(cb) {
+		if(!key || !subkey || strcmp(subkey, "PrefixLength") ||
+		   (strcmp(key, "IPv6") && strcmp(key, "IPv6.Configuration"))) {
+			handle_content_callback(value, key, subkey, cb);
+			return;
+		}
+		guchar len = g_variant_get_byte(value);
+		char *str = g_strdup_printf("%d", len);
+		value = g_variant_new("s", str);
+		g_free(str);
 		handle_content_callback(value, key, subkey, cb);
+		g_variant_unref(value);
+	}
 }
 
 void settings_set_callback(struct settings *sett, const gchar *key,

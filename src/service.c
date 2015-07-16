@@ -288,6 +288,13 @@ gchar *service_get_property_string_raw(struct service *serv, const char *key,
 gchar *service_get_property_string(struct service *serv, const char *key,
                                    const char *subkey)
 {
+	if(key && subkey && !strcmp(subkey, "PrefixLength") &&
+	   (!strcmp(key, "IPv6") || !strcmp(key, "IPv6.Configuration"))) {
+		int len = service_get_property_int(serv, key, subkey);
+		if(!len)
+			return g_strdup("");
+		return g_strdup_printf("%d", len);
+	}
 	gchar *str = service_get_property_string_raw(serv, key, subkey);
 	if(!serv || !key)
 		return str;

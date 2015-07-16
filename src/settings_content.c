@@ -67,6 +67,9 @@ static GVariant *content_value_entry(struct settings_content *content)
 	GtkWidget *entry = g_object_get_data(G_OBJECT(content->content),
 	                                     "entry");
 	const gchar *str = gtk_entry_get_text(GTK_ENTRY(entry));
+	if(!strcmp(content->key, "IPv6.Configuration") &&
+	   !strcmp(content->subkey, "Gateway") && !strlen(str))
+		return NULL;
 	GVariant *var = g_variant_new("s", str);
 	return var;
 }
