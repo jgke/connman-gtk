@@ -32,7 +32,6 @@ typedef gboolean (*settings_writable)(struct settings_content *content);
 typedef GVariant *(*settings_field_value)(struct settings_content *content);
 
 struct settings_content {
-	GtkWidget *content;
 	GtkWidget *data;
 	struct settings *sett;
 

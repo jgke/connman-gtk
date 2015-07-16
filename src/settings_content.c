@@ -54,14 +54,6 @@ static GVariant *content_value_null(struct settings_content *content)
 	return NULL;
 }
 
-void _settings_add_content(struct settings_page *page,
-                          struct settings_content *content)
-{
-	gtk_grid_attach(GTK_GRID(page->grid), content->content,
-	                0, page->index, 1, 1);
-	page->index++;
-}
-
 static GVariant *content_value_entry(struct settings_content *content)
 {
 	GtkWidget *entry = content->data;
@@ -132,7 +124,6 @@ static struct settings_content *create_base_content(struct settings *sett,
                 const gchar *subkey)
 {
 	struct settings_content *content = g_malloc(sizeof(*content));
-	content->content = gtk_grid_new();
 	content->valid = always_valid;
 	content->value = content_value_null;
 	content->free = g_free;
@@ -140,15 +131,6 @@ static struct settings_content *create_base_content(struct settings *sett,
 	content->writable = writable;
 	content->key = key;
 	content->subkey = subkey;
-
-	g_object_set_data(G_OBJECT(content->content), "content", content);
-
-	g_signal_connect(content->content, "destroy",
-	                 G_CALLBACK(free_content), content);
-
-	gtk_widget_set_margin_bottom(content->content, MARGIN_SMALL);
-
-	gtk_grid_set_column_homogeneous(GTK_GRID(content->content), TRUE);
 
 	return content;
 }
@@ -186,9 +168,6 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 
 	g_free(value);
 
-	g_object_set_data(G_OBJECT(content->content), "value", value_w);
-
-	gtk_widget_set_hexpand(content->content, TRUE);
 	label_align_text_left(GTK_LABEL(value_w));
 
 	add_left_aligned(GTK_GRID(page->grid), label_w, value_w, page->index++);
@@ -200,6 +179,9 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 		settings_set_callback(page->sett, key, subkey, cb);
 	}
 
+	content->data = value_w;
+	g_signal_connect(content->data, "destroy",
+	                 G_CALLBACK(free_content), content);
 	return value_w;
 }
 
@@ -230,7 +212,6 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 	}
 	gtk_entry_set_text(GTK_ENTRY(entry), value);
 	g_free(value);
-	g_object_set_data(G_OBJECT(content->content), "entry", entry);
 
 	if(!strncmp(key, "IPv4", 4))
 		gtk_entry_set_width_chars(GTK_ENTRY(entry), 4*3 + 3);
@@ -243,6 +224,8 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 	hash_table_set_dual_key(sett->contents, ekey, esubkey, content);
 
 	content->data = entry;
+	g_signal_connect(content->data, "destroy",
+	                 G_CALLBACK(free_content), content);
 	return entry;
 }
 
@@ -264,22 +247,21 @@ GtkWidget *settings_add_switch(struct settings *sett,
 
 	gtk_switch_set_active(GTK_SWITCH(toggle), value);
 
-	g_object_set_data(G_OBJECT(content->content), "toggle", toggle);
-
 	add_left_aligned(GTK_GRID(page->grid), label_w, toggle, page->index++);
 	gtk_widget_show_all(page->grid);
 
 	hash_table_set_dual_key(sett->contents, key, subkey, content);
 
 	content->data = toggle;
+	g_signal_connect(content->data, "destroy",
+	                 G_CALLBACK(free_content), content);
 	return toggle;
 }
 
 static void free_combo_box(void *data)
 {
 	struct settings_content *content = data;
-	GtkWidget *box = g_object_get_data(G_OBJECT(content->content), "box");
-	g_hash_table_unref(g_object_get_data(G_OBJECT(box), "items"));
+	g_hash_table_unref(g_object_get_data(G_OBJECT(content->data), "items"));
 	g_free(content);
 }
 
@@ -309,16 +291,12 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
 	gtk_notebook_set_show_border(GTK_NOTEBOOK(notebook), FALSE);
 	gtk_widget_set_hexpand(notebook, TRUE);
 	gtk_widget_set_vexpand(notebook, FALSE);
-	gtk_grid_set_row_spacing(GTK_GRID(content->content), MARGIN_LARGE);
 
 	g_object_set_data(G_OBJECT(box), "notebook", notebook);
 	g_object_set_data(G_OBJECT(box), "items", items);
-	g_object_set_data(G_OBJECT(content->content), "box", box);
 
 	g_signal_connect(box, "changed", G_CALLBACK(combo_box_changed),
 	                 notebook);
-
-	gtk_widget_show_all(content->content);
 
 	add_left_aligned(GTK_GRID(page->grid), label_w, box, page->index++);
 	gtk_widget_set_margin_bottom(label_w, MARGIN_LARGE);
@@ -335,6 +313,8 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
 	}
 
 	content->data = box;
+	g_signal_connect(content->data, "destroy",
+	                 G_CALLBACK(free_content), content);
 	return box;
 }
 
@@ -414,7 +394,7 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	struct settings_content *content;
 	gchar **values;
 	gchar **iter;
-	GtkWidget *box, *label_w, *toolbar, *frame, *button, *buttonbox;
+	GtkWidget *box, *label_w, *toolbar, *frame, *button, *buttonbox, *grid;
 	GtkToolItem *item, *buttonitem;
 
 	content = create_base_content(sett, writable, ekey, esubkey);
@@ -426,12 +406,12 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	                                       GTK_ICON_SIZE_MENU);
 	/* needs to be a box and not a grid for inline-toolbar css */
 	buttonbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	grid = gtk_grid_new();
 	item = gtk_separator_tool_item_new();
 	buttonitem = gtk_tool_item_new();
 
 	content->value = content_value_entry_list;
 
-	g_object_set_data(G_OBJECT(content->content), "list", box);
 	g_object_set_data(G_OBJECT(box), "count", GINT_TO_POINTER(0));
 	g_signal_connect(button, "clicked", G_CALLBACK(add_entry_to_list), box);
 
@@ -449,7 +429,7 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
 	gtk_toolbar_set_icon_size(GTK_TOOLBAR(toolbar), GTK_ICON_SIZE_MENU);
 
-	gtk_widget_set_margin_start(content->content, MARGIN_LARGE);
+	gtk_widget_set_margin_start(grid, MARGIN_LARGE);
 	gtk_widget_set_margin_bottom(label_w, MARGIN_MEDIUM);
 	gtk_widget_set_hexpand(toolbar, TRUE);
 	gtk_widget_set_halign(label_w, GTK_ALIGN_START);
@@ -461,11 +441,11 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(item), 0);
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), buttonitem, 1);
 	gtk_container_add(GTK_CONTAINER(frame), box);
-	gtk_grid_attach(GTK_GRID(content->content), label_w, 0, 0, 1, 1);
-	gtk_grid_attach(GTK_GRID(content->content), frame, 0, 1, 1, 1);
-	gtk_grid_attach(GTK_GRID(content->content), toolbar, 0, 2, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), label_w, 0, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), frame, 0, 1, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), toolbar, 0, 2, 1, 1);
 
-	gtk_grid_attach(GTK_GRID(page->grid), content->content, 0,
+	gtk_grid_attach(GTK_GRID(page->grid), grid, 0,
 			page->index++, 2, 1);
 	gtk_widget_show_all(page->grid);
 
@@ -478,5 +458,7 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	}
 
 	content->data = box;
+	g_signal_connect(content->data, "destroy",
+	                 G_CALLBACK(free_content), content);
 	return box;
 }
