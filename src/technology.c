@@ -298,7 +298,7 @@ struct technology_settings *create_technology_settings(struct technology *tech,
 	powerbox = gtk_grid_new();
 	frame = gtk_frame_new(NULL);
 	scrolled_window = gtk_scrolled_window_new(NULL, NULL);
-	item->tethering = gtk_button_new_with_mnemonic(_("Enable _Tethering"));
+	item->tethering = gtk_button_new_with_mnemonic(_("Enable _tethering"));
 
 	g_object_ref(item->grid);
 	g_object_ref(item->icon);
