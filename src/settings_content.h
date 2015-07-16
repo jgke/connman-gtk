@@ -33,6 +33,7 @@ typedef GVariant *(*settings_field_value)(struct settings_content *content);
 
 struct settings_content {
 	GtkWidget *content;
+	GtkWidget *data;
 	struct settings *sett;
 
 	settings_field_validator valid;

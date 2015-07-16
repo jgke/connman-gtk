@@ -97,6 +97,10 @@ static struct settings_page *add_page_to_combo_box(struct settings *sett,
 	g_hash_table_insert(items, g_strdup(name), page->grid);
 	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), id, name);
 	if(active)
+		g_object_set_data(G_OBJECT(page->grid), "selected", page->grid);
+	else
+		g_object_set_data(G_OBJECT(page->grid), "selected", NULL);
+	if(active)
 		gtk_combo_box_set_active_id(GTK_COMBO_BOX(box), id);
 	return page;
 }
@@ -313,7 +317,6 @@ static void apply_cb(GtkWidget *window, gpointer user_data)
 
 	dual_hash_table_foreach(sett->contents, append_dict_inner, table);
 	out = dual_hash_table_to_variant(table);
-	printf("%s\n", g_variant_print(out, TRUE));
 	service_set_properties(sett->serv, out);
 	g_variant_unref(out);
 	dual_hash_table_unref(table);

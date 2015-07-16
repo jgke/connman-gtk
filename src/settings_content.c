@@ -40,7 +40,7 @@ gboolean always_write(struct settings_content *content)
 
 gboolean write_if_selected(struct settings_content *content)
 {
-	GtkWidget *parent = gtk_widget_get_parent(content->content);
+	GtkWidget *parent = gtk_widget_get_parent(content->data);
 	return  !!g_object_get_data(G_OBJECT(parent), "selected");
 }
 
@@ -54,7 +54,7 @@ static GVariant *content_value_null(struct settings_content *content)
 	return NULL;
 }
 
-void settings_add_content(struct settings_page *page,
+void _settings_add_content(struct settings_page *page,
                           struct settings_content *content)
 {
 	gtk_grid_attach(GTK_GRID(page->grid), content->content,
@@ -64,8 +64,7 @@ void settings_add_content(struct settings_page *page,
 
 static GVariant *content_value_entry(struct settings_content *content)
 {
-	GtkWidget *entry = g_object_get_data(G_OBJECT(content->content),
-	                                     "entry");
+	GtkWidget *entry = content->data;
 	const gchar *str = gtk_entry_get_text(GTK_ENTRY(entry));
 	if(!strcmp(content->key, "IPv6.Configuration") &&
 	   !strcmp(content->subkey, "Gateway") && !strlen(str))
@@ -76,8 +75,7 @@ static GVariant *content_value_entry(struct settings_content *content)
 
 static GVariant *content_value_switch(struct settings_content *content)
 {
-	GtkWidget *toggle = g_object_get_data(G_OBJECT(content->content),
-	                                      "toggle");
+	GtkWidget *toggle = content->data;
 	gboolean active = gtk_switch_get_active(GTK_SWITCH(toggle));
 	GVariant *var = g_variant_new("b", active);
 	return var;
@@ -85,7 +83,7 @@ static GVariant *content_value_switch(struct settings_content *content)
 
 static GVariant *content_value_list(struct settings_content *content)
 {
-	GtkWidget *list = g_object_get_data(G_OBJECT(content->content), "box");
+	GtkWidget *list = content->data;
 	GtkComboBox *box = GTK_COMBO_BOX(list);
 	GVariant *var = g_variant_new("s", gtk_combo_box_get_active_id(box));
 	return var;
@@ -93,7 +91,7 @@ static GVariant *content_value_list(struct settings_content *content)
 
 static GVariant *content_value_entry_list(struct settings_content *content)
 {
-	GtkWidget *list = g_object_get_data(G_OBJECT(content->content), "list");
+	GtkWidget *list = content->data;
 	GList *children = gtk_container_get_children(GTK_CONTAINER(list));
 	GPtrArray *array = g_ptr_array_new();
 	GList *l;
@@ -155,19 +153,21 @@ static struct settings_content *create_base_content(struct settings *sett,
 	return content;
 }
 
-static void add_left_aligned(GtkGrid *grid, GtkWidget *a, GtkWidget *b)
+static void add_left_aligned(GtkGrid *grid, GtkWidget *a, GtkWidget *b, int y)
 {
 	gtk_widget_set_margin_start(a, MARGIN_LARGE);
 	gtk_widget_set_margin_end(a, MARGIN_SMALL);
 	gtk_widget_set_margin_start(b, MARGIN_SMALL);
+	gtk_widget_set_margin_bottom(a, MARGIN_SMALL);
+	gtk_widget_set_margin_bottom(b, MARGIN_SMALL);
 
 	gtk_widget_set_halign(a, GTK_ALIGN_START);
 	gtk_widget_set_halign(b, GTK_ALIGN_START);
 	gtk_widget_set_hexpand(a, TRUE);
 	gtk_widget_set_hexpand(b, TRUE);
 
-	gtk_grid_attach(grid, a, 0, 0, 1, 1);
-	gtk_grid_attach(grid, b, 1, 0, 1, 1);
+	gtk_grid_attach(grid, a, 0, y, 1, 1);
+	gtk_grid_attach(grid, b, 1, y, 1, 1);
 }
 
 GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
@@ -191,9 +191,8 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 	gtk_widget_set_hexpand(content->content, TRUE);
 	label_align_text_left(GTK_LABEL(value_w));
 
-	add_left_aligned(GTK_GRID(content->content), label_w, value_w);
-
-	settings_add_content(page, content);
+	add_left_aligned(GTK_GRID(page->grid), label_w, value_w, page->index++);
+	gtk_widget_show_all(page->grid);
 
 	if(key) {
 		struct content_callback *cb;
@@ -233,13 +232,17 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 	g_free(value);
 	g_object_set_data(G_OBJECT(content->content), "entry", entry);
 
-	add_left_aligned(GTK_GRID(content->content), label_w, entry);
+	if(!strncmp(key, "IPv4", 4))
+		gtk_entry_set_width_chars(GTK_ENTRY(entry), 4*3 + 3);
+	else if(!strncmp(key, "IPv6", 4))
+		gtk_entry_set_width_chars(GTK_ENTRY(entry), 8*4 + 7);
 
-	gtk_widget_show_all(content->content);
+	add_left_aligned(GTK_GRID(page->grid), label_w, entry, page->index++);
+	gtk_widget_show_all(page->grid);
 
-	settings_add_content(page, content);
 	hash_table_set_dual_key(sett->contents, ekey, esubkey, content);
 
+	content->data = entry;
 	return entry;
 }
 
@@ -263,13 +266,12 @@ GtkWidget *settings_add_switch(struct settings *sett,
 
 	g_object_set_data(G_OBJECT(content->content), "toggle", toggle);
 
-	add_left_aligned(GTK_GRID(content->content), label_w, toggle);
+	add_left_aligned(GTK_GRID(page->grid), label_w, toggle, page->index++);
+	gtk_widget_show_all(page->grid);
 
-	gtk_widget_show_all(content->content);
-
-	settings_add_content(page, content);
 	hash_table_set_dual_key(sett->contents, key, subkey, content);
 
+	content->data = toggle;
 	return toggle;
 }
 
@@ -316,12 +318,14 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
 	g_signal_connect(box, "changed", G_CALLBACK(combo_box_changed),
 	                 notebook);
 
-	add_left_aligned(GTK_GRID(content->content), label_w, box);
-	gtk_grid_attach(GTK_GRID(content->content), notebook, 0, 1, 2, 1);
-
 	gtk_widget_show_all(content->content);
 
-	settings_add_content(page, content);
+	add_left_aligned(GTK_GRID(page->grid), label_w, box, page->index++);
+	gtk_widget_set_margin_bottom(label_w, MARGIN_LARGE);
+	gtk_widget_set_margin_bottom(box, MARGIN_LARGE);
+	gtk_grid_attach(GTK_GRID(page->grid), notebook, 0, page->index++, 2, 1);
+	gtk_widget_show_all(page->grid);
+
 	hash_table_set_dual_key(sett->contents, ekey, esubkey, content);
 
 	if(key) {
@@ -330,6 +334,7 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
 		settings_set_callback(page->sett, key, subkey, cb);
 	}
 
+	content->data = box;
 	return box;
 }
 
@@ -460,9 +465,10 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	gtk_grid_attach(GTK_GRID(content->content), frame, 0, 1, 1, 1);
 	gtk_grid_attach(GTK_GRID(content->content), toolbar, 0, 2, 1, 1);
 
-	gtk_widget_show_all(content->content);
+	gtk_grid_attach(GTK_GRID(page->grid), content->content, 0,
+			page->index++, 2, 1);
+	gtk_widget_show_all(page->grid);
 
-	settings_add_content(page, content);
 	hash_table_set_dual_key(sett->contents, ekey, esubkey, content);
 
 	if(ekey) {
@@ -471,5 +477,6 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 		settings_set_callback(page->sett, ekey, esubkey, cb);
 	}
 
+	content->data = box;
 	return box;
 }
