@@ -41,6 +41,7 @@ struct settings_content {
 	void (*free)(void *ptr);
 	const gchar *key;
 	const gchar *subkey;
+	const gchar *secondary_key;
 };
 
 gboolean never_write(struct settings_content *content);
@@ -56,7 +57,7 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
                               settings_writable writable, const gchar *label,
                               const gchar *key, const gchar *subkey,
-                              const gchar *ekey, const gchar *esubkey,
+			      const gchar *secondary_key,
                               settings_field_validator valid);
 GtkWidget *settings_add_switch(struct settings *sett,
                                struct settings_page *page,
@@ -67,13 +68,13 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
                                   settings_writable writable,
                                   const gchar *label,
                                   const gchar *key, const gchar *subkey,
-                                  const gchar *ekey, const gchar *esubkey);
+				  const gchar *secondary_key);
 GtkWidget *settings_add_entry_list(struct settings *sett,
                                    struct settings_page *page,
                                    settings_writable writable,
                                    const gchar *label,
                                    const gchar *key, const gchar *subkey,
-                                   const gchar *ekey, const gchar *esubkey);
+				   const gchar *secondary_key);
 void content_add_entry_to_list(GtkWidget *list, const gchar *value);
 
 void free_content(GtkWidget *widget, gpointer user_data);

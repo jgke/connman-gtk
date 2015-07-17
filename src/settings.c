@@ -183,7 +183,7 @@ static void add_ipv_page(struct settings *sett, int ipv)
 	}
 	page = add_page_to_settings(sett, local);
 	box = settings_add_combo_box(sett, page, always_write, _("Method"),
-	                             ipvs, "Method", conf, "Method");
+	                             conf, "Method", ipvs);
 
 	none = add_page_to_combo_box(sett, box, "off", _("None"), TRUE);
 
@@ -208,29 +208,24 @@ static void add_ipv_page(struct settings *sett, int ipv)
 				  "PrefixLength");
 
 	settings_add_text(manual, _("Address"), NULL, NULL);
-	settings_add_entry(sett, manual, write_if_selected,
-			   NULL, ipvs, "Address", conf,
-			   "Address", validator);
+	settings_add_entry(sett, manual, write_if_selected, NULL, conf,
+			   "Address", ipvs, validator);
 	settings_add_text(manual, _("Gateway"), NULL, NULL);
-	settings_add_entry(sett, manual, write_if_selected,
-			   NULL, ipvs, "Gateway", conf,
-			   "Gateway", validator);
+	settings_add_entry(sett, manual, write_if_selected, NULL, conf,
+			   "Gateway", ipvs, validator);
 	if(ipv == 4) {
 		settings_add_text(manual, _("Netmask"), NULL, NULL);
-		settings_add_entry(sett, manual, write_if_selected,
-				   NULL, ipvs, "Netmask", conf,
-				   "Netmask", validator);
+		settings_add_entry(sett, manual, write_if_selected, NULL, conf,
+				   "Netmask", ipvs, validator);
 	}
 	else {
 		settings_add_text(manual, _("Prefix length"), NULL, NULL);
-		settings_add_entry(sett, manual, write_if_selected,
-				   NULL, ipvs, "PrefixLength",
-				   conf, "PrefixLength", always_valid);
+		settings_add_entry(sett, manual, write_if_selected, NULL, conf,
+				   "PrefixLength", ipvs, always_valid);
 		ipv6_privacy = settings_add_combo_box(sett, dhcp,
 						      always_write,
-						      _("Privacy"), ipvs,
-						      "Privacy", conf,
-						      "Privacy");
+						      _("Privacy"), conf,
+						      "Privacy", ipvs);
 
 		cur = service_get_property_string(sett->serv, ipvs, "Privacy");
 		add_page_to_combo_box(sett, ipv6_privacy, "disabled",
@@ -249,18 +244,18 @@ static void add_server_page(struct settings *sett)
 
 	page = add_page_to_settings(sett, _("Nameservers"));
 	settings_add_entry_list(sett, page, always_write, _("Nameservers"),
-				"Nameservers", NULL,
-				"Nameservers.Configuration", NULL);
+				"Nameservers.Configuration", NULL,
+				"Nameservers");
 
 	page = add_page_to_settings(sett, _("Timeservers"));
 	settings_add_entry_list(sett, page, always_write, _("Timeservers"),
-				"Timeservers", NULL,
-				"Timeservers.Configuration", NULL);
+				"Timeservers.Configuration", NULL,
+				"Timeservers");
 
 	page = add_page_to_settings(sett, _("Domains"));
 	settings_add_entry_list(sett, page, always_write, _("Domains"),
-				"Domains", NULL,
-				"Domains.Configuration", NULL);
+				"Domains.Configuration", NULL,
+				"Domains");
 }
 
 static void add_proxy_page(struct settings *sett)
@@ -273,7 +268,7 @@ static void add_proxy_page(struct settings *sett)
 	gchar *cur = service_get_property_string(sett->serv, "Proxy", "Method");
 
 	box = settings_add_combo_box(sett, page, always_write, _("Method"),
-	                             "Proxy", "Method", conf, "Method");
+	                             conf, "Method", "Proxy");
 
 	direct = add_page_to_combo_box(sett, box, "direct", _("Direct"),
 	                             !strlen(cur) || !strcmp("direct", cur));
@@ -286,12 +281,12 @@ static void add_proxy_page(struct settings *sett)
 	settings_add_text(direct, NULL, NULL, NULL);
 
 	settings_add_entry(sett, automatic, write_if_selected, _("URL"),
-			   "Proxy", "URL", conf, "URL", always_valid);
+			   conf, "URL", "Proxy", always_valid);
 
 	settings_add_entry_list(sett, manual, write_if_selected, _("Servers"),
-				"Proxy", "Servers", conf, "Servers");
+				conf, "Servers", "Proxy");
 	settings_add_entry_list(sett, manual, write_if_selected, _("Excludes"),
-				"Proxy", "Excludes", conf, "Excludes");
+				conf, "Excludes", "Proxy");
 }
 
 static void append_dict_inner(const gchar *key, const gchar *subkey,

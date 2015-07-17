@@ -121,7 +121,8 @@ static GtkWidget *create_label(const gchar *text)
 static struct settings_content *create_base_content(struct settings *sett,
                 settings_writable writable,
                 const gchar *key,
-                const gchar *subkey)
+                const gchar *subkey,
+		const gchar *secondary_key)
 {
 	struct settings_content *content = g_malloc(sizeof(*content));
 	content->valid = always_valid;
@@ -131,6 +132,7 @@ static struct settings_content *create_base_content(struct settings *sett,
 	content->writable = writable;
 	content->key = key;
 	content->subkey = subkey;
+	content->secondary_key = secondary_key;
 
 	return content;
 }
@@ -164,7 +166,7 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 	gchar *value;
 	struct settings_content *content;
 
-	content = create_base_content(NULL, never_write, NULL, NULL);
+	content = create_base_content(NULL, never_write, NULL, NULL, NULL);
 
 	value = service_get_property_string(page->sett->serv, key, subkey);
 
@@ -193,14 +195,15 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
                               settings_writable writable, const gchar *label,
                               const gchar *key, const gchar *subkey,
-                              const gchar *ekey, const gchar *esubkey,
+			      const gchar *secondary_key,
                               settings_field_validator valid)
 {
 	GtkWidget *label_w, *entry;
 	gchar *value;
 	struct settings_content *content;
 
-	content = create_base_content(sett, writable, ekey, esubkey);
+	content = create_base_content(sett, writable, key, subkey,
+				      secondary_key);
 	if(valid)
 		content->valid = valid;
 	content->free = g_free;
@@ -212,11 +215,11 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 		label_w = NULL;
 	entry = gtk_entry_new();
 
-	value = service_get_property_string(page->sett->serv, ekey, esubkey);
+	value = service_get_property_string(page->sett->serv, key, subkey);
 	if(!strlen(value)) {
 		g_free(value);
 		value = service_get_property_string(page->sett->serv,
-		                                    key, subkey);
+		                                    secondary_key, subkey);
 	}
 	gtk_entry_set_text(GTK_ENTRY(entry), value);
 	g_free(value);
@@ -229,7 +232,7 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 	add_left_aligned(GTK_GRID(page->grid), label_w, entry, page->index++);
 	gtk_widget_show_all(page->grid);
 
-	hash_table_set_dual_key(sett->contents, ekey, esubkey, content);
+	hash_table_set_dual_key(sett->contents, key, subkey, content);
 
 	content->data = entry;
 	g_signal_connect(content->data, "destroy",
@@ -246,7 +249,7 @@ GtkWidget *settings_add_switch(struct settings *sett,
 	struct settings_content *content;
 	gboolean value;
 
-	content = create_base_content(sett, writable, key, subkey);
+	content = create_base_content(sett, writable, key, subkey, NULL);
 	content->value = content_value_switch;
 	value = service_get_property_boolean(page->sett->serv, key, subkey);
 
@@ -278,13 +281,14 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
                                   settings_writable writable,
                                   const gchar *label,
                                   const gchar *key, const gchar *subkey,
-                                  const gchar *ekey, const gchar *esubkey)
+                                  const gchar *secondary_key)
 {
 	struct settings_content *content;
 	GtkWidget *label_w, *notebook, *box;
 	GHashTable *items;
 
-	content = create_base_content(sett, writable, ekey, esubkey);
+	content = create_base_content(sett, writable, key, subkey,
+				      secondary_key);
 	items = g_hash_table_new_full(g_str_hash, g_str_equal,
 	                              g_free, NULL);
 
@@ -312,7 +316,7 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
 	gtk_grid_attach(GTK_GRID(page->grid), notebook, 0, page->index++, 2, 1);
 	gtk_widget_show_all(page->grid);
 
-	hash_table_set_dual_key(sett->contents, ekey, esubkey, content);
+	hash_table_set_dual_key(sett->contents, key, subkey, content);
 
 	if(key) {
 		struct content_callback *cb;
@@ -398,7 +402,7 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
                                    settings_writable writable,
                                    const gchar *label,
                                    const gchar *key, const gchar *subkey,
-                                   const gchar *ekey, const gchar *esubkey)
+                                   const gchar *secondary_key)
 {
 	struct settings_content *content;
 	gchar **values;
@@ -406,7 +410,8 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	GtkWidget *box, *label_w, *toolbar, *frame, *button, *buttonbox, *grid;
 	GtkToolItem *item, *buttonitem;
 
-	content = create_base_content(sett, writable, ekey, esubkey);
+	content = create_base_content(sett, writable, key, subkey,
+				      secondary_key);
 	box = gtk_list_box_new();
 	label_w = create_label(label);
 	toolbar = gtk_toolbar_new();
@@ -424,10 +429,11 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	g_object_set_data(G_OBJECT(box), "count", GINT_TO_POINTER(0));
 	g_signal_connect(button, "clicked", G_CALLBACK(add_entry_to_list), box);
 
-	values = service_get_property_strv(sett->serv, ekey, esubkey);
+	values = service_get_property_strv(sett->serv, key, subkey);
 	if(!*values) {
 		g_strfreev(values);
-		values = service_get_property_strv(sett->serv, key, subkey);
+		values = service_get_property_strv(sett->serv, secondary_key,
+						   subkey);
 		if(!*values)
 			content_add_entry_to_list(box, NULL);
 	}
@@ -462,12 +468,12 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 			page->index++, 2, 1);
 	gtk_widget_show_all(page->grid);
 
-	hash_table_set_dual_key(sett->contents, ekey, esubkey, content);
+	hash_table_set_dual_key(sett->contents, key, subkey, content);
 
-	if(ekey) {
+	if(key) {
 		struct content_callback *cb;
 		cb = create_entry_list_callback(box);
-		settings_set_callback(page->sett, ekey, esubkey, cb);
+		settings_set_callback(page->sett, key, subkey, cb);
 	}
 
 	content->data = box;
