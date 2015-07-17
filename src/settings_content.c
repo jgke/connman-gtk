@@ -349,7 +349,7 @@ static void destroy_entry(GtkButton *button, gpointer user_data)
 	update_button_visibility(box);
 }
 
-static void add_entry_to_list_value(GtkWidget *list, const gchar *value)
+void content_add_entry_to_list(GtkWidget *list, const gchar *value)
 {
 	GtkWidget *entry = gtk_entry_new();
 	GtkWidget *rem = gtk_button_new_from_icon_name("list-remove-symbolic",
@@ -361,6 +361,7 @@ static void add_entry_to_list_value(GtkWidget *list, const gchar *value)
 	g_signal_connect(rem, "clicked", G_CALLBACK(destroy_entry), row);
 	g_object_set_data(G_OBJECT(row), "entry", entry);
 	g_object_set_data(G_OBJECT(row), "button", rem);
+	g_object_set_data(G_OBJECT(row), "destroy", destroy_entry);
 
 	if(value)
 		gtk_entry_set_text(GTK_ENTRY(entry), value);
@@ -389,7 +390,7 @@ static void add_entry_to_list_value(GtkWidget *list, const gchar *value)
 static void add_entry_to_list(GtkButton *button, gpointer user_data)
 {
 	GtkWidget *list = user_data;
-	add_entry_to_list_value(list, NULL);
+	content_add_entry_to_list(list, NULL);
 }
 
 GtkWidget *settings_add_entry_list(struct settings *sett,
@@ -423,11 +424,15 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	g_object_set_data(G_OBJECT(box), "count", GINT_TO_POINTER(0));
 	g_signal_connect(button, "clicked", G_CALLBACK(add_entry_to_list), box);
 
-	values = service_get_property_strv(sett->serv, key, subkey);
-	if(!*values)
-		add_entry_to_list_value(box, NULL);
+	values = service_get_property_strv(sett->serv, ekey, esubkey);
+	if(!*values) {
+		g_strfreev(values);
+		values = service_get_property_strv(sett->serv, key, subkey);
+		if(!*values)
+			content_add_entry_to_list(box, NULL);
+	}
 	for(iter = values; *iter; iter++)
-		add_entry_to_list_value(box, *iter);
+		content_add_entry_to_list(box, *iter);
 	g_strfreev(values);
 
 	gtk_style_context_add_class(gtk_widget_get_style_context(toolbar),

@@ -74,6 +74,7 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
                                    const gchar *label,
                                    const gchar *key, const gchar *subkey,
                                    const gchar *ekey, const gchar *esubkey);
+void content_add_entry_to_list(GtkWidget *list, const gchar *value);
 
 void free_content(GtkWidget *widget, gpointer user_data);
 

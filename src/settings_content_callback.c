@@ -73,7 +73,26 @@ void handle_content_callback(GVariant *value, const gchar *key,
 		return;
 	}
 	case CONTENT_CALLBACK_TYPE_ENTRY_LIST: {
-		//TODO
+		GtkWidget *list, *child;
+		gchar **values, **iter;
+		GList *children, *l;
+		void (*destroy)(GtkWidget *list, void *user_data);
+
+		list = cb->data;
+		values = variant_to_strv(value);
+		children = gtk_container_get_children(GTK_CONTAINER(list));
+		for(l = children; l != NULL; l = l->next) {
+			child = l->data;
+			destroy = g_object_get_data(G_OBJECT(child), "destroy");
+			destroy(NULL, child);
+		}
+		g_list_free(children);
+
+		if(!*values)
+			content_add_entry_to_list(cb->data, NULL);
+		for(iter = values; *iter; iter++)
+			content_add_entry_to_list(cb->data, *iter);
+		g_strfreev(values);
 		return;
 	}
 	default:

@@ -127,10 +127,12 @@ static void update_status(struct technology_settings *item)
 			gtk_label_set_text(GTK_LABEL(item->status),
 			                   _("Not connected"));
 			gtk_widget_show(item->buttons);
+			gtk_widget_show(item->contents);
 		} else {
 			gtk_label_set_text(GTK_LABEL(item->status),
 			                   _("Disabled"));
 			gtk_widget_hide(item->buttons);
+			gtk_widget_hide(item->contents);
 		}
 	}
 }
@@ -342,6 +344,8 @@ struct technology_settings *create_technology_settings(struct technology *tech,
 	gtk_widget_set_vexpand(powerbox, FALSE);
 	gtk_widget_set_hexpand(item->contents, TRUE);
 	gtk_widget_set_vexpand(item->contents, TRUE);
+	gtk_widget_set_hexpand(item->services, TRUE);
+	gtk_widget_set_vexpand(item->services, TRUE);
 	gtk_widget_set_vexpand(scrolled_window, TRUE);
 	gtk_widget_set_hexpand(item->filler, TRUE);
 	gtk_widget_set_hexpand(item->buttons, TRUE);
@@ -420,13 +424,10 @@ void technology_property_changed(struct technology *item, const gchar *key)
 void technology_services_updated(struct technology *item)
 {
 	int count = g_hash_table_size(item->services);
-	if(count) {
-		gtk_widget_show(item->settings->contents);
+	if(count)
 		gtk_widget_show(item->settings->connect_button);
-	} else {
-		gtk_widget_hide(item->settings->contents);
+	else
 		gtk_widget_hide(item->settings->connect_button);
-	}
 	if(functions[item->type].services_updated)
 		functions[item->type].services_updated(item);
 }
