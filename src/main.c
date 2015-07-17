@@ -379,7 +379,7 @@ static void connman_appeared(GDBusConnection *connection, const gchar *name,
 	gtk_container_add(GTK_CONTAINER(list), vpn->list_item->item);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
 	                         vpn->settings->grid, NULL);
-	register_agent(connection, proxy);
+	register_agents(connection, proxy, vpn->settings->proxy);
 }
 
 static void connman_disappeared(GDBusConnection *connection, const gchar *name,

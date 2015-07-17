@@ -30,25 +30,29 @@
 #include "style.h"
 
 GDBusConnection *conn = NULL;
-gint agent_id;
 
-void release(GDBusMethodInvocation *invocation)
+struct agent {
+	gint id;
+	const gchar *cancel;
+} *normal_agent, *vpn_agent;
+
+void release(struct agent *agent, GDBusMethodInvocation *invocation)
 {
 	g_dbus_method_invocation_return_value(invocation, NULL);
 }
 
-void report_error(GDBusMethodInvocation *invocation, GVariant *parameters)
+void report_error(struct agent *agent, GDBusMethodInvocation *invocation, GVariant *parameters)
 {
 	g_dbus_method_invocation_return_dbus_error(invocation,
 	                "net.connman.Agent.Error.Retry", "");
 }
 
-void report_peer_error(GDBusMethodInvocation *invocation, GVariant *parameters)
+void report_peer_error(struct agent *agent, GDBusMethodInvocation *invocation, GVariant *parameters)
 {
 	g_dbus_method_invocation_return_value(invocation, NULL);
 }
 
-void request_browser(GDBusMethodInvocation *invocation, GVariant *parameters)
+void request_browser(struct agent *agent, GDBusMethodInvocation *invocation, GVariant *parameters)
 {
 	g_dbus_method_invocation_return_dbus_error(invocation,
 	                "net.connman.Agent.Error.Canceled",
@@ -104,7 +108,7 @@ static GPtrArray *generate_entries(GVariant *args)
 	return array;
 }
 
-void request_input(GDBusMethodInvocation *invocation, GVariant *parameters)
+void request_input(struct agent *agent, GDBusMethodInvocation *invocation, GVariant *parameters)
 {
 	GtkDialog *dialog;
 	GtkWidget *grid = gtk_grid_new();
@@ -151,14 +155,14 @@ void request_input(GDBusMethodInvocation *invocation, GVariant *parameters)
 		g_variant_dict_unref(dict);
 	} else
 		g_dbus_method_invocation_return_dbus_error(invocation,
-		                "net.connman.Agent.Error.Canceled",
+							   agent->cancel,
 		                "User canceled password dialog");
 
 	g_ptr_array_free(entries, TRUE);
 	gtk_widget_destroy(window);
 }
 
-void request_peer_authorization(GDBusMethodInvocation *invocation,
+void request_peer_authorization(struct agent *agent, GDBusMethodInvocation *invocation,
                                 GVariant *parameters)
 {
 	g_dbus_method_invocation_return_dbus_error(invocation,
@@ -177,17 +181,17 @@ void method_call(GDBusConnection *connection, const gchar *sender,
                  GDBusMethodInvocation *invocation, gpointer user_data)
 {
 	if(!strcmp(method_name, "Release"))
-		release(invocation);
+		release(user_data, invocation);
 	else if(!strcmp(method_name, "ReportError"))
-		report_error(invocation, parameters);
+		report_error(user_data, invocation, parameters);
 	else if(!strcmp(method_name, "ReportPeerError"))
-		report_peer_error(invocation, parameters);
+		report_peer_error(user_data, invocation, parameters);
 	else if(!strcmp(method_name, "RequestBrowser"))
-		request_browser(invocation, parameters);
+		request_browser(user_data, invocation, parameters);
 	else if(!strcmp(method_name, "RequestInput"))
-		request_input(invocation, parameters);
+		request_input(user_data, invocation, parameters);
 	else if(!strcmp(method_name, "RequestPeerAuthorization"))
-		request_peer_authorization(invocation, parameters);
+		request_peer_authorization(user_data, invocation, parameters);
 	else
 		cancel(invocation);
 }
@@ -200,52 +204,92 @@ static char *agent_path(void)
 	return path;
 }
 
+static char *vpn_agent_path(void)
+{
+	static char *path = NULL;
+	if(!path)
+		path = g_strdup_printf("/net/connmangtk/vpn/agent%d", getpid());
+	return path;
+}
+
 static const GDBusInterfaceVTable vtable = {
 	method_call,
 	NULL,
 	NULL
 };
 
-void register_agent(GDBusConnection *connection, GDBusProxy *manager)
+static struct agent *agent_create(GDBusConnection *connection,
+				  GDBusProxy *manager,
+				  const gchar *interface_name,
+				  const gchar *agent_path, const gchar *path,
+				  const gchar *cancel)
 {
 	GError *error = NULL;
-	GDBusNodeInfo *info = g_dbus_node_info_new_for_xml(AGENT_INTERFACE,
-	                      &error);
+	struct agent *agent;
 	GVariant *ret;
+	GDBusNodeInfo *info;
+	GDBusInterfaceInfo *interface;
+
+	info = g_dbus_node_info_new_for_xml(interface_name, &error);
 	if(error) {
 		g_critical("Failed to load agent interface: %s",
 		           error->message);
 		g_error_free(error);
-		return;
+		return NULL;
 	}
-	agent_id = g_dbus_connection_register_object(connection, agent_path(),
-	                g_dbus_node_info_lookup_interface(info,
-	                                "net.connman.Agent"),
-	                &vtable, NULL, NULL, &error);
+
+	agent = g_malloc(sizeof(*agent));
+	interface = g_dbus_node_info_lookup_interface(info, agent_path),
+	agent->id = g_dbus_connection_register_object(connection, path,
+						      interface, &vtable, agent,
+						      NULL, &error);
 	conn = connection;
 	g_dbus_node_info_unref(info);
 	if(error) {
 		g_critical("Failed to register agent object: %s",
 		           error->message);
 		g_error_free(error);
-		return;
+		g_free(agent);
+		return NULL;
 	}
+
 	ret = g_dbus_proxy_call_sync(manager, "RegisterAgent",
-	                             g_variant_new("(o)", agent_path()),
+	                             g_variant_new("(o)", path),
 	                             G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
 	if(error) {
 		g_critical("Failed to register agent: %s",
 		           error->message);
 		g_error_free(error);
-		return;
+		g_free(agent);
+		return NULL;
 	}
 	g_variant_unref(ret);
+
+	agent->cancel = cancel;
+	return agent;
+}
+
+
+void register_agents(GDBusConnection *connection, GDBusProxy *manager,
+		     GDBusProxy *vpn_manager)
+{
+	normal_agent = agent_create(connection, manager, AGENT_INTERFACE,
+				    AGENT_NAME, agent_path(),
+				    "net.connman.Agent.Error.Canceled");
+	vpn_agent  = agent_create(connection, vpn_manager, VPN_AGENT_INTERFACE,
+				  VPN_AGENT_NAME, vpn_agent_path(),
+				  "net.connman.vpn.Agent.Error.Canceled");
 }
 
 void agent_release(void)
 {
-	if(conn && agent_id)
-		g_dbus_connection_unregister_object(conn, agent_id);
+	if(conn && normal_agent)
+		g_dbus_connection_unregister_object(conn, normal_agent->id);
+	if(conn && vpn_agent)
+		g_dbus_connection_unregister_object(conn, vpn_agent->id);
 	conn = NULL;
-	agent_id = 0;
+	g_free(normal_agent);
+	g_free(vpn_agent);
+	normal_agent = NULL;
+	vpn_agent = NULL;
 }

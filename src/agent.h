@@ -23,7 +23,8 @@
 
 #include <gio/gio.h>
 
-void register_agent(GDBusConnection *connection, GDBusProxy *manager);
+void register_agents(GDBusConnection *connection, GDBusProxy *manager,
+		     GDBusProxy *vpn_manager);
 void agent_release(void);
 
 #endif /* _CONNMAN_GTK_AGENT_H */
