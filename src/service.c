@@ -55,6 +55,12 @@ void service_update_property(struct service *serv, const gchar *key,
 	if(strcmp(g_variant_get_type_string(value), "a{sv}")) {
 		hash_table_set_dual_key(serv->properties, key, NULL,
 		                        g_variant_ref(value));
+		if(!strcmp(key, "Name")) {
+			gchar *title;
+			title = service_get_property_string(serv, key, NULL);
+			gtk_label_set_text(GTK_LABEL(serv->title), title);
+			g_free(title);
+		}
 		if(serv->sett)
 			settings_update(serv->sett, key, NULL, value);
 	} else {
@@ -274,7 +280,7 @@ GVariant *service_get_property(struct service *serv, const char *key,
 }
 
 gchar *service_get_property_string_raw(struct service *serv, const char *key,
-				       const char *subkey)
+                                       const char *subkey)
 {
 	if(!serv || !key)
 		return g_strdup("");
@@ -289,7 +295,7 @@ gchar *service_get_property_string(struct service *serv, const char *key,
                                    const char *subkey)
 {
 	if(key && subkey && !strcmp(subkey, "PrefixLength") &&
-	   (!strcmp(key, "IPv6") || !strcmp(key, "IPv6.Configuration"))) {
+	    (!strcmp(key, "IPv6") || !strcmp(key, "IPv6.Configuration"))) {
 		int len = service_get_property_int(serv, key, subkey);
 		if(!len)
 			return g_strdup("");
@@ -306,7 +312,7 @@ gchar *service_get_property_string(struct service *serv, const char *key,
 }
 
 gchar **service_get_property_strv(struct service *serv, const char *key,
-                                   const char *subkey)
+                                  const char *subkey)
 {
 	if(!serv || !key)
 		return g_malloc0(sizeof(gchar *));

@@ -30,6 +30,7 @@
 #include "connection.h"
 #include "style.h"
 #include "technology.h"
+#include "vpn.h"
 #include "connections/bluetooth.h"
 #include "connections/cellular.h"
 #include "connections/ethernet.h"
@@ -54,10 +55,10 @@ static struct {
 	{technology_bluetooth_init},
 	{technology_cellular_init},
 	{},
-	{technology_vpn_init}
+	{}
 };
 
-static struct technology_list_item *create_list_item(struct technology *tech,
+struct technology_list_item *technology_create_item(struct technology *tech,
                 const gchar *name)
 {
 	GtkWidget *grid;
@@ -78,6 +79,8 @@ static struct technology_list_item *create_list_item(struct technology *tech,
 
 	g_object_set_data(G_OBJECT(item->item), "content",
 	                  tech->settings->grid);
+	g_object_set_data(G_OBJECT(item->item), "technology-type",
+	                  &tech->type);
 
 	STYLE_ADD_MARGIN(grid, MARGIN_SMALL);
 	gtk_widget_set_margin_start(item->label, MARGIN_SMALL);
@@ -109,7 +112,7 @@ static gboolean toggle_power(GtkSwitch *widget, GParamSpec *pspec,
 	gboolean state = gtk_switch_get_active(widget);
 
 	technology_set_property(item->technology, "Powered",
-				g_variant_new("b", state));
+	                        g_variant_new("b", state));
 	return TRUE;
 }
 
@@ -201,9 +204,8 @@ static void tether_button_cb(GtkButton *widget, gpointer user_data)
 	gboolean state = variant_to_bool(state_v);
 	if(tech->technology->type != CONNECTION_TYPE_WIRELESS || state) {
 		technology_set_property(tech->technology, "Tethering",
-					g_variant_new("b", !state));
-	}
-	else
+		                        g_variant_new("b", !state));
+	} else
 		technology_wireless_tether(tech->technology);
 }
 
@@ -255,7 +257,7 @@ static void service_selected(GtkListBox *box, GtkListBoxRow *row,
 	update_connect_button(tech);
 }
 
-struct technology_settings *create_technology_settings(struct technology *tech,
+struct technology_settings *technology_create_settings(struct technology *tech,
                 GVariant *properties, GDBusProxy *proxy)
 {
 	struct technology_settings *item = g_malloc(sizeof(*item));
@@ -325,7 +327,7 @@ struct technology_settings *create_technology_settings(struct technology *tech,
 	g_signal_connect(item->connect_button, "clicked",
 	                 G_CALLBACK(connect_button_cb), item);
 	g_signal_connect(item->tethering, "clicked",
-			 G_CALLBACK(tether_button_cb), item);
+	                 G_CALLBACK(tether_button_cb), item);
 
 	gtk_widget_set_margin_start(item->grid, MARGIN_LARGE);
 	gtk_widget_set_margin_end(item->grid, MARGIN_LARGE);
@@ -463,6 +465,10 @@ void technology_free(struct technology *item)
 {
 	if(!item)
 		return;
+	if(item->type == CONNECTION_TYPE_VPN) {
+		vpn_free(item);
+		return;
+	}
 	free_list_item(item->list_item);
 	free_technology_settings(item->settings);
 	g_hash_table_unref(item->services);
@@ -489,15 +495,13 @@ void technology_init(struct technology *tech, GVariant *properties_v,
 	type = g_variant_get_string(type_v, NULL);
 	g_variant_dict_unref(properties);
 
+	tech->type = connection_type_from_string(type);
 	tech->services = g_hash_table_new_full(g_str_hash, g_str_equal,
 	                                       g_free, NULL);
-	tech->settings = create_technology_settings(tech, properties_v,
+	tech->settings = technology_create_settings(tech, properties_v,
 	                 proxy);
-	tech->list_item = create_list_item(tech, name);
+	tech->list_item = technology_create_item(tech, name);
 	technology_services_updated(tech);
-	tech->type = connection_type_from_string(type);
-	g_object_set_data(G_OBJECT(tech->list_item->item), "technology-type",
-	                  &tech->type);
 
 	g_variant_unref(name_v);
 	g_variant_unref(type_v);
@@ -532,7 +536,7 @@ struct technology *technology_create(GDBusProxy *proxy, const gchar *path,
 }
 
 void technology_set_property(struct technology *tech, const gchar *key,
-			     GVariant *value)
+                             GVariant *value)
 {
 	GVariant *ret;
 	GError *error = NULL;

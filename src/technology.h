@@ -71,6 +71,11 @@ struct technology {
 	enum connection_type type;
 };
 
+struct technology_list_item *technology_create_item(struct technology *tech,
+                const gchar *name);
+struct technology_settings *technology_create_settings(struct technology *tech,
+                GVariant *properties,
+                GDBusProxy *proxy);
 struct technology *technology_create(GDBusProxy *proxy, const gchar *path,
                                      GVariant *properties);
 void technology_init(struct technology *tech, GVariant *properties_v,
@@ -82,7 +87,7 @@ void technology_update_service(struct technology *item, struct service *serv,
                                GVariant *properties);
 void technology_remove_service(struct technology *item, const gchar *path);
 void technology_set_property(struct technology *item, const gchar *key,
-			     GVariant *value);
+                             GVariant *value);
 void technology_free(struct technology *item);
 
 #endif /* _CONNMAN_GTK_TECHNOLOGY_H */

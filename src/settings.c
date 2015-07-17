@@ -189,10 +189,10 @@ static void add_ipv_page(struct settings *sett, int ipv)
 
 	if(ipv == 4)
 		dhcp = add_page_to_combo_box(sett, box, "dhcp", _("Automatic"),
-					     !strcmp("dhcp", cur));
+		                             !strcmp("dhcp", cur));
 	else
 		dhcp = add_page_to_combo_box(sett, box, "auto", _("Automatic"),
-					     !strcmp("auto", cur));
+		                             !strcmp("auto", cur));
 	manual = add_page_to_combo_box(sett, box, "manual", _("Manual"),
 	                               !strcmp("manual", cur));
 	g_free(cur);
@@ -205,35 +205,34 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		settings_add_text(dhcp, _("Netmask"), ipvs, "Netmask");
 	else
 		settings_add_text(dhcp, _("Prefix length"), ipvs,
-				  "PrefixLength");
+		                  "PrefixLength");
 
 	settings_add_text(manual, _("Address"), NULL, NULL);
 	settings_add_entry(sett, manual, write_if_selected, NULL, conf,
-			   "Address", ipvs, validator);
+	                   "Address", ipvs, validator);
 	settings_add_text(manual, _("Gateway"), NULL, NULL);
 	settings_add_entry(sett, manual, write_if_selected, NULL, conf,
-			   "Gateway", ipvs, validator);
+	                   "Gateway", ipvs, validator);
 	if(ipv == 4) {
 		settings_add_text(manual, _("Netmask"), NULL, NULL);
 		settings_add_entry(sett, manual, write_if_selected, NULL, conf,
-				   "Netmask", ipvs, validator);
-	}
-	else {
+		                   "Netmask", ipvs, validator);
+	} else {
 		settings_add_text(manual, _("Prefix length"), NULL, NULL);
 		settings_add_entry(sett, manual, write_if_selected, NULL, conf,
-				   "PrefixLength", ipvs, always_valid);
+		                   "PrefixLength", ipvs, always_valid);
 		ipv6_privacy = settings_add_combo_box(sett, dhcp,
-						      always_write,
-						      _("Privacy"), conf,
-						      "Privacy", ipvs);
+		                                      always_write,
+		                                      _("Privacy"), conf,
+		                                      "Privacy", ipvs);
 
 		cur = service_get_property_string(sett->serv, ipvs, "Privacy");
 		add_page_to_combo_box(sett, ipv6_privacy, "disabled",
-				      _("Disabled"), TRUE);
+		                      _("Disabled"), TRUE);
 		add_page_to_combo_box(sett, ipv6_privacy, "enabled",
-				      _("Enabled"), !strcmp("enabled", cur));
+		                      _("Enabled"), !strcmp("enabled", cur));
 		add_page_to_combo_box(sett, ipv6_privacy, "prefered",
-				      _("Prefered"), !strcmp("prefered", cur));
+		                      _("Prefered"), !strcmp("prefered", cur));
 		g_free(cur);
 	}
 }
@@ -244,18 +243,18 @@ static void add_server_page(struct settings *sett)
 
 	page = add_page_to_settings(sett, _("Nameservers"));
 	settings_add_entry_list(sett, page, always_write, _("Nameservers"),
-				"Nameservers.Configuration", NULL,
-				"Nameservers");
+	                        "Nameservers.Configuration", NULL,
+	                        "Nameservers");
 
 	page = add_page_to_settings(sett, _("Timeservers"));
 	settings_add_entry_list(sett, page, always_write, _("Timeservers"),
-				"Timeservers.Configuration", NULL,
-				"Timeservers");
+	                        "Timeservers.Configuration", NULL,
+	                        "Timeservers");
 
 	page = add_page_to_settings(sett, _("Domains"));
 	settings_add_entry_list(sett, page, always_write, _("Domains"),
-				"Domains.Configuration", NULL,
-				"Domains");
+	                        "Domains.Configuration", NULL,
+	                        "Domains");
 }
 
 static void add_proxy_page(struct settings *sett)
@@ -271,9 +270,9 @@ static void add_proxy_page(struct settings *sett)
 	                             conf, "Method", "Proxy");
 
 	direct = add_page_to_combo_box(sett, box, "direct", _("Direct"),
-	                             !strlen(cur) || !strcmp("direct", cur));
+	                               !strlen(cur) || !strcmp("direct", cur));
 	automatic = add_page_to_combo_box(sett, box, "auto", _("Automatic"),
-	                             !strcmp("auto", cur));
+	                                  !strcmp("auto", cur));
 	manual = add_page_to_combo_box(sett, box, "manual", _("Manual"),
 	                               !strcmp("manual", cur));
 	g_free(cur);
@@ -281,12 +280,12 @@ static void add_proxy_page(struct settings *sett)
 	settings_add_text(direct, NULL, NULL, NULL);
 
 	settings_add_entry(sett, automatic, write_if_selected, _("URL"),
-			   conf, "URL", "Proxy", always_valid);
+	                   conf, "URL", "Proxy", always_valid);
 
 	settings_add_entry_list(sett, manual, write_if_selected, _("Servers"),
-				conf, "Servers", "Proxy");
+	                        conf, "Servers", "Proxy");
 	settings_add_entry_list(sett, manual, write_if_selected, _("Excludes"),
-				conf, "Excludes", "Proxy");
+	                        conf, "Excludes", "Proxy");
 }
 
 static void append_dict_inner(const gchar *key, const gchar *subkey,
@@ -300,13 +299,13 @@ static void append_dict_inner(const gchar *key, const gchar *subkey,
 	if(!variant)
 		return;
 	if(key && subkey && !strcmp(key, "IPv6.Configuration") &&
-				!strcmp(subkey, "PrefixLength")) {
+	    !strcmp(subkey, "PrefixLength")) {
 		const gchar *str = g_variant_get_string(variant, NULL);
 		guint64 val = g_ascii_strtoll(str, NULL, 10);
 		variant = g_variant_new("y", (gchar)val);
 	}
 	hash_table_set_dual_key(dict, content->key, content->subkey,
-				g_variant_ref(variant));
+	                        g_variant_ref(variant));
 
 }
 
@@ -422,7 +421,7 @@ void settings_update(struct settings *sett, const gchar *key,
 	cb = hash_table_get_dual_key(sett->callbacks, key, subkey);
 	if(cb) {
 		if(!key || !subkey || strcmp(subkey, "PrefixLength") ||
-		   (strcmp(key, "IPv6") && strcmp(key, "IPv6.Configuration"))) {
+		    (strcmp(key, "IPv6") && strcmp(key, "IPv6.Configuration"))) {
 			handle_content_callback(value, key, subkey, cb);
 			return;
 		}

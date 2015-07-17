@@ -123,14 +123,13 @@ void technology_wireless_tether(struct technology *tech)
 	gtk_grid_attach(GTK_GRID(grid), passphrase_e, 1, 1, 1, 1);
 	gtk_widget_show_all(grid);
 
-
 	title = _("Set Access Point SSID and passphrase");
 	flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
 	window = gtk_dialog_new_with_buttons(title, GTK_WINDOW(main_window),
-					     flags,
-					     _("_OK"), GTK_RESPONSE_ACCEPT,
-					     _("_Cancel"), GTK_RESPONSE_CANCEL,
-					     NULL);
+	                                     flags,
+	                                     _("_OK"), GTK_RESPONSE_ACCEPT,
+	                                     _("_Cancel"), GTK_RESPONSE_CANCEL,
+	                                     NULL);
 
 	area = gtk_dialog_get_content_area(GTK_DIALOG(window));
 	gtk_container_add(GTK_CONTAINER(area), grid);
@@ -142,11 +141,11 @@ void technology_wireless_tether(struct technology *tech)
 	pass = gtk_entry_get_text(GTK_ENTRY(passphrase_e));
 	printf("%s %s\n", ssid, pass);
 	technology_set_property(tech, "TetheringIdentifier",
-				g_variant_new("s", ssid));
+	                        g_variant_new("s", ssid));
 	technology_set_property(tech, "TetheringPassphrase",
-				g_variant_new("s", pass));
+	                        g_variant_new("s", pass));
 	technology_set_property(tech, "Tethering",
-				g_variant_new("b", TRUE));
+	                        g_variant_new("b", TRUE));
 out:
 	gtk_widget_destroy(window);
 }

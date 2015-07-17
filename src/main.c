@@ -31,6 +31,7 @@
 #include "interfaces.h"
 #include "style.h"
 #include "util.h"
+#include "vpn.h"
 
 GtkWidget *list, *notebook, *main_window;
 GHashTable *technology_types, *services;
@@ -306,8 +307,7 @@ static void add_all_services(GDBusConnection *connection, GVariant *services_v)
 	}
 }
 
-static void connman_appeared(GDBusConnection *connection, const gchar *name,
-                             const gchar *name_owner, gpointer user_data)
+static GDBusProxy *manager_register(GDBusConnection *connection)
 {
 	GDBusNodeInfo *info;
 	GError *error = NULL;
@@ -320,7 +320,7 @@ static void connman_appeared(GDBusConnection *connection, const gchar *name,
 		g_critical("Failed to load manager interface: %s",
 		           error->message);
 		g_error_free(error);
-		return;
+		return NULL;
 	}
 
 	proxy = g_dbus_proxy_new_sync(connection, G_DBUS_PROXY_FLAGS_NONE,
@@ -332,7 +332,7 @@ static void connman_appeared(GDBusConnection *connection, const gchar *name,
 	if(error) {
 		g_warning("failed to connect to ConnMan: %s", error->message);
 		g_error_free(error);
-		return;
+		return NULL;
 	}
 
 	data = g_dbus_proxy_call_sync(proxy, "GetTechnologies", NULL,
@@ -341,7 +341,7 @@ static void connman_appeared(GDBusConnection *connection, const gchar *name,
 		g_warning("failed to get technologies: %s", error->message);
 		g_error_free(error);
 		g_object_unref(proxy);
-		return;
+		return NULL;
 	}
 
 	g_signal_connect(proxy, "g-signal", G_CALLBACK(manager_signal), NULL);
@@ -358,7 +358,7 @@ static void connman_appeared(GDBusConnection *connection, const gchar *name,
 		g_warning("failed to get services: %s", error->message);
 		g_error_free(error);
 		g_object_unref(proxy);
-		return;
+		return NULL;
 	}
 
 	child = g_variant_get_child_value(data, 0);
@@ -367,6 +367,18 @@ static void connman_appeared(GDBusConnection *connection, const gchar *name,
 	g_variant_unref(data);
 	g_variant_unref(child);
 
+	return proxy;
+}
+
+static void connman_appeared(GDBusConnection *connection, const gchar *name,
+                             const gchar *name_owner, gpointer user_data)
+{
+	GDBusProxy *proxy = manager_register(connection);
+	struct technology *vpn = vpn_register(connection, list, notebook);
+	technologies[CONNECTION_TYPE_VPN] = vpn;
+	gtk_container_add(GTK_CONTAINER(list), vpn->list_item->item);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
+	                         vpn->settings->grid, NULL);
 	register_agent(connection, proxy);
 }
 

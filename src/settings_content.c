@@ -59,7 +59,7 @@ static GVariant *content_value_entry(struct settings_content *content)
 	GtkWidget *entry = content->data;
 	const gchar *str = gtk_entry_get_text(GTK_ENTRY(entry));
 	if(!strcmp(content->key, "IPv6.Configuration") &&
-	   !strcmp(content->subkey, "Gateway") && !strlen(str))
+	    !strcmp(content->subkey, "Gateway") && !strlen(str))
 		return NULL;
 	GVariant *var = g_variant_new("s", str);
 	return var;
@@ -122,7 +122,7 @@ static struct settings_content *create_base_content(struct settings *sett,
                 settings_writable writable,
                 const gchar *key,
                 const gchar *subkey,
-		const gchar *secondary_key)
+                const gchar *secondary_key)
 {
 	struct settings_content *content = g_malloc(sizeof(*content));
 	content->valid = always_valid;
@@ -152,8 +152,7 @@ static void add_left_aligned(GtkGrid *grid, GtkWidget *a, GtkWidget *b, int y)
 		gtk_widget_set_hexpand(a, TRUE);
 		gtk_grid_attach(grid, a, 0, y, 1, 1);
 		gtk_grid_attach(grid, b, 1, y, 1, 1);
-	}
-	else {
+	} else {
 		gtk_widget_set_margin_start(b, MARGIN_LARGE);
 		gtk_grid_attach(grid, b, 0, y, 2, 1);
 	}
@@ -195,7 +194,7 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
                               settings_writable writable, const gchar *label,
                               const gchar *key, const gchar *subkey,
-			      const gchar *secondary_key,
+                              const gchar *secondary_key,
                               settings_field_validator valid)
 {
 	GtkWidget *label_w, *entry;
@@ -203,7 +202,7 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 	struct settings_content *content;
 
 	content = create_base_content(sett, writable, key, subkey,
-				      secondary_key);
+	                              secondary_key);
 	if(valid)
 		content->valid = valid;
 	content->free = g_free;
@@ -288,7 +287,7 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
 	GHashTable *items;
 
 	content = create_base_content(sett, writable, key, subkey,
-				      secondary_key);
+	                              secondary_key);
 	items = g_hash_table_new_full(g_str_hash, g_str_equal,
 	                              g_free, NULL);
 
@@ -411,7 +410,7 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	GtkToolItem *item, *buttonitem;
 
 	content = create_base_content(sett, writable, key, subkey,
-				      secondary_key);
+	                              secondary_key);
 	box = gtk_list_box_new();
 	label_w = create_label(label);
 	toolbar = gtk_toolbar_new();
@@ -433,7 +432,7 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	if(!*values) {
 		g_strfreev(values);
 		values = service_get_property_strv(sett->serv, secondary_key,
-						   subkey);
+		                                   subkey);
 		if(!*values)
 			content_add_entry_to_list(box, NULL);
 	}
@@ -465,7 +464,7 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	gtk_grid_attach(GTK_GRID(grid), toolbar, 0, 2, 1, 1);
 
 	gtk_grid_attach(GTK_GRID(page->grid), grid, 0,
-			page->index++, 2, 1);
+	                page->index++, 2, 1);
 	gtk_widget_show_all(page->grid);
 
 	hash_table_set_dual_key(sett->contents, key, subkey, content);
