@@ -313,15 +313,11 @@ static GDBusProxy *manager_register(GDBusConnection *connection)
 	GError *error = NULL;
 	GVariant *data, *child;
 	GDBusProxy *proxy;
+	const gchar *title, *content;
 
 	info = g_dbus_node_info_new_for_xml(MANAGER_INTERFACE, &error);
-	if(error) {
-		/* TODO: show user error message */
-		g_critical("Failed to load manager interface: %s",
-		           error->message);
-		g_error_free(error);
-		return NULL;
-	}
+	if(error)
+		goto out;
 
 	proxy = g_dbus_proxy_new_sync(connection, G_DBUS_PROXY_FLAGS_NONE,
 	                              g_dbus_node_info_lookup_interface(info,
@@ -329,19 +325,14 @@ static GDBusProxy *manager_register(GDBusConnection *connection)
 	                              "net.connman", "/", "net.connman.Manager",
 	                              NULL, &error);
 	g_dbus_node_info_unref(info);
-	if(error) {
-		g_warning("failed to connect to ConnMan: %s", error->message);
-		g_error_free(error);
-		return NULL;
-	}
+	if(error)
+		goto out;
 
 	data = g_dbus_proxy_call_sync(proxy, "GetTechnologies", NULL,
 	                              G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
 	if(error) {
-		g_warning("failed to get technologies: %s", error->message);
-		g_error_free(error);
 		g_object_unref(proxy);
-		return NULL;
+		goto out;
 	}
 
 	g_signal_connect(proxy, "g-signal", G_CALLBACK(manager_signal), NULL);
@@ -355,10 +346,8 @@ static GDBusProxy *manager_register(GDBusConnection *connection)
 	data = g_dbus_proxy_call_sync(proxy, "GetServices", NULL,
 	                              G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
 	if(error) {
-		g_warning("failed to get services: %s", error->message);
-		g_error_free(error);
 		g_object_unref(proxy);
-		return NULL;
+		goto out;
 	}
 
 	child = g_variant_get_child_value(data, 0);
@@ -368,6 +357,11 @@ static GDBusProxy *manager_register(GDBusConnection *connection)
 	g_variant_unref(child);
 
 	return proxy;
+
+out:
+	g_critical("Failed to connect to connman: %s", error->message);
+	g_error_free(error);
+	return NULL;
 }
 
 static void connman_appeared(GDBusConnection *connection, const gchar *name,
