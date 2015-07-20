@@ -50,7 +50,7 @@ static struct {
 	{technology_ethernet_init},
 	{
 		technology_wireless_init, technology_wireless_create,
-		technology_wireless_free
+		technology_wireless_free, technology_wireless_hidden_update
 	},
 	{technology_bluetooth_init},
 	{technology_cellular_init},
@@ -425,11 +425,6 @@ void technology_property_changed(struct technology *item, const gchar *key)
 
 void technology_services_updated(struct technology *item)
 {
-	int count = g_hash_table_size(item->services);
-	if(count)
-		gtk_widget_show(item->settings->connect_button);
-	else
-		gtk_widget_hide(item->settings->connect_button);
 	if(functions[item->type].services_updated)
 		functions[item->type].services_updated(item);
 }

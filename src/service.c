@@ -231,6 +231,7 @@ static void service_toggle_connection_cb(GObject *source, GAsyncResult *res,
                 gpointer user_data)
 {
 	const gchar *ia = "GDBus.Error:net.connman.Error.InvalidArguments";
+	const gchar *c = "GDBus.Error:net.connman.Error.Canceled";
 	GError *error = NULL;
 	GVariant *out;
 	out = g_dbus_proxy_call_finish((GDBusProxy *)user_data, res, &error);
@@ -239,7 +240,8 @@ static void service_toggle_connection_cb(GObject *source, GAsyncResult *res,
 		 * InvalidArguments is thrown when user cancels the dialog,
 		 * so ignore it
 		 */
-		if(strncmp(ia, error->message, strlen(ia)))
+		if(strncmp(ia, error->message, strlen(ia)) &&
+		   strncmp(c, error->message, strlen(c)))
 			g_warning("failed to toggle connection state: %s",
 			          error->message);
 		g_error_free(error);
