@@ -101,6 +101,7 @@ static void hidden_service_iter(gpointer key, gpointer value, gpointer
 	name = service_get_property_string(value, "Name", NULL);
 	if(!*name)
 		gtk_widget_set_sensitive(item->hidden_button, TRUE);
+	g_free(name);
 }
 
 void technology_wireless_hidden_update(struct technology *tech)

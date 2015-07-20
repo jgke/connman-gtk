@@ -139,6 +139,7 @@ static void remove_technology_by_path(const gchar *path)
 	enum connection_type type;
 
 	type_p = g_hash_table_lookup(technology_types, path);
+
 	if(!type_p)
 		return;
 	type = *type_p;
@@ -313,7 +314,6 @@ static GDBusProxy *manager_register(GDBusConnection *connection)
 	GError *error = NULL;
 	GVariant *data, *child;
 	GDBusProxy *proxy;
-	const gchar *title, *content;
 
 	info = g_dbus_node_info_new_for_xml(MANAGER_INTERFACE, &error);
 	if(error)
@@ -380,9 +380,13 @@ static void connman_disappeared(GDBusConnection *connection, const gchar *name,
                                 gpointer user_data)
 {
 	int i;
-	for(i = CONNECTION_TYPE_ETHERNET; i < CONNECTION_TYPE_COUNT; i++)
-		if(technologies[i])
-			remove_technology_by_path(technologies[i]->path);
+	for(i = CONNECTION_TYPE_ETHERNET; i < CONNECTION_TYPE_COUNT; i++) {
+		if(technologies[i]) {
+			if(technologies[i]->path)
+				remove_technology_by_path(technologies[i]->path);
+			technologies[i] = NULL;
+		}
+	}
 	g_hash_table_remove_all(services);
 	agent_release();
 }

@@ -114,7 +114,8 @@ static void service_proxy_signal(GDBusProxy *proxy, gchar *sender,
 
 static void settings_closed(struct service *serv)
 {
-	serv->sett = NULL;
+	if(serv)
+		serv->sett = NULL;
 }
 
 static void settings_button_cb(GtkButton *button, gpointer user_data)
@@ -216,11 +217,15 @@ void service_free(struct service *serv)
 {
 	if(!serv)
 		return;
+	if(serv->sett) {
+		serv->sett->serv = NULL;
+		gtk_window_close(GTK_WINDOW(serv->sett->window));
+	}
 	g_object_unref(serv->proxy);
-	g_object_unref(serv->item);
 	g_free(serv->path);
 	dual_hash_table_unref(serv->properties);
 	gtk_widget_destroy(serv->item);
+	g_object_unref(serv->item);
 	if(functions[serv->type].free)
 		functions[serv->type].free(serv);
 	else

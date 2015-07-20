@@ -30,15 +30,6 @@
 #include "style.h"
 #include "util.h"
 
-static struct {
-	struct settings *(*create)(void);
-	void (*free)(struct settings *sett);
-	void (*init)(struct settings *sett);
-	void (*property_changed)(struct settings *tech, const gchar *name);
-} functions[CONNECTION_TYPE_COUNT] = {
-	{}
-};
-
 static void free_page(GtkWidget *widget, gpointer user_data)
 {
 	struct settings_page *page = user_data;
@@ -110,10 +101,7 @@ static void free_settings(struct settings *sett)
 	sett->closed(sett->serv);
 	dual_hash_table_unref(sett->callbacks);
 	dual_hash_table_unref(sett->contents);
-	if(functions[sett->serv->type].free)
-		functions[sett->serv->type].free(sett);
-	else
-		g_free(sett);
+	g_free(sett);
 }
 
 static void add_info_page(struct settings *sett)
@@ -390,9 +378,6 @@ static void init_settings(struct settings *sett)
 	add_server_page(sett);
 	add_proxy_page(sett);
 
-	if(functions[sett->serv->type].init)
-		functions[sett->serv->type].init(sett);
-
 	gtk_widget_show_all(sett->window);
 }
 
@@ -401,10 +386,7 @@ struct settings *settings_create(struct service *serv,
 {
 	struct settings *sett;
 
-	if(functions[serv->type].create)
-		sett = functions[serv->type].create();
-	else
-		sett = g_malloc(sizeof(*sett));
+	sett = g_malloc(sizeof(*sett));
 
 	sett->serv = serv;
 	sett->closed = closed;
