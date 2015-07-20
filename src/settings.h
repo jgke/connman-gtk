@@ -34,6 +34,9 @@ struct settings {
 	GtkWidget *list;
 	GtkWidget *notebook;
 
+	GtkWidget *apply;
+	int invalid_count;
+
 	struct service *serv;
 	void (*closed)(struct service *serv);
 

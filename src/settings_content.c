@@ -44,7 +44,7 @@ gboolean write_if_selected(struct settings_content *content)
 	return  !!g_object_get_data(G_OBJECT(parent), "selected");
 }
 
-gboolean always_valid(struct settings_content *content)
+gboolean always_valid(GtkWidget *entry)
 {
 	return TRUE;
 }
@@ -125,7 +125,6 @@ static struct settings_content *create_base_content(struct settings *sett,
                 const gchar *secondary_key)
 {
 	struct settings_content *content = g_malloc(sizeof(*content));
-	content->valid = always_valid;
 	content->value = content_value_null;
 	content->free = g_free;
 	content->sett = sett;
@@ -191,11 +190,40 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 	return value_w;
 }
 
+static void entry_changed(GtkEditable *editable, gpointer user_data)
+{
+	GtkWidget *entry = GTK_WIDGET(editable);
+	GtkStyleContext *context = gtk_widget_get_style_context(entry);
+	settings_entry_validator validator = g_object_get_data(G_OBJECT(entry),
+							       "validator");
+	struct settings_content *content = user_data;
+
+	gboolean valid = validator(entry);
+
+	if(!valid && !g_object_get_data(G_OBJECT(entry), "invalid")) {
+		if(!content->sett->invalid_count)
+			gtk_widget_set_sensitive(content->sett->apply, FALSE);
+		g_object_set_data(G_OBJECT(entry), "invalid",
+				  GINT_TO_POINTER(TRUE));
+		content->sett->invalid_count++;
+		gtk_style_context_add_class(context, "error");
+	}
+	else if (valid && g_object_get_data(G_OBJECT(entry), "invalid")) {
+		g_object_set_data(G_OBJECT(entry), "invalid",
+				  GINT_TO_POINTER(FALSE));
+		content->sett->invalid_count--;
+		gtk_style_context_remove_class(context, "error");
+		if(!content->sett->invalid_count)
+			gtk_widget_set_sensitive(content->sett->apply,
+						 TRUE);
+	}
+}
+
 GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
                               settings_writable writable, const gchar *label,
                               const gchar *key, const gchar *subkey,
                               const gchar *secondary_key,
-                              settings_field_validator valid)
+                              settings_entry_validator valid)
 {
 	GtkWidget *label_w, *entry;
 	gchar *value;
@@ -203,8 +231,6 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 
 	content = create_base_content(sett, writable, key, subkey,
 	                              secondary_key);
-	if(valid)
-		content->valid = valid;
 	content->free = g_free;
 	content->value = content_value_entry;
 
@@ -213,6 +239,7 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 	else
 		label_w = NULL;
 	entry = gtk_entry_new();
+	g_object_set_data(G_OBJECT(entry), "validator", valid);
 
 	value = service_get_property_string(page->sett->serv, key, subkey);
 	if(!strlen(value)) {
@@ -236,6 +263,8 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 	content->data = entry;
 	g_signal_connect(content->data, "destroy",
 	                 G_CALLBACK(free_content), content);
+	g_signal_connect(entry, "changed",
+	                 G_CALLBACK(entry_changed), content);
 	return entry;
 }
 
@@ -354,6 +383,10 @@ static void destroy_entry(GtkButton *button, gpointer user_data)
 
 void content_add_entry_to_list(GtkWidget *list, const gchar *value)
 {
+	struct settings_content *content = g_object_get_data(G_OBJECT(list),
+							     "content");
+	settings_entry_validator validator  = g_object_get_data(G_OBJECT(list),
+								"validator");
 	GtkWidget *entry = gtk_entry_new();
 	GtkWidget *rem = gtk_button_new_from_icon_name("list-remove-symbolic",
 	                 GTK_ICON_SIZE_MENU);
@@ -361,13 +394,16 @@ void content_add_entry_to_list(GtkWidget *list, const gchar *value)
 	GtkWidget *grid = gtk_grid_new();
 	GtkWidget *row = gtk_list_box_row_new();
 
-	g_signal_connect(rem, "clicked", G_CALLBACK(destroy_entry), row);
+	if(value)
+		gtk_entry_set_text(GTK_ENTRY(entry), value);
+
+	g_signal_connect(entry, "changed",
+	                 G_CALLBACK(entry_changed), content);
+	g_object_set_data(G_OBJECT(entry), "validator", validator);
 	g_object_set_data(G_OBJECT(row), "entry", entry);
 	g_object_set_data(G_OBJECT(row), "button", rem);
 	g_object_set_data(G_OBJECT(row), "destroy", destroy_entry);
-
-	if(value)
-		gtk_entry_set_text(GTK_ENTRY(entry), value);
+	g_signal_connect(rem, "clicked", G_CALLBACK(destroy_entry), row);
 
 	STYLE_ADD_MARGIN(entry, MARGIN_SMALL);
 	gtk_widget_set_hexpand(entry, TRUE);
@@ -401,7 +437,8 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
                                    settings_writable writable,
                                    const gchar *label,
                                    const gchar *key, const gchar *subkey,
-                                   const gchar *secondary_key)
+                                   const gchar *secondary_key,
+				   settings_entry_validator valid)
 {
 	struct settings_content *content;
 	gchar **values;
@@ -426,6 +463,8 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	content->value = content_value_entry_list;
 
 	g_object_set_data(G_OBJECT(box), "count", GINT_TO_POINTER(0));
+	g_object_set_data(G_OBJECT(box), "content", content);
+	g_object_set_data(G_OBJECT(box), "validator", valid);
 	g_signal_connect(button, "clicked", G_CALLBACK(add_entry_to_list), box);
 
 	values = service_get_property_strv(sett->serv, key, subkey);

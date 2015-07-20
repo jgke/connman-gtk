@@ -132,26 +132,28 @@ static void add_info_page(struct settings *sett)
 	settings_add_text(page, _("Nameservers"), "Nameservers", NULL);
 }
 
-static gboolean valid_ipv4_entry(struct settings_content *content)
+static gboolean valid_ipv4_entry(GtkWidget *entry)
 {
-	GVariant *variant = content->value(content);
-	gboolean valid = valid_ipv4(g_variant_get_string(variant, NULL));
-	g_variant_unref(variant);
-	return valid;
+	const gchar *value = gtk_entry_get_text(GTK_ENTRY(entry));
+	return valid_ipv4(value);
 }
 
-static gboolean valid_ipv6_entry(struct settings_content *content)
+static gboolean valid_ipv6_entry(GtkWidget *entry)
 {
-	GVariant *variant = content->value(content);
-	gboolean valid = valid_ipv6(g_variant_get_string(variant, NULL));
-	g_variant_unref(variant);
-	return valid;
+	const gchar *value = gtk_entry_get_text(GTK_ENTRY(entry));
+	return valid_ipv6(value);
+}
+
+static gboolean valid_address_entry(GtkWidget *entry)
+{
+	const gchar *value = gtk_entry_get_text(GTK_ENTRY(entry));
+	return valid_ipv4(value) || valid_ipv6(value);
 }
 
 static void add_ipv_page(struct settings *sett, int ipv)
 {
 	struct settings_page *page;
-	settings_field_validator validator;
+	settings_entry_validator validator;
 	const char *local;
 	const char *conf;
 	const char *ipvs;
@@ -244,17 +246,17 @@ static void add_server_page(struct settings *sett)
 	page = add_page_to_settings(sett, _("Nameservers"));
 	settings_add_entry_list(sett, page, always_write, _("Nameservers"),
 	                        "Nameservers.Configuration", NULL,
-	                        "Nameservers");
+	                        "Nameservers", valid_address_entry);
 
 	page = add_page_to_settings(sett, _("Timeservers"));
 	settings_add_entry_list(sett, page, always_write, _("Timeservers"),
 	                        "Timeservers.Configuration", NULL,
-	                        "Timeservers");
+	                        "Timeservers", always_valid);
 
 	page = add_page_to_settings(sett, _("Domains"));
 	settings_add_entry_list(sett, page, always_write, _("Domains"),
 	                        "Domains.Configuration", NULL,
-	                        "Domains");
+	                        "Domains", always_valid);
 }
 
 static void add_proxy_page(struct settings *sett)
@@ -283,9 +285,9 @@ static void add_proxy_page(struct settings *sett)
 	                   conf, "URL", "Proxy", always_valid);
 
 	settings_add_entry_list(sett, manual, write_if_selected, _("Servers"),
-	                        conf, "Servers", "Proxy");
+	                        conf, "Servers", "Proxy", always_valid);
 	settings_add_entry_list(sett, manual, write_if_selected, _("Excludes"),
-	                        conf, "Excludes", "Proxy");
+	                        conf, "Excludes", "Proxy", always_valid);
 }
 
 static void append_dict_inner(const gchar *key, const gchar *subkey,
@@ -334,9 +336,10 @@ static void init_settings(struct settings *sett)
 {
 	gchar *name;
 	gchar *title;
-	GtkWidget *frame, *apply;
+	GtkWidget *frame;
 	GtkGrid *grid = GTK_GRID(gtk_grid_new());
 
+	sett->invalid_count = 0;
 	sett->window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	name = service_get_property_string(sett->serv, "Name", NULL);
 	title = g_strdup_printf("%s - %s", _("Network Settings"), name);
@@ -349,8 +352,8 @@ static void init_settings(struct settings *sett)
 
 	sett->list = gtk_list_box_new();
 	sett->notebook = gtk_notebook_new();
+	sett->apply = gtk_button_new_with_mnemonic(_("_Apply"));
 	frame = gtk_frame_new(NULL);
-	apply = gtk_button_new_with_mnemonic(_("_Apply"));
 
 	g_object_ref(sett->window);
 	g_object_ref(sett->list);
@@ -360,11 +363,11 @@ static void init_settings(struct settings *sett)
 	                 sett);
 	g_signal_connect(sett->list, "row-selected",
 	                 G_CALLBACK(list_item_selected), sett->notebook);
-	g_signal_connect(apply, "clicked",
+	g_signal_connect(sett->apply, "clicked",
 	                 G_CALLBACK(apply_cb), sett);
 
 	STYLE_ADD_MARGIN(GTK_WIDGET(grid), MARGIN_LARGE);
-	gtk_widget_set_margin_top(apply, MARGIN_LARGE);
+	gtk_widget_set_margin_top(sett->apply, MARGIN_LARGE);
 
 	gtk_widget_set_size_request(sett->list, SETTINGS_LIST_WIDTH, -1);
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(sett->notebook), FALSE);
@@ -372,13 +375,13 @@ static void init_settings(struct settings *sett)
 	gtk_widget_set_vexpand(sett->list, TRUE);
 	gtk_widget_set_hexpand(sett->notebook, TRUE);
 	gtk_widget_set_vexpand(sett->notebook, TRUE);
-	gtk_widget_set_valign(apply, GTK_ALIGN_END);
-	gtk_widget_set_halign(apply, GTK_ALIGN_END);
+	gtk_widget_set_valign(sett->apply, GTK_ALIGN_END);
+	gtk_widget_set_halign(sett->apply, GTK_ALIGN_END);
 
 	gtk_container_add(GTK_CONTAINER(frame), sett->list);
 	gtk_grid_attach(grid, frame, 0, 0, 1, 2);
 	gtk_grid_attach(grid, sett->notebook, 1, 0, 1, 1);
-	gtk_grid_attach(grid, apply, 1, 1, 1, 1);
+	gtk_grid_attach(grid, sett->apply, 1, 1, 1, 1);
 	gtk_container_add(GTK_CONTAINER(sett->window), GTK_WIDGET(grid));
 
 	add_info_page(sett);

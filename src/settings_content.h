@@ -27,7 +27,7 @@
 
 struct settings_content;
 
-typedef gboolean (*settings_field_validator)(struct settings_content *content);
+typedef gboolean (*settings_entry_validator)(GtkWidget *entry);
 typedef gboolean (*settings_writable)(struct settings_content *content);
 typedef GVariant *(*settings_field_value)(struct settings_content *content);
 
@@ -35,7 +35,6 @@ struct settings_content {
 	GtkWidget *data;
 	struct settings *sett;
 
-	settings_field_validator valid;
 	settings_field_value value;
 	settings_writable writable;
 	void (*free)(void *ptr);
@@ -47,7 +46,7 @@ struct settings_content {
 gboolean never_write(struct settings_content *content);
 gboolean always_write(struct settings_content *content);
 gboolean write_if_selected(struct settings_content *content);
-gboolean always_valid(struct settings_content *content);
+gboolean always_valid(GtkWidget *entry);
 
 void settings_add_content(struct settings_page *page,
                           struct settings_content *content);
@@ -58,7 +57,7 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
                               settings_writable writable, const gchar *label,
                               const gchar *key, const gchar *subkey,
                               const gchar *secondary_key,
-                              settings_field_validator valid);
+                              settings_entry_validator valid);
 GtkWidget *settings_add_switch(struct settings *sett,
                                struct settings_page *page,
                                settings_writable writable, const gchar *label,
@@ -74,7 +73,8 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
                                    settings_writable writable,
                                    const gchar *label,
                                    const gchar *key, const gchar *subkey,
-                                   const gchar *secondary_key);
+                                   const gchar *secondary_key,
+				   settings_entry_validator valid);
 void content_add_entry_to_list(GtkWidget *list, const gchar *value);
 
 void free_content(GtkWidget *widget, gpointer user_data);
