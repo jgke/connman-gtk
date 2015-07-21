@@ -120,6 +120,5 @@ void service_ethernet_update(struct service *serv)
 	set_property(serv, item->ipv4gateway, "IPv4", "Gateway");
 	set_property(serv, item->ipv6, "IPv6", "Address");
 	set_property(serv, item->ipv6gateway, "IPv6", "Gateway");
-	set_property(serv, serv->title, "Ethernet", "Interface");
 	set_property(serv, item->mac, "Ethernet", "Address");
 }

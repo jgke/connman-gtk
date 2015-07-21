@@ -55,10 +55,21 @@ void service_update_property(struct service *serv, const gchar *key,
 	if(strcmp(g_variant_get_type_string(value), "a{sv}")) {
 		hash_table_set_dual_key(serv->properties, key, NULL,
 		                        g_variant_ref(value));
-		if(!strcmp(key, "Name")) {
-			gchar *title;
-			title = service_get_property_string(serv, key, NULL);
+		if(!strcmp(key, "Name") || !strcmp(key, "State")) {
+			gchar *name, *state, *title;
+			name = service_get_property_string(serv, "Name", NULL);
+			if(!strlen(name)) {
+				g_free(name);
+				name = service_get_property_string(serv,
+								   "Ethernet",
+								   "Interface");
+			}
+			state = service_get_property_string(serv, "State",
+							    NULL);
+			title = g_strdup_printf("%s - %s", name, state);
 			gtk_label_set_text(GTK_LABEL(serv->title), title);
+			g_free(name);
+			g_free(state);
 			g_free(title);
 		}
 		if(serv->sett)

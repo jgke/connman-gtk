@@ -253,11 +253,15 @@ void service_wireless_update(struct service *serv)
 	struct wireless_service *item = (struct wireless_service *)serv;
 
 	GVariant *variant;
-	gchar *name;
+	gchar *name, *state;
 	int strength;
 
 	name = service_get_property_string(serv, "Name", NULL);
-	gtk_label_set_text(GTK_LABEL(serv->title), name);
+	state = service_get_property_string_raw(serv, "State", NULL);
+	if(!strcmp(state, "idle"))
+		gtk_label_set_text(GTK_LABEL(serv->title), name);
+	g_free(state);
+
 	if(strlen(name))
 		gtk_widget_show(serv->item);
 	else
