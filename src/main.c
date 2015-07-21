@@ -37,6 +37,7 @@ GtkWidget *list, *notebook, *main_window;
 GHashTable *technology_types, *services;
 struct technology *technologies[CONNECTION_TYPE_COUNT];
 gboolean shutting_down = FALSE;
+const gchar *default_page;
 
 /* sort smallest enum value first */
 gint technology_list_sort_cb(GtkListBoxRow *row1, GtkListBoxRow *row2,
@@ -272,10 +273,23 @@ static void add_all_technologies(GDBusConnection *connection,
 {
 	int i;
 	int size = g_variant_n_children(technologies_v);
+	enum connection_type default_type = CONNECTION_TYPE_UNKNOWN;
 	for(i = 0; i < size; i++) {
 		GVariant *child = g_variant_get_child_value(technologies_v, i);
 		add_technology(connection, child);
 		g_variant_unref(child);
+	}
+	if(default_page)
+		default_type = connection_type_from_string(default_page);
+	for(i = CONNECTION_TYPE_ETHERNET; i < CONNECTION_TYPE_COUNT; i++) {
+		if(default_type && technologies[i]) {
+			if(default_type != technologies[i]->type)
+				continue;
+			GtkWidget *row = technologies[i]->list_item->item;
+			gtk_list_box_select_row(GTK_LIST_BOX(list),
+			                        GTK_LIST_BOX_ROW(row));
+			return;
+		}
 	}
 	for(i = CONNECTION_TYPE_ETHERNET; i < CONNECTION_TYPE_COUNT; i++) {
 		if(technologies[i]) {
@@ -437,6 +451,12 @@ static void activate(GtkApplication *app, gpointer user_data)
 	gtk_widget_show_all(main_window);
 }
 
+static const GOptionEntry options[] = {
+	{ "page", 0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_STRING, &default_page,
+		NULL, NULL },
+	{ NULL }
+};
+
 int main(int argc, char *argv[])
 {
 	GtkApplication *app;
@@ -455,6 +475,7 @@ int main(int argc, char *argv[])
 	                                 g_free, remove_service_struct);
 
 	app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
+	g_application_add_main_option_entries(G_APPLICATION(app), options);
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
 	status = g_application_run(G_APPLICATION(app), argc, argv);
 	g_object_unref(app);
