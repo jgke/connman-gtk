@@ -29,41 +29,6 @@ static struct technology tech;
 static GDBusProxy *proxy;
 static GDBusConnection *connection;
 
-static void add_connection(const gchar *path, GVariant *properties)
-{
-	struct service *serv;
-	GDBusProxy *proxy;
-	GDBusNodeInfo *info;
-	GDBusInterfaceInfo *interface;
-	GError *error = NULL;
-
-	info = g_dbus_node_info_new_for_xml(VPN_CONNECTION_INTERFACE, &error);
-	if(error) {
-		g_warning("Failed to load service interface: %s",
-		          error->message);
-		g_error_free(error);
-		return;
-	}
-
-	interface = g_dbus_node_info_lookup_interface(info,
-	                VPN_CONNECTION_NAME);
-	proxy = g_dbus_proxy_new_sync(connection, G_DBUS_PROXY_FLAGS_NONE,
-	                              interface, CONNMAN_PATH ".vpn", path,
-	                              VPN_CONNECTION_NAME, NULL, &error);
-	if(error) {
-		g_warning("failed to connect ConnMan vpn connection proxy: %s",
-		          error->message);
-		g_error_free(error);
-		goto out;
-	}
-
-	serv = service_create(&tech, proxy, path, properties);
-	technology_add_service(&tech, serv);
-
-out:
-	g_dbus_node_info_unref(info);
-}
-
 static void vpn_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
                        GVariant *parameters, gpointer user_data)
 {
@@ -95,18 +60,6 @@ static void init_vpn_technology(void)
 	gtk_widget_hide(tech.settings->tethering);
 	g_variant_unref(properties);
 	g_variant_builder_unref(b);
-}
-
-static void add_all_connections(GVariant *connections)
-{
-	GVariantIter *iter;
-	gchar *path;
-	GVariant *parameters;
-
-	iter = g_variant_iter_new(connections);
-	while(g_variant_iter_loop(iter, "(o@*)", &path, &parameters))
-		add_connection(path, parameters);
-	g_variant_iter_free(iter);
 }
 
 void vpn_free(struct technology *tech)
@@ -156,7 +109,6 @@ struct technology *vpn_register(GDBusConnection *conn, GtkWidget *list,
 
 	child = g_variant_get_child_value(data, 0);
 	init_vpn_technology();
-	add_all_connections(child);
 
 	g_variant_unref(data);
 	g_variant_unref(child);

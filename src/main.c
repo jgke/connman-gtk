@@ -367,12 +367,12 @@ out:
 static void connman_appeared(GDBusConnection *connection, const gchar *name,
                              const gchar *name_owner, gpointer user_data)
 {
-	GDBusProxy *proxy = manager_register(connection);
 	struct technology *vpn = vpn_register(connection, list, notebook);
 	technologies[CONNECTION_TYPE_VPN] = vpn;
 	gtk_container_add(GTK_CONTAINER(list), vpn->list_item->item);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
 	                         vpn->settings->grid, NULL);
+	GDBusProxy *proxy = manager_register(connection);
 	register_agents(connection, proxy, vpn->settings->proxy);
 }
 

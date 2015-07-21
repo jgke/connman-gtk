@@ -122,7 +122,7 @@ const gchar *status_localized(const gchar *state)
 		return _("Configuration");
 	else if(!strcmp(state, "ready"))
 		return _("Ready");
-	else if(!strcmp(state, "disconnected"))
+	else if(!strcmp(state, "disconnect"))
 		return _("Disconnected");
 	else if(!strcmp(state, "online"))
 		return _("Online");

@@ -435,7 +435,7 @@ const gchar *service_status_localized(struct service *serv)
 		out = _("Configuration");
 	else if(!strcmp(state, "ready"))
 		out = _("Ready");
-	else if(!strcmp(state, "disconnected"))
+	else if(!strcmp(state, "disconnect"))
 		out = _("Disconnected");
 	else if(!strcmp(state, "online"))
 		out = _("Online");

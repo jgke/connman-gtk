@@ -35,6 +35,8 @@ enum connection_type connection_type_from_string(const gchar *str)
 		return CONNECTION_TYPE_CELLULAR;
 	if(!strcmp(str, "p2p"))
 		return CONNECTION_TYPE_P2P;
+	if(!strcmp(str, "vpn"))
+		return CONNECTION_TYPE_VPN;
 	return CONNECTION_TYPE_UNKNOWN;
 }
 

@@ -169,21 +169,4 @@
         "</interface>" \
         "</node>"
 
-#define VPN_CONNECTION_NAME CONNMAN_PATH ".vpn.Connection"
-#define VPN_CONNECTION_INTERFACE \
-        "<node>" \
-        "<interface name=\"net.connman.vpn.Connection\">" \
-        "    <method name=\"SetProperty\">" \
-        "        <arg name=\"name\" type=\"s\" direction=\"in\"/>" \
-        "        <arg name=\"value\" type=\"v\" direction=\"in\"/>" \
-        "    </method>" \
-        "    <method name=\"Connect\"></method>" \
-        "    <method name=\"Disconnect\"></method>" \
-        "    <signal name=\"PropertyChanged\">" \
-        "        <arg name=\"name\" type=\"s\"/>" \
-        "        <arg name=\"value\" type=\"v\"/>" \
-        "    </signal>" \
-        "</interface>" \
-        "</node>"
-
 #endif /* _CONNMAN_GTK_INTERFACES_H */
