@@ -140,6 +140,8 @@ void technology_wireless_init(struct technology *tech, GVariant *properties,
 			 G_CALLBACK(hidden_cb), item);
 	gtk_widget_set_margin_start(item->hidden_button, MARGIN_SMALL);
 	gtk_widget_set_margin_end(item->hidden_button, MARGIN_SMALL);
+	gtk_widget_set_hexpand(item->hidden_button, FALSE);
+	gtk_widget_set_halign(item->hidden_button, GTK_ALIGN_START);
 	gtk_grid_attach_next_to(GTK_GRID(tech->settings->buttons),
 				item->hidden_button, tech->settings->tethering,
 				GTK_POS_RIGHT, 1, 1);
