@@ -29,5 +29,6 @@ AC_CONFIG_FILES([
   Makefile
   po/Makefile.in
   src/Makefile
+  connman-gtk.desktop
 ])
 AC_OUTPUT

@@ -1,5 +1,8 @@
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
+desktopdir = $(datadir)/applications
+desktop_DATA = connman-gtk.desktop
+
 SUBDIRS = src po
 
 INTLTOOL_FILES = intltool-extract.in \

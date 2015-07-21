@@ -23,6 +23,7 @@ po/stamp-it
 
 Makefile
 Makefile.in
+connman-gtk.desktop
 .dirstamp
 .deps
 *.gmo

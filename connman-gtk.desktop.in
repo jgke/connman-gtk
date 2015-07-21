@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Exec=@PACKAGE@
+Name=Connman Settings
+Name[fi_FI]=Connman-Asetukset
+Categories=GTK;GNOME;Settings
+Icon=preferences-system-network
