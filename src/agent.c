@@ -200,7 +200,7 @@ static char *agent_path(void)
 {
 	static char *path = NULL;
 	if(!path)
-		path = g_strdup_printf("/net/connmangtk/agent%d", getpid());
+		path = g_strdup_printf("/net/connman/gtk/agent%d", getpid());
 	return path;
 }
 
@@ -208,7 +208,8 @@ static char *vpn_agent_path(void)
 {
 	static char *path = NULL;
 	if(!path)
-		path = g_strdup_printf("/net/connmangtk/vpn/agent%d", getpid());
+		path = g_strdup_printf("/net/connman/gtk/vpn/agent%d",
+				       getpid());
 	return path;
 }
 
