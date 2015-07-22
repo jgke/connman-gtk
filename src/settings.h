@@ -46,6 +46,7 @@ struct settings {
 
 struct settings_page {
 	GtkWidget *grid;
+	GtkWidget *item;
 	struct settings *sett;
 	int index;
 };

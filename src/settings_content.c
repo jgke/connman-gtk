@@ -609,7 +609,7 @@ void content_add_route_to_list(GtkWidget *list, GVariant *properties)
 		netmask = gtk_entry_new();
 		prefix = gtk_entry_new();
 		gateway = gtk_entry_new();
-		rem = gtk_button_new_from_icon_name("list-remove-symbolic",
+		rem = gtk_button_new_from_icon_name("user-trash-symbolic",
 						    GTK_ICON_SIZE_MENU);
 		remgrid = gtk_grid_new();
 	} else {
@@ -624,12 +624,15 @@ void content_add_route_to_list(GtkWidget *list, GVariant *properties)
 	if(properties)
 		dict = g_variant_dict_new(properties);
 	if(dict) {
-		GVariant *version;
+		GVariant *version_v;
+		int version;
 
-		version = g_variant_dict_lookup_value(dict, "ProtocolFamily",
-						      NULL);
-		ipv4 = variant_to_bool(version);
-		g_variant_unref(version);
+		version_v = g_variant_dict_lookup_value(dict, "ProtocolFamily",
+							NULL);
+		version = variant_to_int(version_v);
+		ipv4 = version == 4;
+		printf("%d\n", ipv4);
+		g_variant_unref(version_v);
 	}
 	if(!labels) {
 		set_entry_value(network, dict, "Network", content);
@@ -662,6 +665,7 @@ void content_add_route_to_list(GtkWidget *list, GVariant *properties)
 
 		STYLE_ADD_MARGIN(ipv_l, MARGIN_SMALL);
 		STYLE_ADD_MARGIN(ipv, MARGIN_SMALL);
+		STYLE_ADD_MARGIN(rem, MARGIN_LARGE);
 	}
 
 	STYLE_ADD_MARGIN(network_l, MARGIN_SMALL);
@@ -671,30 +675,53 @@ void content_add_route_to_list(GtkWidget *list, GVariant *properties)
 	gtk_widget_set_hexpand(row, TRUE);
 
 	if(!labels) {
+		gtk_widget_set_halign(ipv_l, GTK_ALIGN_START);
+		gtk_widget_set_halign(network_l, GTK_ALIGN_START);
+		gtk_widget_set_halign(netmask_l, GTK_ALIGN_START);
+		gtk_widget_set_halign(prefix_l, GTK_ALIGN_START);
+		gtk_widget_set_halign(gateway_l, GTK_ALIGN_START);
 		gtk_widget_set_vexpand(rem, FALSE);
 		gtk_widget_set_halign(rem, GTK_ALIGN_END);
 		gtk_widget_set_valign(rem, GTK_ALIGN_CENTER);
 		gtk_widget_set_valign(remgrid, GTK_ALIGN_CENTER);
+	}
 
+	if(!labels) {
+		int width;
+		if(ipv4)
+			width = 4*3 + 3;
+		else
+			width = 8*4 + 7;
+		gtk_entry_set_width_chars(GTK_ENTRY(network), 4*3 + 3);
+		gtk_entry_set_width_chars(GTK_ENTRY(netmask), 4*3 + 3);
+		gtk_entry_set_width_chars(GTK_ENTRY(prefix), 8*4 + 7);
+		gtk_entry_set_width_chars(GTK_ENTRY(gateway), 4*3 + 3);
 		gtk_grid_attach(GTK_GRID(grid), ipv_l, 0, 0, 1, 1);
 		gtk_grid_attach(GTK_GRID(grid), ipv, 1, 0, 1, 1);
-	}
-
-	gtk_grid_attach(GTK_GRID(grid), network_l, 0, 1, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), network, 1, 1, 1, 1);
-	if(!labels || ipv4) {
-		gtk_grid_attach(GTK_GRID(grid), netmask_l, 0, 2, 1, 1);
-		gtk_grid_attach(GTK_GRID(grid), netmask, 1, 2, 1, 1);
-	}
-	if(!labels || !ipv4) {
-		gtk_grid_attach(GTK_GRID(grid), prefix_l, 0, 3, 1, 1);
-		gtk_grid_attach(GTK_GRID(grid), prefix, 1, 3, 1, 1);
-	}
-	gtk_grid_attach(GTK_GRID(grid), gateway_l, 0, 4, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), gateway, 1, 4, 1, 1);
-	if(!labels) {
+		gtk_grid_attach(GTK_GRID(grid), network_l, 0, 1, 2, 1);
+		gtk_grid_attach(GTK_GRID(grid), network, 0, 2, 2, 1);
+		gtk_grid_attach(GTK_GRID(grid), netmask_l, 0, 3, 2, 1);
+		gtk_grid_attach(GTK_GRID(grid), netmask, 0, 4, 2, 1);
+		gtk_grid_attach(GTK_GRID(grid), prefix_l, 0, 3, 2, 1);
+		gtk_grid_attach(GTK_GRID(grid), prefix, 0, 4, 2, 1);
+		gtk_grid_attach(GTK_GRID(grid), gateway_l, 0, 5, 2, 1);
+		gtk_grid_attach(GTK_GRID(grid), gateway, 0, 6, 2, 1);
 		gtk_grid_attach(GTK_GRID(remgrid), rem, 0, 0, 1, 1);
-		gtk_grid_attach(GTK_GRID(grid), remgrid, 2, 2, 1, 2);
+		gtk_grid_attach(GTK_GRID(grid), remgrid, 2, 3, 1, 2);
+	} else {
+		gtk_grid_attach(GTK_GRID(grid), network_l, 0, 1, 1, 1);
+		gtk_grid_attach(GTK_GRID(grid), network, 1, 1, 1, 1);
+
+		if(ipv4) {
+			gtk_grid_attach(GTK_GRID(grid), netmask_l, 0, 2, 1, 1);
+			gtk_grid_attach(GTK_GRID(grid), netmask, 1, 2, 1, 1);
+		} else {
+			gtk_grid_attach(GTK_GRID(grid), prefix_l, 0, 3, 1, 1);
+			gtk_grid_attach(GTK_GRID(grid), prefix, 1, 3, 1, 1);
+		}
+
+		gtk_grid_attach(GTK_GRID(grid), gateway_l, 0, 4, 1, 1);
+		gtk_grid_attach(GTK_GRID(grid), gateway, 1, 4, 1, 1);
 	}
 	gtk_container_add(GTK_CONTAINER(row), grid);
 	gtk_widget_show_all(row);

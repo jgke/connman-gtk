@@ -36,31 +36,45 @@ static void free_page(GtkWidget *widget, gpointer user_data)
 	g_free(page);
 }
 
-static struct settings_page *create_page(GtkWidget *notebook, const gchar *name)
+static struct settings_page *create_page(GtkWidget *notebook, const gchar *name,
+					 gboolean scrolled)
 {
 	struct settings_page *page = g_malloc(sizeof(*page));
 
 	page->index = 0;
 	page->grid = gtk_grid_new();
+	page->item = page->grid;
 
-	g_signal_connect(page->grid, "destroy",
+	if(scrolled) {
+		GtkWidget *scroll = gtk_scrolled_window_new(NULL, NULL);
+		gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),
+					       GTK_POLICY_NEVER,
+					       GTK_POLICY_AUTOMATIC);
+		gtk_container_add(GTK_CONTAINER(scroll), page->item);
+		page->item = scroll;
+	}
+
+	g_signal_connect(page->item, "destroy",
 	                 G_CALLBACK(free_page), page);
-	gtk_widget_set_margin_start(page->grid, MARGIN_LARGE);
-	gtk_widget_show_all(page->grid);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), page->grid, NULL);
+	gtk_widget_set_margin_start(page->item, MARGIN_LARGE);
+	gtk_widget_show_all(page->item);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), page->item, NULL);
 	return page;
 }
 
 static struct settings_page *add_page_to_settings(struct settings *sett,
-                const gchar *name)
+                const gchar *name, gboolean scrolled)
 {
-	struct settings_page *page = create_page(sett->notebook, name);
+	struct settings_page *page;
+	GtkWidget *item, *label;
+
+	page = create_page(sett->notebook, name, scrolled);
 	page->sett = sett;
 
-	GtkWidget *item = gtk_list_box_row_new();
-	GtkWidget *label = gtk_label_new(name);
+	item = gtk_list_box_row_new();
+	label = gtk_label_new(name);
 
-	g_object_set_data(G_OBJECT(item), "content", page->grid);
+	g_object_set_data(G_OBJECT(item), "content", page->item);
 
 	STYLE_ADD_MARGIN(label, MARGIN_SMALL);
 	gtk_widget_set_margin_start(label, MARGIN_LARGE);
@@ -83,14 +97,14 @@ static struct settings_page *add_page_to_combo_box(struct settings *sett,
 {
 	GtkWidget *notebook = g_object_get_data(G_OBJECT(box), "notebook");
 	GHashTable *items = g_object_get_data(G_OBJECT(box), "items");
-	struct settings_page *page = create_page(notebook, name);
+	struct settings_page *page = create_page(notebook, name, FALSE);
 	page->sett = sett;
-	g_hash_table_insert(items, g_strdup(name), page->grid);
+	g_hash_table_insert(items, g_strdup(name), page->item);
 	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), id, name);
 	if(active)
-		g_object_set_data(G_OBJECT(page->grid), "selected", page->grid);
+		g_object_set_data(G_OBJECT(page->item), "selected", page->item);
 	else
-		g_object_set_data(G_OBJECT(page->grid), "selected", NULL);
+		g_object_set_data(G_OBJECT(page->item), "selected", NULL);
 	if(active)
 		gtk_combo_box_set_active_id(GTK_COMBO_BOX(box), id);
 	return page;
@@ -106,7 +120,8 @@ static void free_settings(struct settings *sett)
 
 static void add_info_page(struct settings *sett)
 {
-	struct settings_page *page = add_page_to_settings(sett, _("Info"));
+	struct settings_page *page = add_page_to_settings(sett, _("Info"),
+							  FALSE);
 
 	settings_add_switch(sett, page, always_write, _("Autoconnect"),
 	                    "AutoConnect", NULL);
@@ -171,7 +186,7 @@ static void add_ipv_page(struct settings *sett, int ipv)
 			return;
 		}
 	}
-	page = add_page_to_settings(sett, local);
+	page = add_page_to_settings(sett, local, FALSE);
 	box = settings_add_combo_box(sett, page, always_write, _("Method"),
 	                             conf, "Method", ipvs);
 
@@ -231,17 +246,17 @@ static void add_server_page(struct settings *sett)
 {
 	struct settings_page *page;
 
-	page = add_page_to_settings(sett, _("Nameservers"));
+	page = add_page_to_settings(sett, _("Nameservers"), TRUE);
 	settings_add_entry_list(sett, page, always_write, _("Nameservers"),
 	                        "Nameservers.Configuration", NULL,
 	                        "Nameservers", valid_address_entry);
 
-	page = add_page_to_settings(sett, _("Timeservers"));
+	page = add_page_to_settings(sett, _("Timeservers"), TRUE);
 	settings_add_entry_list(sett, page, always_write, _("Timeservers"),
 	                        "Timeservers.Configuration", NULL,
 	                        "Timeservers", always_valid);
 
-	page = add_page_to_settings(sett, _("Domains"));
+	page = add_page_to_settings(sett, _("Domains"), TRUE);
 	settings_add_entry_list(sett, page, always_write, _("Domains"),
 	                        "Domains.Configuration", NULL,
 	                        "Domains", always_valid);
@@ -249,7 +264,8 @@ static void add_server_page(struct settings *sett)
 
 static void add_proxy_page(struct settings *sett)
 {
-	struct settings_page *page = add_page_to_settings(sett, _("Proxy"));
+	struct settings_page *page = add_page_to_settings(sett, _("Proxy"),
+							  TRUE);
 	struct settings_page *direct, *automatic, *manual;
 	GtkWidget *box;
 
@@ -280,7 +296,8 @@ static void add_proxy_page(struct settings *sett)
 
 static void add_vpn_info_page(struct settings *sett)
 {
-	struct settings_page *page = add_page_to_settings(sett, _("Info"));
+	struct settings_page *page = add_page_to_settings(sett, _("Info"),
+							  FALSE);
 
 	settings_add_switch(sett, page, always_write, _("Autoconnect"),
 	                    "AutoConnect", NULL);
@@ -297,10 +314,10 @@ static void add_route_pages(struct settings *sett)
 {
 	struct settings_page *page;
 
-	page = add_page_to_settings(sett, _("Server routes"));
+	page = add_page_to_settings(sett, _("Server routes"), TRUE);
 	settings_add_route_list(sett, page, "ServerRoutes", TRUE, always_write);
 
-	page = add_page_to_settings(sett, _("User routes"));
+	page = add_page_to_settings(sett, _("User routes"), TRUE);
 	settings_add_route_list(sett, page, "UserRoutes", FALSE, always_write);
 }
 
