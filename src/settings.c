@@ -297,10 +297,10 @@ static void add_route_pages(struct settings *sett)
 {
 	struct settings_page *page;
 
-	page = add_page_to_settings(sett, _("Server Routes"));
+	page = add_page_to_settings(sett, _("Server routes"));
 	settings_add_route_list(sett, page, "ServerRoutes", TRUE, always_write);
 
-	page = add_page_to_settings(sett, _("User Routes"));
+	page = add_page_to_settings(sett, _("User routes"));
 	settings_add_route_list(sett, page, "UserRoutes", FALSE, always_write);
 }
 
