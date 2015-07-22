@@ -180,7 +180,7 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 
 	if(key) {
 		struct content_callback *cb;
-		cb = create_text_callback(value_w);
+		cb = create_callback(value_w, CONTENT_CALLBACK_TYPE_TEXT);
 		settings_set_callback(page->sett, key, subkey, cb);
 	}
 
@@ -348,7 +348,7 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
 
 	if(key) {
 		struct content_callback *cb;
-		cb = create_list_callback(box);
+		cb = create_callback(box, CONTENT_CALLBACK_TYPE_LIST);
 		settings_set_callback(page->sett, key, subkey, cb);
 	}
 
@@ -510,8 +510,291 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 
 	if(key) {
 		struct content_callback *cb;
-		cb = create_entry_list_callback(box);
+		cb = create_callback(box, CONTENT_CALLBACK_TYPE_ENTRY_LIST);
 		settings_set_callback(page->sett, key, subkey, cb);
+	}
+
+	content->data = box;
+	g_signal_connect(content->data, "destroy",
+	                 G_CALLBACK(free_content), content);
+	return box;
+}
+
+static void set_entry_value(GtkWidget *entry, GVariantDict *dict,
+			    const gchar *key, struct settings_content *content)
+{
+	GVariant *value_v;
+	const gchar *value;
+
+	if(dict) {
+		value_v = g_variant_dict_lookup_value(dict, key, NULL);
+		value = g_variant_get_string(value_v, NULL);
+		gtk_entry_set_text(GTK_ENTRY(entry), value);
+		g_variant_unref(value_v);
+	}
+
+	g_signal_connect(entry, "changed",
+	                 G_CALLBACK(entry_changed), content);
+	g_object_set_data(G_OBJECT(entry), "validator", always_valid);
+	gtk_widget_set_hexpand(entry, TRUE);
+	STYLE_ADD_MARGIN(entry, MARGIN_SMALL);
+}
+
+static void set_label_value(GtkWidget *label, GVariantDict *dict,
+			    const gchar *key, struct settings_content *content)
+{
+	GVariant *value_v;
+	const gchar *value;
+
+	if(dict) {
+		value_v = g_variant_dict_lookup_value(dict, key, NULL);
+		value = g_variant_get_string(value_v, NULL);
+		gtk_label_set_text(GTK_LABEL(label), value);
+		g_variant_unref(value_v);
+	}
+
+	gtk_widget_set_hexpand(label, TRUE);
+	STYLE_ADD_MARGIN(label, MARGIN_SMALL);
+}
+
+void route_ipv_changed(GtkComboBox *box, gpointer user_data)
+{
+	GtkWidget *netmask_l, *netmask, *prefix_l, *prefix;
+	gchar *active;
+
+	netmask_l = g_object_get_data(G_OBJECT(box), "netmask_l");
+	netmask = g_object_get_data(G_OBJECT(box), "netmask");
+	prefix_l = g_object_get_data(G_OBJECT(box), "prefix_l");
+	prefix = g_object_get_data(G_OBJECT(box), "prefix");
+
+	active = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(box));
+
+	if(!strcmp(active, "IPv4")) {
+		gtk_widget_show(netmask_l);
+		gtk_widget_show(netmask);
+		gtk_widget_hide(prefix_l);
+		gtk_widget_hide(prefix);
+	} else {
+		gtk_widget_hide(netmask_l);
+		gtk_widget_hide(netmask);
+		gtk_widget_show(prefix_l);
+		gtk_widget_show(prefix);
+	}
+
+	g_free(active);
+}
+
+void content_add_route_to_list(GtkWidget *list, GVariant *properties)
+{
+	struct settings_content *content = g_object_get_data(G_OBJECT(list),
+							     "content");
+	gboolean labels, ipv4 = TRUE;
+	GtkWidget *ipv_l, *network_l, *netmask_l, *prefix_l, *gateway_l,
+		  *ipv, *network, *netmask, *prefix, *gateway,
+		  *rem, *remgrid, *grid, *row;
+	GVariantDict *dict = NULL;
+
+	ipv_l = ipv = rem = remgrid = NULL;
+	labels = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(list), "labels"));
+	if(!labels) {
+		ipv_l = gtk_label_new(_("IP version"));
+		ipv = gtk_combo_box_text_new();
+	}
+	network_l = gtk_label_new(_("Network"));
+	netmask_l = gtk_label_new(_("Netmask"));
+	prefix_l = gtk_label_new(_("Prefix length"));
+	gateway_l = gtk_label_new(_("Gateway"));
+	if(!labels) {
+		network = gtk_entry_new();
+		netmask = gtk_entry_new();
+		prefix = gtk_entry_new();
+		gateway = gtk_entry_new();
+		rem = gtk_button_new_from_icon_name("list-remove-symbolic",
+						    GTK_ICON_SIZE_MENU);
+		remgrid = gtk_grid_new();
+	} else {
+		network = gtk_label_new(NULL);
+		netmask = gtk_label_new(NULL);
+		prefix = gtk_label_new(NULL);
+		gateway = gtk_label_new(NULL);
+	}
+	grid = gtk_grid_new();
+	row = gtk_list_box_row_new();
+
+	if(properties)
+		dict = g_variant_dict_new(properties);
+	if(dict) {
+		GVariant *version;
+
+		version = g_variant_dict_lookup_value(dict, "ProtocolFamily",
+						      NULL);
+		ipv4 = variant_to_bool(version);
+		g_variant_unref(version);
+	}
+	if(!labels) {
+		set_entry_value(network, dict, "Network", content);
+		set_entry_value(netmask, dict, "Netmask", content);
+		set_entry_value(prefix, dict, "Netmask", content);
+		set_entry_value(gateway, dict, "Gateway", content);
+	} else {
+		set_label_value(network, dict, "Network", content);
+		set_label_value(netmask, dict, "Netmask", content);
+		set_label_value(prefix, dict, "Netmask", content);
+		set_label_value(gateway, dict, "Gateway", content);
+	}
+	if(dict)
+		g_variant_dict_unref(dict);
+
+	if(!labels) {
+		g_object_set_data(G_OBJECT(ipv), "netmask_l", netmask_l);
+		g_object_set_data(G_OBJECT(ipv), "netmask", netmask);
+		g_object_set_data(G_OBJECT(ipv), "prefix_l", prefix_l);
+		g_object_set_data(G_OBJECT(ipv), "prefix", prefix);
+		g_object_set_data(G_OBJECT(row), "destroy", destroy_entry);
+		g_object_set_data(G_OBJECT(row), "button", rem);
+		g_signal_connect(rem, "clicked", G_CALLBACK(destroy_entry),
+				 row);
+		g_signal_connect(ipv, "changed", G_CALLBACK(route_ipv_changed),
+				 NULL);
+
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ipv), "IPv4");
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ipv), "IPv6");
+
+		STYLE_ADD_MARGIN(ipv_l, MARGIN_SMALL);
+		STYLE_ADD_MARGIN(ipv, MARGIN_SMALL);
+	}
+
+	STYLE_ADD_MARGIN(network_l, MARGIN_SMALL);
+	STYLE_ADD_MARGIN(netmask_l, MARGIN_SMALL);
+	STYLE_ADD_MARGIN(prefix_l, MARGIN_SMALL);
+	STYLE_ADD_MARGIN(gateway_l, MARGIN_SMALL);
+	gtk_widget_set_hexpand(row, TRUE);
+
+	if(!labels) {
+		gtk_widget_set_vexpand(rem, FALSE);
+		gtk_widget_set_halign(rem, GTK_ALIGN_END);
+		gtk_widget_set_valign(rem, GTK_ALIGN_CENTER);
+		gtk_widget_set_valign(remgrid, GTK_ALIGN_CENTER);
+
+		gtk_grid_attach(GTK_GRID(grid), ipv_l, 0, 0, 1, 1);
+		gtk_grid_attach(GTK_GRID(grid), ipv, 1, 0, 1, 1);
+	}
+
+	gtk_grid_attach(GTK_GRID(grid), network_l, 0, 1, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), network, 1, 1, 1, 1);
+	if(!labels || ipv4) {
+		gtk_grid_attach(GTK_GRID(grid), netmask_l, 0, 2, 1, 1);
+		gtk_grid_attach(GTK_GRID(grid), netmask, 1, 2, 1, 1);
+	}
+	if(!labels || !ipv4) {
+		gtk_grid_attach(GTK_GRID(grid), prefix_l, 0, 3, 1, 1);
+		gtk_grid_attach(GTK_GRID(grid), prefix, 1, 3, 1, 1);
+	}
+	gtk_grid_attach(GTK_GRID(grid), gateway_l, 0, 4, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), gateway, 1, 4, 1, 1);
+	if(!labels) {
+		gtk_grid_attach(GTK_GRID(remgrid), rem, 0, 0, 1, 1);
+		gtk_grid_attach(GTK_GRID(grid), remgrid, 2, 2, 1, 2);
+	}
+	gtk_container_add(GTK_CONTAINER(row), grid);
+	gtk_widget_show_all(row);
+	gtk_container_add(GTK_CONTAINER(list), row);
+
+	if(!labels && ipv4)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(ipv), 0);
+	else if(!labels)
+		gtk_combo_box_set_active(GTK_COMBO_BOX(ipv), 1);
+
+	int count = GPOINTER_TO_INT(g_object_get_data(G_OBJECT(list), "count"));
+	count++;
+	g_object_set_data(G_OBJECT(list), "count", GINT_TO_POINTER(count));
+	if(!labels)
+		update_button_visibility(list);
+}
+
+static void add_route_to_list(GtkButton *button, gpointer user_data)
+{
+	GtkWidget *list = user_data;
+	content_add_route_to_list(list, NULL);
+}
+
+GtkWidget *settings_add_route_list(struct settings *sett,
+				   struct settings_page *page,
+				   const gchar *key, gboolean labels,
+				   settings_writable writable)
+{
+	struct settings_content *content;
+	GtkWidget *grid, *box, *toolbar, *frame, *buttonbox, *button;
+	GtkToolItem *item, *buttonitem;
+	GVariantIter *iter;
+	GVariant *values, *value;
+	gboolean empty = TRUE;
+
+	content = create_base_content(sett, writable, NULL, NULL, NULL);
+	box = gtk_list_box_new();
+	toolbar = gtk_toolbar_new();
+	frame = gtk_frame_new(NULL);
+	button = gtk_button_new_from_icon_name("list-add-symbolic",
+	                                       GTK_ICON_SIZE_MENU);
+	/* needs to be a box and not a grid for inline-toolbar css */
+	buttonbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	grid = gtk_grid_new();
+	item = gtk_separator_tool_item_new();
+	buttonitem = gtk_tool_item_new();
+
+	content->value = content_value_entry_list;
+
+	g_object_set_data(G_OBJECT(box), "labels", GINT_TO_POINTER(labels));
+	g_object_set_data(G_OBJECT(box), "count", GINT_TO_POINTER(0));
+	g_object_set_data(G_OBJECT(box), "content", content);
+	g_signal_connect(button, "clicked", G_CALLBACK(add_route_to_list), box);
+
+	gtk_style_context_add_class(gtk_widget_get_style_context(toolbar),
+	                            GTK_STYLE_CLASS_INLINE_TOOLBAR);
+	gtk_tool_item_set_expand(item, TRUE);
+	gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(item), FALSE);
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
+	gtk_toolbar_set_icon_size(GTK_TOOLBAR(toolbar), GTK_ICON_SIZE_MENU);
+
+	gtk_widget_set_margin_start(grid, MARGIN_LARGE);
+	gtk_widget_set_hexpand(toolbar, TRUE);
+	gtk_widget_set_halign(button, GTK_ALIGN_END);
+	gtk_list_box_set_selection_mode(GTK_LIST_BOX(box), GTK_SELECTION_NONE);
+
+	gtk_container_add(GTK_CONTAINER(buttonbox), button);
+	gtk_container_add(GTK_CONTAINER(buttonitem), buttonbox);
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), GTK_TOOL_ITEM(item), 0);
+	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), buttonitem, 1);
+	gtk_container_add(GTK_CONTAINER(frame), box);
+	gtk_grid_attach(GTK_GRID(grid), frame, 0, 1, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), toolbar, 0, 2, 1, 1);
+
+	gtk_grid_attach(GTK_GRID(page->grid), grid, 0,
+	                page->index++, 2, 1);
+	gtk_widget_show_all(page->grid);
+
+	if(labels)
+		gtk_widget_hide(toolbar);
+
+	values = service_get_property(sett->serv, key, NULL);
+	iter = g_variant_iter_new(values);
+
+	while(g_variant_iter_loop(iter, "v", &value)) {
+		empty = FALSE;
+		content_add_route_to_list(box, value);
+	}
+	if(empty)
+		content_add_route_to_list(box, NULL);
+
+	g_variant_iter_free(iter);
+	g_variant_unref(values);
+
+	hash_table_set_dual_key(sett->contents, key, NULL, content);
+
+	if(key) {
+		struct content_callback *cb;
+		cb = create_callback(box, CONTENT_CALLBACK_TYPE_ROUTE_LIST);
+		settings_set_callback(page->sett, key, NULL, cb);
 	}
 
 	content->data = box;

@@ -75,6 +75,11 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
                                    const gchar *key, const gchar *subkey,
                                    const gchar *secondary_key,
 				   settings_entry_validator valid);
+GtkWidget *settings_add_route_list(struct settings *sett,
+				   struct settings_page *page,
+				   const gchar *key, gboolean labels,
+				   settings_writable writable);
+
 void content_add_entry_to_list(GtkWidget *list, const gchar *value);
 
 void free_content(GtkWidget *widget, gpointer user_data);

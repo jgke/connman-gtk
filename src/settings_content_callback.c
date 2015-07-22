@@ -26,27 +26,12 @@
 #include "settings_content_callback.h"
 #include "util.h"
 
-struct content_callback *create_text_callback(GtkWidget *label)
+struct content_callback *create_callback(GtkWidget *label,
+					 enum content_callback_type type)
 {
 	struct content_callback *cb = g_malloc(sizeof(*cb));
-	cb->type = CONTENT_CALLBACK_TYPE_TEXT;
+	cb->type = type;
 	cb->data = label;
-	return cb;
-}
-
-struct content_callback *create_list_callback(GtkWidget *list)
-{
-	struct content_callback *cb = g_malloc(sizeof(*cb));
-	cb->type = CONTENT_CALLBACK_TYPE_LIST;
-	cb->data = list;
-	return cb;
-}
-
-struct content_callback *create_entry_list_callback(GtkWidget *list)
-{
-	struct content_callback *cb = g_malloc(sizeof(*cb));
-	cb->type = CONTENT_CALLBACK_TYPE_ENTRY_LIST;
-	cb->data = list;
 	return cb;
 }
 
@@ -106,6 +91,7 @@ void content_callback_free(void *cb_v)
 	case CONTENT_CALLBACK_TYPE_TEXT:
 	case CONTENT_CALLBACK_TYPE_LIST:
 	case CONTENT_CALLBACK_TYPE_ENTRY_LIST:
+	case CONTENT_CALLBACK_TYPE_ROUTE_LIST:
 		break;
 	default:
 		g_warning("Unknown callback type");
