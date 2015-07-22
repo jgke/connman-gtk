@@ -21,6 +21,7 @@
 #include <gio/gio.h>
 #include <gtk/gtk.h>
 
+#include "interfaces.h"
 #include "vpn.h"
 #include "technology.h"
 

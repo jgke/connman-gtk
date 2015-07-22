@@ -22,6 +22,7 @@
 #define _CONNMAN_GTK_INTERFACES_H
 
 #define CONNMAN_PATH "net.connman"
+#define CONNMAN_VPN_PATH "net.connman.vpn"
 
 #define MANAGER_NAME CONNMAN_PATH ".Manager"
 #define MANAGER_INTERFACE \
@@ -122,7 +123,7 @@
         "</interface>" \
         "</node>"
 
-#define VPN_MANAGER_NAME CONNMAN_PATH ".vpn.Manager"
+#define VPN_MANAGER_NAME CONNMAN_VPN_PATH ".Manager"
 #define VPN_MANAGER_INTERFACE \
         "<node>" \
         "<interface name=\"net.connman.vpn.Manager\">" \
@@ -151,7 +152,7 @@
         "</interface>" \
         "</node>"
 
-#define VPN_AGENT_NAME CONNMAN_PATH ".vpn.Agent"
+#define VPN_AGENT_NAME CONNMAN_VPN_PATH ".Agent"
 #define VPN_AGENT_INTERFACE \
         "<node>" \
         "<interface name=\"net.connman.vpn.Agent\">" \
@@ -166,6 +167,23 @@
         "        <arg name=\"values\" type=\"a{sv}\" direction=\"out\"/>" \
         "    </method>" \
         "    <method name=\"Cancel\"></method>" \
+        "</interface>" \
+        "</node>"
+
+#define VPN_CONNECTION_NAME CONNMAN_VPN_PATH ".Connection"
+#define VPN_CONNECTION_INTERFACE \
+        "<node>" \
+        "<interface name=\"net.connman.vpn.Connection\">" \
+        "    <method name=\"SetProperty\">" \
+        "        <arg name=\"name\" type=\"s\" direction=\"in\"/>" \
+        "        <arg name=\"value\" type=\"v\" direction=\"in\"/>" \
+        "    </method>" \
+        "    <method name=\"Connect\"></method>" \
+        "    <method name=\"Disconnect\"></method>" \
+        "    <signal name=\"PropertyChanged\">" \
+        "        <arg name=\"name\" type=\"s\"/>" \
+        "        <arg name=\"value\" type=\"v\"/>" \
+        "    </signal>" \
         "</interface>" \
         "</node>"
 

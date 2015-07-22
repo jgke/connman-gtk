@@ -166,30 +166,43 @@ static void add_service(GDBusConnection *connection, const gchar *path,
 	struct service *serv;
 	GDBusProxy *proxy;
 	GDBusNodeInfo *info;
+	GDBusInterfaceInfo *interface;
 	GError *error = NULL;
 	enum connection_type type;
+	const char *interface_xml;
+	const char *connman_name;
+	const char *interface_name;
 
-	info = g_dbus_node_info_new_for_xml(SERVICE_INTERFACE, &error);
+	type = connection_type_from_path(path);
+	if(type == CONNECTION_TYPE_VPN) {
+		interface_xml = VPN_CONNECTION_INTERFACE;
+		connman_name = CONNMAN_VPN_PATH;
+		interface_name = VPN_CONNECTION_NAME;
+	}
+	else {
+		interface_xml = SERVICE_INTERFACE;
+		connman_name = CONNMAN_PATH;
+		interface_name = SERVICE_NAME;
+	}
+	info = g_dbus_node_info_new_for_xml(interface_xml, &error);
 	if(error) {
 		g_warning("Failed to load service interface: %s",
-		          error->message);
+			  error->message);
 		g_error_free(error);
 		return;
 	}
 
+	info = g_dbus_node_info_new_for_xml(interface_xml, &error);
+	interface = g_dbus_node_info_lookup_interface(info, interface_name);
 	proxy = g_dbus_proxy_new_sync(connection, G_DBUS_PROXY_FLAGS_NONE,
-	                              g_dbus_node_info_lookup_interface(info,
-	                                              "net.connman.Service"),
-	                              "net.connman", path,
-	                              "net.connman.Service", NULL, &error);
+				      interface, connman_name, path,
+	                              interface_name, NULL, &error);
 	if(error) {
 		g_warning("failed to connect ConnMan service proxy: %s",
 		          error->message);
 		g_error_free(error);
 		goto out;
 	}
-
-	type = connection_type_from_path(path);
 
 	serv = service_create(technologies[type], proxy, path, properties);
 	g_hash_table_insert(services, g_strdup(path), serv);
@@ -200,7 +213,7 @@ out:
 	g_dbus_node_info_unref(info);
 }
 
-static void modify_service(GDBusConnection *connection, const gchar *path,
+void modify_service(GDBusConnection *connection, const gchar *path,
                            GVariant *properties)
 {
 	enum connection_type type = connection_type_from_path(path);
@@ -214,7 +227,7 @@ static void modify_service(GDBusConnection *connection, const gchar *path,
 	}
 }
 
-static void remove_service(const gchar *path)
+void remove_service(const gchar *path)
 {
 	enum connection_type type = connection_type_from_path(path);
 	void *spath;
@@ -243,12 +256,14 @@ static void services_changed(GDBusConnection *connection, GVariant *parameters)
 
 	iter = g_variant_iter_new(modified);
 	while(g_variant_iter_loop(iter, "(o@*)", &path, &value))
-		modify_service(connection, path, value);
+		if(!strstr(path, "service/vpn"))
+			modify_service(connection, path, value);
 	g_variant_iter_free(iter);
 
 	iter = g_variant_iter_new(deleted);
 	while(g_variant_iter_loop(iter, "o", &path))
-		remove_service(path);
+		if(!strstr(path, "service/vpn"))
+			remove_service(path);
 	g_variant_iter_free(iter);
 
 	g_variant_unref(modified);
@@ -306,18 +321,18 @@ static void add_all_services(GDBusConnection *connection, GVariant *services_v)
 	int i;
 	int size = g_variant_n_children(services_v);
 	for(i = 0; i < size; i++) {
-		GVariant *path;
-		GVariant *properties;
-		GVariant *child;
+		GVariant *path_v, *properties, *child;;
+		const gchar *path;
 
 		child = g_variant_get_child_value(services_v, i);
-		path = g_variant_get_child_value(child, 0);
+		path_v = g_variant_get_child_value(child, 0);
 		properties = g_variant_get_child_value(child, 1);
-		add_service(connection, g_variant_get_string(path, NULL),
-		            properties);
+		path = g_variant_get_string(path_v, NULL);
+		if(!strstr(path, "service/vpn"))
+			add_service(connection, path, properties);
 
 		g_variant_unref(child);
-		g_variant_unref(path);
+		g_variant_unref(path_v);
 		g_variant_unref(properties);
 	}
 }
@@ -387,6 +402,7 @@ static void connman_appeared(GDBusConnection *connection, const gchar *name,
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
 	                         vpn->settings->grid, NULL);
 	GDBusProxy *proxy = manager_register(connection);
+	vpn_get_connections();
 	register_agents(connection, proxy, vpn->settings->proxy);
 }
 

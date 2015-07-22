@@ -21,6 +21,13 @@
 #ifndef _CONNMAN_GTK_MAIN_H
 #define _CONNMAN_GTK_MAIN_H
 
+#include <gtk/gtk.h>
+#include <gio/gio.h>
+
+void modify_service(GDBusConnection *connection, const gchar *path,
+		    GVariant *parameters);
+void remove_service(const gchar *path);
+
 extern gboolean shutting_down;
 extern GtkWidget *main_window;
 
