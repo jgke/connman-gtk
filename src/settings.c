@@ -278,6 +278,32 @@ static void add_proxy_page(struct settings *sett)
 	                        conf, "Excludes", "Proxy", always_valid);
 }
 
+static void add_vpn_info_page(struct settings *sett)
+{
+	struct settings_page *page = add_page_to_settings(sett, _("Info"));
+
+	settings_add_switch(sett, page, always_write, _("Autoconnect"),
+	                    "AutoConnect", NULL);
+
+	settings_add_text(page, _("Name"), "Name", NULL);
+	settings_add_text(page, _("State"), "State", NULL);
+	settings_add_text(page, _("Host"), "Host", NULL);
+	settings_add_text(page, _("IPv4 address"), "IPv4", "Address");
+	settings_add_text(page, _("IPv6 address"), "IPv6", "Address");
+	settings_add_text(page, _("Nameservers"), "Nameservers", NULL);
+}
+
+static void add_route_pages(struct settings *sett)
+{
+	struct settings_page *page;
+
+	page = add_page_to_settings(sett, _("Server Routes"));
+	settings_add_route_list(sett, page, "ServerRoutes", TRUE, always_write);
+
+	page = add_page_to_settings(sett, _("User Routes"));
+	settings_add_route_list(sett, page, "UserRoutes", FALSE, always_write);
+}
+
 static void append_dict_inner(const gchar *key, const gchar *subkey,
                               gpointer value, gpointer user_data)
 {
@@ -372,13 +398,20 @@ static void init_settings(struct settings *sett)
 	gtk_grid_attach(grid, sett->apply, 1, 1, 1, 1);
 	gtk_container_add(GTK_CONTAINER(sett->window), GTK_WIDGET(grid));
 
-	add_info_page(sett);
-	add_ipv_page(sett, 4);
-	add_ipv_page(sett, 6);
-	add_server_page(sett);
-	add_proxy_page(sett);
-
 	gtk_widget_show_all(sett->window);
+
+	if(sett->serv->type != CONNECTION_TYPE_VPN) {
+		add_info_page(sett);
+		add_ipv_page(sett, 4);
+		add_ipv_page(sett, 6);
+		add_server_page(sett);
+		add_proxy_page(sett);
+	} else {
+		add_vpn_info_page(sett);
+		add_ipv_page(sett, 4);
+		add_ipv_page(sett, 6);
+		add_route_pages(sett);
+	}
 }
 
 struct settings *settings_create(struct service *serv,
