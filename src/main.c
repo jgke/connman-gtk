@@ -192,7 +192,6 @@ static void add_service(GDBusConnection *connection, const gchar *path,
 		return;
 	}
 
-	info = g_dbus_node_info_new_for_xml(interface_xml, &error);
 	interface = g_dbus_node_info_lookup_interface(info, interface_name);
 	proxy = g_dbus_proxy_new_sync(connection, G_DBUS_PROXY_FLAGS_NONE,
 				      interface, connman_name, path,
