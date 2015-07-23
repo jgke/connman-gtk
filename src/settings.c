@@ -432,7 +432,10 @@ static void add_pages(struct settings *sett)
 	gboolean immutable = service_get_property_boolean(sett->serv,
 							  "Immutable", NULL);
 	if(immutable) {
-		add_info_page(sett);
+		if(sett->serv->type != CONNECTION_TYPE_VPN)
+			add_info_page(sett);
+		else
+			add_vpn_info_page(sett);
 		add_immutable_ipv_page(sett);
 		add_immutable_server_page(sett);
 		return;
