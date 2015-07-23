@@ -323,14 +323,33 @@ gchar *service_get_property_string(struct service *serv, const char *key,
 			return g_strdup("");
 		return g_strdup_printf("%d", len);
 	}
+	if(key && !strcmp(key, "AutoConnect")) {
+		gboolean autoconnect = service_get_property_boolean(serv, key,
+								    subkey);
+		if(autoconnect)
+			return g_strdup(_("On"));
+		return g_strdup(_("Off"));
+	}
 	gchar *str = service_get_property_string_raw(serv, key, subkey);
 	if(!serv || !key)
 		return str;
-	if(strcmp(key, "State"))
-		return str;
-	gchar *out = g_strdup(status_localized(str));
-	g_free(str);
-	return out;
+	if(!strcmp(key, "State")) {
+		gchar *out = g_strdup(status_localized(str));
+		g_free(str);
+		return out;
+	}
+	if(!strcmp(key, "Proxy") && !strcmp(subkey, "Method")) {
+		const gchar *out;
+		if(!strcmp(str, "direct"))
+			out = _("Direct");
+		else if(!strcmp(str, "auto"))
+			out = _("Automatic");
+		else
+			out = _("None");
+		g_free(str);
+		return g_strdup(out);
+	}
+	return str;
 }
 
 gchar **service_get_property_strv(struct service *serv, const char *key,

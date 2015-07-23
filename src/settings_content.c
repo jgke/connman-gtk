@@ -631,7 +631,6 @@ void content_add_route_to_list(GtkWidget *list, GVariant *properties)
 							NULL);
 		version = variant_to_int(version_v);
 		ipv4 = version == 4;
-		printf("%d\n", ipv4);
 		g_variant_unref(version_v);
 	}
 	if(!labels) {
@@ -687,11 +686,6 @@ void content_add_route_to_list(GtkWidget *list, GVariant *properties)
 	}
 
 	if(!labels) {
-		int width;
-		if(ipv4)
-			width = 4*3 + 3;
-		else
-			width = 8*4 + 7;
 		gtk_entry_set_width_chars(GTK_ENTRY(network), 4*3 + 3);
 		gtk_entry_set_width_chars(GTK_ENTRY(netmask), 4*3 + 3);
 		gtk_entry_set_width_chars(GTK_ENTRY(prefix), 8*4 + 7);

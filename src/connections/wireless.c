@@ -88,7 +88,6 @@ static void hidden_cb(GtkWidget *button, gpointer user_data)
 	g_hash_table_foreach(item->parent.services, hidden_cb_iter, arr);
 	//if(arr->len == 1)
 		service_toggle_connection(g_ptr_array_index(arr, 0));
-	printf("%d\n", arr->len);
 	g_ptr_array_free(arr, TRUE);
 }
 
@@ -194,7 +193,6 @@ void technology_wireless_tether(struct technology *tech)
 		goto out;
 	ssid = gtk_entry_get_text(GTK_ENTRY(ssid_e));
 	pass = gtk_entry_get_text(GTK_ENTRY(passphrase_e));
-	printf("%s %s\n", ssid, pass);
 	technology_set_property(tech, "TetheringIdentifier",
 	                        g_variant_new("s", ssid));
 	technology_set_property(tech, "TetheringPassphrase",

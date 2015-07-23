@@ -120,12 +120,12 @@ static void free_settings(struct settings *sett)
 }
 
 static void add_info_page(struct settings *sett)
-{
+ {
 	struct settings_page *page = add_page_to_settings(sett, _("Info"),
 							  FALSE);
 
 	settings_add_switch(sett, page, always_write, _("Autoconnect"),
-	                    "AutoConnect", NULL);
+			    "AutoConnect", NULL);
 
 	settings_add_text(page, _("Name"), "Name", NULL);
 	settings_add_text(page, _("State"), "State", NULL);
@@ -152,6 +152,24 @@ static gboolean valid_address_entry(GtkWidget *entry)
 {
 	const gchar *value = gtk_entry_get_text(GTK_ENTRY(entry));
 	return valid_ipv4(value) || valid_ipv6(value);
+}
+
+static void add_immutable_ipv_page(struct settings *sett)
+{
+	struct settings_page *page;
+
+	page = add_page_to_settings(sett, _("IP details"), FALSE);
+	settings_add_text(page, _("IPv4 method"), "IPv4", "Method");
+	settings_add_text(page, _("Address"), "IPv4", "Address");
+	settings_add_text(page, _("Gateway"), "IPv4", "Gateway");
+
+	settings_add_text(page, "", NULL, NULL);
+
+	settings_add_text(page, _("IPv6 method"), "IPv6", "Method");
+	settings_add_text(page, _("Address"), "IPv6", "Address");
+	settings_add_text(page, _("Gateway"), "IPv6", "Gateway");
+
+	return;
 }
 
 static void add_ipv_page(struct settings *sett, int ipv)
@@ -187,6 +205,7 @@ static void add_ipv_page(struct settings *sett, int ipv)
 			return;
 		}
 	}
+
 	page = add_page_to_settings(sett, local, FALSE);
 	box = settings_add_combo_box(sett, page, always_write, _("Method"),
 	                             conf, "Method", ipvs);
@@ -243,36 +262,61 @@ static void add_ipv_page(struct settings *sett, int ipv)
 	}
 }
 
+static void add_immutable_server_page(struct settings *sett)
+{
+	struct settings_page *page;
+	gchar *cur = service_get_property_string_raw(sett->serv,
+						     "Proxy", "Method");
+	page = add_page_to_settings(sett, _("Servers"), TRUE);
+
+	settings_add_text(page, _("Nameservers"), "Nameservers", NULL);
+	settings_add_text(page, _("Timeservers"), "Timeservers", NULL);
+	settings_add_text(page, _("Domains"), "Domains", NULL);
+	settings_add_text(page, _("Proxy method"), "Proxy", "Method");
+
+	if(!strcmp(cur, "direct"));
+	else if(!strcmp(cur, "auto"))
+		settings_add_text(page, _("URL"), "Proxy", "URL");
+	else {
+		settings_add_text(page, _("Servers"), "Proxy",
+				  "Servers");
+		settings_add_text(page, _("Excludes"), "Proxy",
+				  "Excludes");
+	}
+
+	g_free(cur);
+	return;
+}
+
 static void add_server_page(struct settings *sett)
 {
 	struct settings_page *page;
 
 	page = add_page_to_settings(sett, _("Nameservers"), TRUE);
 	settings_add_entry_list(sett, page, always_write, _("Nameservers"),
-	                        "Nameservers.Configuration", NULL,
-	                        "Nameservers", valid_address_entry);
+				"Nameservers.Configuration", NULL,
+				"Nameservers", valid_address_entry);
 
 	page = add_page_to_settings(sett, _("Timeservers"), TRUE);
 	settings_add_entry_list(sett, page, always_write, _("Timeservers"),
-	                        "Timeservers.Configuration", NULL,
-	                        "Timeservers", always_valid);
+				"Timeservers.Configuration", NULL,
+				"Timeservers", always_valid);
 
 	page = add_page_to_settings(sett, _("Domains"), TRUE);
 	settings_add_entry_list(sett, page, always_write, _("Domains"),
-	                        "Domains.Configuration", NULL,
-	                        "Domains", always_valid);
+				"Domains.Configuration", NULL,
+				"Domains", always_valid);
 }
 
 static void add_proxy_page(struct settings *sett)
 {
-	struct settings_page *page = add_page_to_settings(sett, _("Proxy"),
-							  TRUE);
-	struct settings_page *direct, *automatic, *manual;
+	struct settings_page *page, *direct, *automatic, *manual;
 	GtkWidget *box;
-
 	const gchar *conf = "Proxy.Configuration";
-	gchar *cur = service_get_property_string(sett->serv, "Proxy", "Method");
+	gchar *cur;
 
+	page = add_page_to_settings(sett, _("Proxy"), TRUE);
+	cur = service_get_property_string_raw(sett->serv, "Proxy", "Method");
 	box = settings_add_combo_box(sett, page, always_write, _("Method"),
 	                             conf, "Method", "Proxy");
 
@@ -299,9 +343,6 @@ static void add_vpn_info_page(struct settings *sett)
 {
 	struct settings_page *page = add_page_to_settings(sett, _("Info"),
 							  FALSE);
-
-	settings_add_switch(sett, page, always_write, _("Autoconnect"),
-	                    "AutoConnect", NULL);
 
 	settings_add_text(page, _("Name"), "Name", NULL);
 	settings_add_text(page, _("State"), "State", NULL);
@@ -363,6 +404,32 @@ static void add_clear_page(struct settings *sett)
 		gtk_widget_hide(remove);
 		gtk_widget_hide(remove_l);
 	}
+}
+
+static void add_pages(struct settings *sett)
+{
+	gboolean immutable = service_get_property_boolean(sett->serv,
+							  "Immutable", NULL);
+	if(immutable) {
+		add_info_page(sett);
+		add_immutable_ipv_page(sett);
+		add_immutable_server_page(sett);
+		return;
+	}
+
+	if(sett->serv->type != CONNECTION_TYPE_VPN) {
+		add_info_page(sett);
+		add_ipv_page(sett, 4);
+		add_ipv_page(sett, 6);
+		add_server_page(sett);
+		add_proxy_page(sett);
+	} else {
+		add_vpn_info_page(sett);
+		add_ipv_page(sett, 4);
+		add_ipv_page(sett, 6);
+		add_route_pages(sett);
+	}
+	add_clear_page(sett);
 }
 
 static void append_dict_inner(const gchar *key, const gchar *subkey,
@@ -461,19 +528,7 @@ static void init_settings(struct settings *sett)
 
 	gtk_widget_show_all(sett->window);
 
-	if(sett->serv->type != CONNECTION_TYPE_VPN) {
-		add_info_page(sett);
-		add_ipv_page(sett, 4);
-		add_ipv_page(sett, 6);
-		add_server_page(sett);
-		add_proxy_page(sett);
-	} else {
-		add_vpn_info_page(sett);
-		add_ipv_page(sett, 4);
-		add_ipv_page(sett, 6);
-		add_route_pages(sett);
-	}
-	add_clear_page(sett);
+	add_pages(sett);
 }
 
 struct settings *settings_create(struct service *serv,
