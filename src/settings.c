@@ -78,6 +78,7 @@ static struct settings_page *add_page_to_settings(struct settings *sett,
 
 	STYLE_ADD_MARGIN(label, MARGIN_SMALL);
 	gtk_widget_set_margin_start(label, MARGIN_LARGE);
+	gtk_widget_set_margin_end(label, MARGIN_LARGE);
 
 	gtk_widget_set_halign(label, GTK_ALIGN_START);
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-22 14:10+0300\n"
+"POT-Creation-Date: 2015-07-23 10:28+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,175 +29,195 @@ msgstr ""
 msgid "_Cancel"
 msgstr ""
 
-#: src/main.c:461 src/settings.c:359
+#: src/main.c:460 src/settings.c:419
 msgid "Network Settings"
 msgstr ""
 
-#: src/service.c:429 src/util.c:116
+#: src/service.c:493 src/util.c:116
 msgid "Idle"
 msgstr ""
 
-#: src/service.c:431 src/util.c:118
+#: src/service.c:495 src/util.c:118
 msgid "Failure"
 msgstr ""
 
-#: src/service.c:433 src/util.c:120
+#: src/service.c:497 src/util.c:120
 msgid "Association"
 msgstr ""
 
-#: src/service.c:435 src/util.c:122
+#: src/service.c:499 src/util.c:122
 msgid "Configuration"
 msgstr ""
 
-#: src/service.c:437 src/util.c:124
+#: src/service.c:501 src/util.c:124
 msgid "Ready"
 msgstr ""
 
-#: src/service.c:439 src/util.c:126
+#: src/service.c:503 src/util.c:126
 msgid "Disconnected"
 msgstr ""
 
-#: src/service.c:441 src/util.c:128
+#: src/service.c:505 src/util.c:128
 msgid "Online"
 msgstr ""
 
-#: src/service.c:443 src/util.c:130
+#: src/service.c:507 src/util.c:130
 msgid "Error"
 msgstr ""
 
-#: src/settings.c:109 src/settings.c:283
+#: src/settings.c:123 src/settings.c:299
 msgid "Info"
 msgstr ""
 
-#: src/settings.c:111 src/settings.c:285
+#: src/settings.c:126 src/settings.c:302
 msgid "Autoconnect"
 msgstr ""
 
-#: src/settings.c:114 src/settings.c:288
+#: src/settings.c:129 src/settings.c:305
 msgid "Name"
 msgstr ""
 
-#: src/settings.c:115 src/settings.c:289
+#: src/settings.c:130 src/settings.c:306
 msgid "State"
 msgstr ""
 
-#: src/settings.c:116 src/connections/ethernet.c:83
+#: src/settings.c:131 src/connections/ethernet.c:83
 msgid "MAC address"
 msgstr ""
 
-#: src/settings.c:117
+#: src/settings.c:132
 msgid "Interface"
 msgstr ""
 
-#: src/settings.c:118 src/settings.c:291 src/connections/ethernet.c:79
+#: src/settings.c:133 src/settings.c:308 src/connections/ethernet.c:79
 msgid "IPv4 address"
 msgstr ""
 
-#: src/settings.c:119 src/settings.c:292 src/connections/ethernet.c:81
+#: src/settings.c:134 src/settings.c:309 src/connections/ethernet.c:81
 msgid "IPv6 address"
 msgstr ""
 
-#: src/settings.c:120 src/settings.c:234 src/settings.c:235 src/settings.c:293
+#: src/settings.c:135 src/settings.c:249 src/settings.c:250 src/settings.c:310
 msgid "Nameservers"
 msgstr ""
 
-#: src/settings.c:155
+#: src/settings.c:170
 msgid "IPv4"
 msgstr ""
 
-#: src/settings.c:160
+#: src/settings.c:175
 msgid "IPv6"
 msgstr ""
 
-#: src/settings.c:175 src/settings.c:259
+#: src/settings.c:190 src/settings.c:275
 msgid "Method"
 msgstr ""
 
-#: src/settings.c:178
+#: src/settings.c:193
 msgid "None"
 msgstr ""
 
-#: src/settings.c:181 src/settings.c:184 src/settings.c:264
+#: src/settings.c:196 src/settings.c:199 src/settings.c:280
 msgid "Automatic"
 msgstr ""
 
-#: src/settings.c:186 src/settings.c:266
+#: src/settings.c:201 src/settings.c:282
 msgid "Manual"
 msgstr ""
 
-#: src/settings.c:192 src/settings.c:200
+#: src/settings.c:207 src/settings.c:215
 msgid "Address"
 msgstr ""
 
-#: src/settings.c:193 src/settings.c:203 src/settings_content.c:606
+#: src/settings.c:208 src/settings.c:218 src/settings_content.c:606
 msgid "Gateway"
 msgstr ""
 
-#: src/settings.c:195 src/settings.c:207 src/settings_content.c:604
+#: src/settings.c:210 src/settings.c:222 src/settings_content.c:604
 msgid "Netmask"
 msgstr ""
 
-#: src/settings.c:197 src/settings.c:211 src/settings_content.c:605
+#: src/settings.c:212 src/settings.c:226 src/settings_content.c:605
 msgid "Prefix length"
 msgstr ""
 
-#: src/settings.c:216
+#: src/settings.c:231
 msgid "Privacy"
 msgstr ""
 
-#: src/settings.c:221 src/technology.c:136
+#: src/settings.c:236 src/technology.c:136
 msgid "Disabled"
 msgstr ""
 
-#: src/settings.c:223
+#: src/settings.c:238
 msgid "Enabled"
 msgstr ""
 
-#: src/settings.c:225
+#: src/settings.c:240
 msgid "Prefered"
 msgstr ""
 
-#: src/settings.c:239 src/settings.c:240
+#: src/settings.c:254 src/settings.c:255
 msgid "Timeservers"
 msgstr ""
 
-#: src/settings.c:244 src/settings.c:245
+#: src/settings.c:259 src/settings.c:260
 msgid "Domains"
 msgstr ""
 
-#: src/settings.c:252
+#: src/settings.c:267
 msgid "Proxy"
 msgstr ""
 
-#: src/settings.c:262
+#: src/settings.c:278
 msgid "Direct"
 msgstr ""
 
-#: src/settings.c:272
+#: src/settings.c:288
 msgid "URL"
 msgstr ""
 
-#: src/settings.c:275
+#: src/settings.c:291
 msgid "Servers"
 msgstr ""
 
-#: src/settings.c:277
+#: src/settings.c:293
 msgid "Excludes"
 msgstr ""
 
-#: src/settings.c:290
+#: src/settings.c:307
 msgid "Host"
 msgstr ""
 
-#: src/settings.c:300
+#: src/settings.c:317
 msgid "Server routes"
 msgstr ""
 
-#: src/settings.c:303
+#: src/settings.c:320
 msgid "User routes"
 msgstr ""
 
-#: src/settings.c:369
+#: src/settings.c:339
+msgid "Clear settings"
+msgstr ""
+
+#: src/settings.c:341
+msgid "_Reset"
+msgstr ""
+
+#: src/settings.c:342
+msgid "_Forget"
+msgstr ""
+
+#: src/settings.c:343
+msgid "Set all properties to defaults."
+msgstr ""
+
+#: src/settings.c:344
+msgid "Remove this service."
+msgstr ""
+
+#: src/settings.c:429
 msgid "_Apply"
 msgstr ""
 
