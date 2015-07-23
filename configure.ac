@@ -1,4 +1,4 @@
-AC_INIT([connman-gtk],[0.1],[https://github.com/jgke/connman-gtk])
+AC_INIT([connman-gtk],[0.9],[https://github.com/jgke/connman-gtk])
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config])
