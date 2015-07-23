@@ -119,6 +119,26 @@ static void free_settings(struct settings *sett)
 	g_free(sett);
 }
 
+static void add_security(struct settings *sett, struct settings_page *page)
+{
+	GVariant *security;
+	GVariant *child;
+	if(sett->serv->type != CONNECTION_TYPE_WIRELESS)
+		return;
+	security = service_get_property(sett->serv, "Security", NULL);
+	child = g_variant_get_child_value(security, 0);
+	if(!strcmp(g_variant_get_string(child, NULL), "none")) {
+		settings_add_static_text(page, _("Security"), _("None"));
+		goto out;
+	}
+	else
+		settings_add_text(page, _("Security"), "Security", NULL);
+
+out:
+	g_variant_unref(child);
+	g_variant_unref(security);
+}
+
 static void add_info_page(struct settings *sett)
  {
 	struct settings_page *page = add_page_to_settings(sett, _("Info"),
@@ -129,6 +149,7 @@ static void add_info_page(struct settings *sett)
 
 	settings_add_text(page, _("Name"), "Name", NULL);
 	settings_add_text(page, _("State"), "State", NULL);
+	add_security(sett, page);
 	settings_add_text(page, _("MAC address"), "Ethernet", "Address");
 	settings_add_text(page, _("Interface"), "Ethernet", "Interface");
 	settings_add_text(page, _("IPv4 address"), "IPv4", "Address");

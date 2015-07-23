@@ -157,6 +157,29 @@ static void add_left_aligned(GtkGrid *grid, GtkWidget *a, GtkWidget *b, int y)
 	}
 }
 
+GtkWidget *settings_add_static_text(struct settings_page *page,
+				    const gchar *label, const gchar *text)
+{
+	GtkWidget *label_w, *value_w;
+	gchar *value;
+	struct settings_content *content;
+
+	content = create_base_content(NULL, never_write, NULL, NULL, NULL);
+
+	label_w = create_label(label);
+	value_w = gtk_label_new(text);
+
+	label_align_text_left(GTK_LABEL(value_w));
+
+	add_left_aligned(GTK_GRID(page->grid), label_w, value_w, page->index++);
+	gtk_widget_show_all(page->grid);
+
+	content->data = value_w;
+	g_signal_connect(content->data, "destroy",
+	                 G_CALLBACK(free_content), content);
+	return value_w;
+}
+
 GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
                              const gchar *key, const gchar *subkey)
 {

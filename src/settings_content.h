@@ -51,6 +51,8 @@ gboolean always_valid(GtkWidget *entry);
 void settings_add_content(struct settings_page *page,
                           struct settings_content *content);
 
+GtkWidget *settings_add_static_text(struct settings_page *page,
+				    const gchar *label, const gchar *text);
 GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
                              const gchar *key, const gchar *subkey);
 GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
