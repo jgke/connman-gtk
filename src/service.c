@@ -126,13 +126,16 @@ static void service_proxy_signal(GDBusProxy *proxy, gchar *sender,
 
 static void settings_closed(struct service *serv)
 {
-	if(serv)
+	if(serv) {
 		serv->sett = NULL;
+		gtk_widget_set_sensitive(serv->settings_button, TRUE);
+	}
 }
 
 static void settings_button_cb(GtkButton *button, gpointer user_data)
 {
 	struct service *serv = user_data;
+	gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
 	serv->sett = settings_create(serv, settings_closed);
 }
 
