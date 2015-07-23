@@ -161,7 +161,6 @@ GtkWidget *settings_add_static_text(struct settings_page *page,
 				    const gchar *label, const gchar *text)
 {
 	GtkWidget *label_w, *value_w;
-	gchar *value;
 	struct settings_content *content;
 
 	content = create_base_content(NULL, never_write, NULL, NULL, NULL);
