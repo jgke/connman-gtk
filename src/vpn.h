@@ -28,6 +28,7 @@
 struct technology *vpn_register(GDBusConnection *connection, GtkWidget *list,
                                 GtkWidget *notebook);
 void vpn_get_connections(void);
+void vpn_clear_properties(struct service *serv);
 void vpn_free(struct technology *tech);
 
 #endif /* _CONNMAN_GTK_VPN_H */

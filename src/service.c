@@ -28,6 +28,7 @@
 #include "service.h"
 #include "settings.h"
 #include "util.h"
+#include "vpn.h"
 #include "connections/ethernet.h"
 #include "connections/wireless.h"
 
@@ -401,6 +402,69 @@ void service_set_property(struct service *serv, const char *key,
 	                             G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
 	if(error) {
 		g_warning("failed to set property %s: %s", key, error->message);
+		g_error_free(error);
+		return;
+	}
+	g_variant_unref(ret);
+}
+
+void service_clear_properties(struct service *serv)
+{
+	GVariantBuilder *b;
+
+	if(serv->type == CONNECTION_TYPE_VPN) {
+		vpn_clear_properties(serv);
+		return;
+	}
+
+	b = g_variant_builder_new(G_VARIANT_TYPE("a{sv}"));
+	g_variant_builder_add(b, "{sv}", "Method",
+			      g_variant_new_string("dhcp"));
+	service_set_property(serv, "IPv4.Configuration",
+			     g_variant_builder_end(b));
+	g_variant_builder_unref(b);
+
+	b = g_variant_builder_new(G_VARIANT_TYPE("a{sv}"));
+	g_variant_builder_add(b, "{sv}", "Method",
+			      g_variant_new_string("auto"));
+	g_variant_builder_add(b, "{sv}", "Privacy",
+			      g_variant_new_string("disabled"));
+	service_set_property(serv, "IPv6.Configuration",
+			     g_variant_builder_end(b));
+	g_variant_builder_unref(b);
+
+	b = g_variant_builder_new(G_VARIANT_TYPE("as"));
+	service_set_property(serv, "Nameservers.Configuration",
+			     g_variant_builder_end(b));
+	g_variant_builder_unref(b);
+
+	b = g_variant_builder_new(G_VARIANT_TYPE("as"));
+	service_set_property(serv, "Timeservers.Configuration",
+			     g_variant_builder_end(b));
+	g_variant_builder_unref(b);
+
+	b = g_variant_builder_new(G_VARIANT_TYPE("as"));
+	service_set_property(serv, "Domains.Configuration",
+			     g_variant_builder_end(b));
+	g_variant_builder_unref(b);
+
+	b = g_variant_builder_new(G_VARIANT_TYPE("a{sv}"));
+	g_variant_builder_add(b, "{sv}", "Method",
+			      g_variant_new_string("direct"));
+	service_set_property(serv, "Proxy.Configuration",
+			     g_variant_builder_end(b));
+	g_variant_builder_unref(b);
+}
+
+void service_remove(struct service *serv)
+{
+	GVariant *ret;
+	GError *error = NULL;
+
+	ret = g_dbus_proxy_call_sync(serv->proxy, "Remove", NULL,
+	                             G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+	if(error) {
+		g_warning("failed to remove service: %s", error->message);
 		g_error_free(error);
 		return;
 	}

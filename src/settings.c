@@ -321,6 +321,49 @@ static void add_route_pages(struct settings *sett)
 	settings_add_route_list(sett, page, "UserRoutes", FALSE, always_write);
 }
 
+static void clear_cb(GtkWidget *button, gpointer user_data)
+{
+	service_clear_properties(user_data);
+}
+
+static void remove_cb(GtkWidget *button, gpointer user_data)
+{
+	service_remove(user_data);
+}
+
+static void add_clear_page(struct settings *sett)
+{
+	struct settings_page *page;
+	GtkWidget *clear, *clear_l, *remove, *remove_l;
+
+	page = add_page_to_settings(sett, _("Clear settings"), TRUE);
+
+	clear = gtk_button_new_with_mnemonic(_("_Reset"));
+	remove = gtk_button_new_with_mnemonic(_("_Forget"));
+	clear_l = gtk_label_new(_("Set all properties to defaults."));
+	remove_l = gtk_label_new(_("Remove this service."));
+
+	g_signal_connect(clear, "clicked", G_CALLBACK(clear_cb), sett->serv);
+	g_signal_connect(remove, "clicked", G_CALLBACK(remove_cb), sett->serv);
+
+	gtk_widget_set_halign(clear_l, GTK_ALIGN_START);
+	gtk_widget_set_halign(remove_l, GTK_ALIGN_START);
+	STYLE_ADD_MARGIN(clear, MARGIN_LARGE);
+	STYLE_ADD_MARGIN(remove, MARGIN_LARGE);
+
+	gtk_grid_attach(GTK_GRID(page->grid), clear, 0, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(page->grid), clear_l, 1, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(page->grid), remove, 0, 1, 1, 1);
+	gtk_grid_attach(GTK_GRID(page->grid), remove_l, 1, 1, 1, 1);
+
+	gtk_widget_show_all(page->grid);
+
+	if(sett->serv->type == CONNECTION_TYPE_ETHERNET) {
+		gtk_widget_hide(remove);
+		gtk_widget_hide(remove_l);
+	}
+}
+
 static void append_dict_inner(const gchar *key, const gchar *subkey,
                               gpointer value, gpointer user_data)
 {
@@ -429,6 +472,7 @@ static void init_settings(struct settings *sett)
 		add_ipv_page(sett, 6);
 		add_route_pages(sett);
 	}
+	add_clear_page(sett);
 }
 
 struct settings *settings_create(struct service *serv,

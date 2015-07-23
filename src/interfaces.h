@@ -178,6 +178,9 @@
         "        <arg name=\"name\" type=\"s\" direction=\"in\"/>" \
         "        <arg name=\"value\" type=\"v\" direction=\"in\"/>" \
         "    </method>" \
+        "    <method name=\"ClearProperty\">" \
+        "        <arg name=\"name\" type=\"s\" direction=\"in\"/>" \
+        "    </method>" \
         "    <method name=\"Connect\"></method>" \
         "    <method name=\"Disconnect\"></method>" \
         "    <signal name=\"PropertyChanged\">" \

@@ -108,6 +108,11 @@ static void init_vpn_technology(void)
 	g_variant_builder_unref(b);
 }
 
+void vpn_clear_properties(struct service *serv)
+{
+
+}
+
 void vpn_free(struct technology *tech)
 {
 	g_hash_table_unref(tech->services);
