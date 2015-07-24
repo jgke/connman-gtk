@@ -319,7 +319,7 @@ void service_wireless_update(struct service *serv)
 	gchar *name, *state;
 	int strength;
 
-	name = service_get_property_string_local(serv, "Name", NULL);
+	name = service_get_property_string(serv, "Name", NULL);
 	state = service_get_property_string_raw(serv, "State", NULL);
 	if(!strcmp(state, "idle"))
 		gtk_label_set_text(GTK_LABEL(serv->title), name);

@@ -50,37 +50,38 @@ static struct {
 	}
 };
 
+static void update_name(struct service *serv)
+{
+	gchar *name, *state, *state_r, *title, *error;
+	name = service_get_property_string(serv, "Name", NULL);
+	state = service_get_property_string(serv, "State", NULL);
+	state_r = service_get_property_string_raw(serv, "State", NULL);
+	if(!strcmp(state_r, "failure")) {
+		const gchar *failure;
+		error = service_get_property_string(serv, "Error", NULL);
+		failure = failure_localized(error);
+		title = g_strdup_printf("%s - %s: %s", name, state, failure);
+		g_free(error);
+	}
+	else
+		title = g_strdup_printf("%s - %s", name, state);
+	gtk_label_set_text(GTK_LABEL(serv->title), title);
+	g_free(name);
+	g_free(state);
+	g_free(state_r);
+	g_free(title);
+}
+
 void service_update_property(struct service *serv, const gchar *key,
                              GVariant *value)
 {
 	if(strcmp(g_variant_get_type_string(value), "a{sv}")) {
 		hash_table_set_dual_key(serv->properties, key, NULL,
 		                        g_variant_ref(value));
-		if(!strcmp(key, "Name") || !strcmp(key, "State")) {
-			gchar *name, *state, *state_r, *title, *error;
-			name = service_get_property_string(serv, "Name",
-							   NULL);
-			state = service_get_property_string(serv, "State",
-							    NULL);
-			state_r = service_get_property_string_raw(serv, "State",
-								  NULL);
-			if(!strcmp(state_r, "failure")) {
-				const gchar *failure;
-				error = service_get_property_string(serv,
-								    "Error",
-								    NULL);
-				failure = failure_localized(error);
-				title = g_strdup_printf("%s - %s: %s", name,
-							state, failure);
-				g_free(error);
-			}
-			else
-				title = g_strdup_printf("%s - %s", name, state);
-			gtk_label_set_text(GTK_LABEL(serv->title), title);
-			g_free(name);
-			g_free(state);
-			g_free(state_r);
-			g_free(title);
+		if(!strcmp(key, "Name") || !strcmp(key, "State") ||
+		   (serv->type == CONNECTION_TYPE_ETHERNET &&
+		    !strcmp(key, "Ethernet"))) {
+			update_name(serv);
 		}
 		if(serv->sett)
 			settings_update(serv->sett, key, NULL, value);
@@ -107,6 +108,7 @@ void service_update(struct service *serv, GVariant *properties)
 	while(g_variant_iter_loop(iter, "{sv}", &key, &value))
 		service_update_property(serv, key, value);
 	g_variant_iter_free(iter);
+	update_name(serv);
 	if(functions[serv->type].update)
 		functions[serv->type].update(serv);
 }
@@ -325,40 +327,55 @@ gchar *service_get_property_string_raw(struct service *serv, const char *key,
 gchar *service_get_property_string(struct service *serv, const char *key,
                                    const char *subkey)
 {
-	if(key && subkey && !strcmp(subkey, "PrefixLength") &&
-	    (!strcmp(key, "IPv6") || !strcmp(key, "IPv6.Configuration"))) {
-		int len = service_get_property_int(serv, key, subkey);
-		if(!len)
-			return g_strdup("");
-		return g_strdup_printf("%d", len);
+	if(!serv)
+		return g_strdup("");
+
+	if(key && subkey) {
+		if(!strcmp(subkey, "PrefixLength") &&
+		   (!strcmp(key, "IPv6") ||
+		    !strcmp(key, "IPv6.Configuration"))) {
+			int len = service_get_property_int(serv, key, subkey);
+			if(!len)
+				return g_strdup("");
+			return g_strdup_printf("%d", len);
+		} else if(!strcmp(key, "Proxy") && !strcmp(subkey, "Method")) {
+			gchar *str = service_get_property_string_raw(serv, key,
+								     subkey);
+			const gchar *out;
+			if(!strcmp(str, "direct"))
+				out = _("Direct");
+			else if(!strcmp(str, "auto"))
+				out = _("Automatic");
+			else
+				out = _("None");
+			g_free(str);
+			return g_strdup(out);
+		}
 	}
-	if(key && !strcmp(key, "AutoConnect")) {
-		gboolean autoconnect = service_get_property_boolean(serv, key,
-								    subkey);
-		if(autoconnect)
-			return g_strdup(_("On"));
-		return g_strdup(_("Off"));
+
+	if(key) {
+		if(!strcmp(key, "AutoConnect")) {
+			gboolean ac;
+
+			ac = service_get_property_boolean(serv, key, subkey);
+			if(ac)
+				return g_strdup(_("On"));
+			return g_strdup(_("Off"));
+		} else if(!strcmp(key, "State")) {
+			gchar *str = service_get_property_string_raw(serv, key,
+								     subkey);
+			gchar *out = g_strdup(status_localized(str));
+			g_free(str);
+			return out;
+		} else if(serv->type == CONNECTION_TYPE_ETHERNET &&
+			  !strcmp(key, "Name")) {
+			return service_get_property_string_raw(serv, "Ethernet",
+							       "Interface");
+		}
+
 	}
-	gchar *str = service_get_property_string_raw(serv, key, subkey);
-	if(!serv || !key)
-		return str;
-	if(!strcmp(key, "State")) {
-		gchar *out = g_strdup(status_localized(str));
-		g_free(str);
-		return out;
-	}
-	if(!strcmp(key, "Proxy") && !strcmp(subkey, "Method")) {
-		const gchar *out;
-		if(!strcmp(str, "direct"))
-			out = _("Direct");
-		else if(!strcmp(str, "auto"))
-			out = _("Automatic");
-		else
-			out = _("None");
-		g_free(str);
-		return g_strdup(out);
-	}
-	return str;
+
+	return service_get_property_string_raw(serv, key, subkey);
 }
 
 gchar **service_get_property_strv(struct service *serv, const char *key,
