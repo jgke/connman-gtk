@@ -152,6 +152,22 @@ void technology_wireless_init(struct technology *tech, GVariant *properties,
 
 }
 
+static void check_passphrase(GtkWidget *entry, gpointer user_data)
+{
+	const gchar *str = gtk_entry_get_text(GTK_ENTRY(entry));
+	GtkStyleContext *context = gtk_widget_get_style_context(entry);
+
+	if(strlen(str) < 8 || strlen(str) > 63) {
+		gtk_style_context_add_class(context, "error");
+		gtk_dialog_set_response_sensitive(user_data,
+						  GTK_RESPONSE_ACCEPT, FALSE);
+	} else {
+		gtk_style_context_remove_class(context, "error");
+		gtk_dialog_set_response_sensitive(user_data,
+						  GTK_RESPONSE_ACCEPT, TRUE);
+	}
+}
+
 static void toggle_entry_mode(GtkToggleButton *button, gpointer user_data)
 {
 	GtkEntry *entry = GTK_ENTRY(user_data);
@@ -181,6 +197,13 @@ void technology_wireless_tether(struct technology *tech)
 	passphrase_l = gtk_label_new(_("Passphrase"));
 	passphrase_e = gtk_entry_new();
 	toggle = gtk_check_button_new_with_mnemonic(_("_Show password"));
+	title = _("Set Access Point SSID and passphrase");
+	flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
+	window = gtk_dialog_new_with_buttons(title, GTK_WINDOW(main_window),
+	                                     flags,
+	                                     _("_OK"), GTK_RESPONSE_ACCEPT,
+	                                     _("_Cancel"), GTK_RESPONSE_CANCEL,
+	                                     NULL);
 
 	old_ssid = g_hash_table_lookup(tech->settings->properties,
 				       "TetheringIdentifier");
@@ -200,6 +223,9 @@ void technology_wireless_tether(struct technology *tech)
 
 	g_signal_connect(toggle, "toggled", G_CALLBACK(toggle_entry_mode),
 			 passphrase_e);
+	g_signal_connect(passphrase_e, "changed", G_CALLBACK(check_passphrase),
+			 window);
+	check_passphrase(passphrase_e, window);
 
 	gtk_widget_set_halign(ssid_l, GTK_ALIGN_END);
 	gtk_widget_set_halign(passphrase_l, GTK_ALIGN_END);
@@ -219,14 +245,6 @@ void technology_wireless_tether(struct technology *tech)
 	gtk_grid_attach(GTK_GRID(grid), passphrase_e, 1, 1, 1, 1);
 	gtk_grid_attach(GTK_GRID(grid), toggle, 1, 2, 1, 1);
 	gtk_widget_show_all(grid);
-
-	title = _("Set Access Point SSID and passphrase");
-	flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
-	window = gtk_dialog_new_with_buttons(title, GTK_WINDOW(main_window),
-	                                     flags,
-	                                     _("_OK"), GTK_RESPONSE_ACCEPT,
-	                                     _("_Cancel"), GTK_RESPONSE_CANCEL,
-	                                     NULL);
 
 	area = gtk_dialog_get_content_area(GTK_DIALOG(window));
 	gtk_container_add(GTK_CONTAINER(area), grid);
