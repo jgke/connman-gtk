@@ -263,11 +263,11 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 	entry = gtk_entry_new();
 	g_object_set_data(G_OBJECT(entry), "validator", valid);
 
-	value = service_get_property_string(page->sett->serv, key, subkey);
+	value = service_get_property_string_raw(page->sett->serv, key, subkey);
 	if(!strlen(value)) {
 		g_free(value);
-		value = service_get_property_string(page->sett->serv,
-		                                    secondary_key, subkey);
+		value = service_get_property_string_raw(page->sett->serv,
+							secondary_key, subkey);
 	}
 	gtk_entry_set_text(GTK_ENTRY(entry), value);
 	g_free(value);

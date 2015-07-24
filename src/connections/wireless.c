@@ -76,9 +76,10 @@ static void hidden_cb_iter(gpointer key, gpointer value, gpointer user_data)
 	struct service *serv = value;
 	gchar *name;
 
-	name = service_get_property_string(serv, "Name", NULL);
+	name = service_get_property_string_raw(serv, "Name", NULL);
 	if(!*name)
 		g_ptr_array_add(user_data, serv);
+	g_free(name);
 }
 
 static void hidden_cb(GtkWidget *button, gpointer user_data)
@@ -86,6 +87,7 @@ static void hidden_cb(GtkWidget *button, gpointer user_data)
 	struct wireless_technology *item = user_data;
 	GPtrArray *arr = g_ptr_array_new();
 	g_hash_table_foreach(item->parent.services, hidden_cb_iter, arr);
+	// TODO menu
 	//if(arr->len == 1)
 		service_toggle_connection(g_ptr_array_index(arr, 0));
 	g_ptr_array_free(arr, TRUE);
@@ -97,7 +99,7 @@ static void hidden_service_iter(gpointer key, gpointer value, gpointer
 	struct wireless_technology *item = user_data;
 	gchar *name;
 
-	name = service_get_property_string(value, "Name", NULL);
+	name = service_get_property_string_raw(value, "Name", NULL);
 	if(!*name)
 		gtk_widget_set_sensitive(item->hidden_button, TRUE);
 	g_free(name);
@@ -317,7 +319,7 @@ void service_wireless_update(struct service *serv)
 	gchar *name, *state;
 	int strength;
 
-	name = service_get_property_string(serv, "Name", NULL);
+	name = service_get_property_string_local(serv, "Name", NULL);
 	state = service_get_property_string_raw(serv, "State", NULL);
 	if(!strcmp(state, "idle"))
 		gtk_label_set_text(GTK_LABEL(serv->title), name);

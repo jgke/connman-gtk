@@ -217,10 +217,10 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		conf = "IPv6.Configuration";
 		ipvs = "IPv6";
 	}
-	char *cur = service_get_property_string(sett->serv, ipvs, "Method");
+	char *cur = service_get_property_string_raw(sett->serv, ipvs, "Method");
 	if(!strlen(cur)) {
 		g_free(cur);
-		cur = service_get_property_string(sett->serv, conf, "Method");
+		cur = service_get_property_string_raw(sett->serv, conf, "Method");
 		if(!strlen(cur)) {
 			g_free(cur);
 			return;
@@ -272,7 +272,7 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		                                      _("Privacy"), conf,
 		                                      "Privacy", ipvs);
 
-		cur = service_get_property_string(sett->serv, ipvs, "Privacy");
+		cur = service_get_property_string_raw(sett->serv, ipvs, "Privacy");
 		add_page_to_combo_box(sett, ipv6_privacy, "disabled",
 		                      _("Disabled"), TRUE);
 		add_page_to_combo_box(sett, ipv6_privacy, "enabled",

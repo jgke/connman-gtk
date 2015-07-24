@@ -58,13 +58,8 @@ void service_update_property(struct service *serv, const gchar *key,
 		                        g_variant_ref(value));
 		if(!strcmp(key, "Name") || !strcmp(key, "State")) {
 			gchar *name, *state, *state_r, *title, *error;
-			name = service_get_property_string(serv, "Name", NULL);
-			if(!strlen(name)) {
-				g_free(name);
-				name = service_get_property_string(serv,
-								   "Ethernet",
-								   "Interface");
-			}
+			name = service_get_property_string(serv, "Name",
+							   NULL);
 			state = service_get_property_string(serv, "State",
 							    NULL);
 			state_r = service_get_property_string_raw(serv, "State",

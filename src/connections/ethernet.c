@@ -107,7 +107,7 @@ void service_ethernet_free(struct service *serv)
 static void set_property(struct service *serv, GtkWidget *label,
                          const gchar *key, const gchar *subkey)
 {
-	gchar *value = service_get_property_string(serv, key, subkey);
+	gchar *value = service_get_property_string_raw(serv, key, subkey);
 	gtk_label_set_text(GTK_LABEL(label), value);
 	g_free(value);
 }
