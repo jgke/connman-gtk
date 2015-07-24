@@ -125,6 +125,7 @@ void service_update(struct service *serv, GVariant *properties)
 		STYLE_ADD_CONTEXT(serv->title);
 		context = gtk_widget_get_style_context(serv->title);
 		gtk_style_context_add_class(context, "cm-wireless-hidden");
+		gtk_widget_hide(serv->settings_button);
 
 		g_free(name);
 	}
