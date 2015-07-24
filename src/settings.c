@@ -319,9 +319,12 @@ static void add_server_page(struct settings *sett)
 				"Nameservers", valid_address_entry);
 
 	page = add_page_to_settings(sett, _("Timeservers"), TRUE);
-	settings_add_entry_list(sett, page, always_write, _("Timeservers"),
+	settings_add_text(page, _("Timeservers"), "Timeservers", NULL);
+	settings_add_static_text(page, "", "");;
+	settings_add_entry_list(sett, page, always_write,
+				_("Custom Timeservers"),
 				"Timeservers.Configuration", NULL,
-				"Timeservers", always_valid);
+				NULL, always_valid);
 
 	page = add_page_to_settings(sett, _("Domains"), TRUE);
 	settings_add_entry_list(sett, page, always_write, _("Domains"),
