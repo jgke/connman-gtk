@@ -31,8 +31,6 @@
 struct wireless_technology {
 	struct technology parent;
 
-	GtkWidget *hidden_button;
-
 	guint scan_id;
 };
 
@@ -71,52 +69,9 @@ static gboolean scan_cb(gpointer user_data)
 	return TRUE;
 }
 
-static void hidden_cb_iter(gpointer key, gpointer value, gpointer user_data)
-{
-	struct service *serv = value;
-	gchar *name;
-
-	name = service_get_property_string_raw(serv, "Name", NULL);
-	if(!*name)
-		g_ptr_array_add(user_data, serv);
-	g_free(name);
-}
-
-static void hidden_cb(GtkWidget *button, gpointer user_data)
-{
-	struct wireless_technology *item = user_data;
-	GPtrArray *arr = g_ptr_array_new();
-	g_hash_table_foreach(item->parent.services, hidden_cb_iter, arr);
-	// TODO menu
-	//if(arr->len == 1)
-		service_toggle_connection(g_ptr_array_index(arr, 0));
-	g_ptr_array_free(arr, TRUE);
-}
-
-static void hidden_service_iter(gpointer key, gpointer value, gpointer
-				user_data)
-{
-	struct wireless_technology *item = user_data;
-	gchar *name;
-
-	name = service_get_property_string_raw(value, "Name", NULL);
-	if(!*name)
-		gtk_widget_set_sensitive(item->hidden_button, TRUE);
-	g_free(name);
-}
-
-void technology_wireless_hidden_update(struct technology *tech)
-{
-	struct wireless_technology *item = (struct wireless_technology *)tech;
-	gtk_widget_set_sensitive(item->hidden_button, FALSE);
-	g_hash_table_foreach(tech->services, hidden_service_iter, tech);
-}
-
 struct technology *technology_wireless_create(void)
 {
 	struct wireless_technology *tech = g_malloc(sizeof(*tech));
-	const gchar *hidden_text = _("Connect to Hidden Network...");
-	tech->hidden_button = gtk_button_new_with_mnemonic(hidden_text);
 	return (struct technology *)tech;
 }
 
@@ -137,16 +92,6 @@ void technology_wireless_init(struct technology *tech, GVariant *properties,
 	                             GTK_ICON_SIZE_LARGE_TOOLBAR);
 	gtk_image_set_from_icon_name(GTK_IMAGE(tech->settings->icon),
 	                             "network-wireless", GTK_ICON_SIZE_DIALOG);
-	g_signal_connect(item->hidden_button, "clicked",
-			 G_CALLBACK(hidden_cb), item);
-	gtk_widget_set_margin_start(item->hidden_button, MARGIN_SMALL);
-	gtk_widget_set_margin_end(item->hidden_button, MARGIN_SMALL);
-	gtk_widget_set_hexpand(item->hidden_button, FALSE);
-	gtk_widget_set_halign(item->hidden_button, GTK_ALIGN_START);
-	gtk_grid_attach_next_to(GTK_GRID(tech->settings->buttons),
-				item->hidden_button, tech->settings->tethering,
-				GTK_POS_RIGHT, 1, 1);
-	gtk_widget_show(item->hidden_button);
 
 	scan_cb(item);
 	item->scan_id = g_timeout_add_seconds(WIRELESS_SCAN_INTERVAL,

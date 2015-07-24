@@ -324,6 +324,34 @@ gchar *service_get_property_string_raw(struct service *serv, const char *key,
 	return str;
 }
 
+static gchar *wireless_name(struct service *serv)
+{
+	gchar *name, **security, **iter;
+	const gchar *out;
+	int security_level = 0;
+
+	name = service_get_property_string_raw(serv, "Name", NULL);
+	if(strlen(name))
+		return name;
+	g_free(name);
+
+	security = service_get_property_strv(serv, "Security", NULL);
+	for(iter = security; *iter; iter++) {
+		if(!strcmp("ieee8021x", *iter))
+			security_level = 3;
+		else if(security_level < 2 && !strcmp("psk", *iter))
+			security_level = 2;
+		else if(security_level < 1 && !strcmp("wps", *iter))
+			security_level = 1;
+	}
+	out = (security_level == 3 ? _("Hidden ieee8021x secured network") :
+	       security_level == 2 ? _("Hidden WPA secured network") :
+	       security_level == 1 ? _("Hidden WPS secured network") :
+	       _("Hidden unsecured network"));
+	g_strfreev(security);
+	return strdup(out);
+}
+
 gchar *service_get_property_string(struct service *serv, const char *key,
                                    const char *subkey)
 {
@@ -371,6 +399,9 @@ gchar *service_get_property_string(struct service *serv, const char *key,
 			  !strcmp(key, "Name")) {
 			return service_get_property_string_raw(serv, "Ethernet",
 							       "Interface");
+		} else if(serv->type == CONNECTION_TYPE_WIRELESS &&
+			  !strcmp(key, "Name")) {
+			return wireless_name(serv);
 		}
 
 	}

@@ -49,7 +49,7 @@ static struct {
 	{technology_ethernet_init},
 	{
 		technology_wireless_init, technology_wireless_create,
-		technology_wireless_free, technology_wireless_hidden_update
+		technology_wireless_free
 	},
 	{technology_bluetooth_init},
 	{technology_cellular_init},
