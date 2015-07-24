@@ -156,6 +156,7 @@ void technology_wireless_tether(struct technology *tech)
 {
 	const gchar *title;
 	const gchar *ssid, *pass;
+	GVariant *old_ssid, *old_pass;
 	int flags, status;
 	GtkWidget *window, *area;
 	GtkWidget *grid = gtk_grid_new();
@@ -163,6 +164,18 @@ void technology_wireless_tether(struct technology *tech)
 	GtkWidget *ssid_e = gtk_entry_new();
 	GtkWidget *passphrase_l = gtk_label_new(_("Passphrase"));
 	GtkWidget *passphrase_e = gtk_entry_new();
+
+	old_ssid = g_hash_table_lookup(tech->settings->properties,
+				       "TetheringIdentifier");
+	old_pass = g_hash_table_lookup(tech->settings->properties,
+				       "TetheringPassphrase");
+
+	if(old_ssid)
+		gtk_entry_set_text(GTK_ENTRY(ssid_e),
+				   g_variant_get_string(old_ssid, NULL));
+	if(old_pass)
+		gtk_entry_set_text(GTK_ENTRY(passphrase_e),
+				   g_variant_get_string(old_pass, NULL));
 
 	STYLE_ADD_MARGIN(ssid_l, MARGIN_LARGE);
 	STYLE_ADD_MARGIN(ssid_e, MARGIN_LARGE);
