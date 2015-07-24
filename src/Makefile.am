@@ -9,7 +9,6 @@ connman_gtk_SOURCES = main.c agent.c style.c technology.c service.c util.c \
 			connections/cellular.c \
 			connections/ethernet.c \
 			connections/p2p.c \
-			connections/vpn.c \
 			connections/wireless.c
 connman_gtk_LDADD = @GTK_LIBS@ @GLIB_LIBS@
 connman_gtk_CPPFLAGS = @GTK_CFLAGS@ @GLIB_CFLAGS@ \
@@ -24,6 +23,5 @@ EXTRA_DIST =  agent.h interfaces.h main.h technology.h style.h service.h \
 		connections/cellular.h \
 		connections/ethernet.h \
 		connections/p2p.h \
-		connections/vpn.h \
 		connections/wireless.h \
 	      stylesheet.css

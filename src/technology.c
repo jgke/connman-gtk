@@ -35,7 +35,6 @@
 #include "connections/cellular.h"
 #include "connections/ethernet.h"
 #include "connections/p2p.h"
-#include "connections/vpn.h"
 #include "connections/wireless.h"
 
 static struct {
