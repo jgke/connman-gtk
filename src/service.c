@@ -111,6 +111,23 @@ void service_update(struct service *serv, GVariant *properties)
 	update_name(serv);
 	if(functions[serv->type].update)
 		functions[serv->type].update(serv);
+	// TODO: horribly inefficient
+	if(serv->type == CONNECTION_TYPE_WIRELESS) {
+		gchar *name;
+		GtkStyleContext *context;
+
+		name = service_get_property_string_raw(serv, "Name", NULL);
+		if(strlen(name)) {
+			g_free(name);
+			return;
+		}
+
+		STYLE_ADD_CONTEXT(serv->title);
+		context = gtk_widget_get_style_context(serv->title);
+		gtk_style_context_add_class(context, "cm-wireless-hidden");
+
+		g_free(name);
+	}
 }
 
 static void service_proxy_signal(GDBusProxy *proxy, gchar *sender,

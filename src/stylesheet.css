@@ -1,3 +1,7 @@
 .cm-header-title {
   font-weight: bold;
 }
+
+.cm-wireless-hidden {
+  font-style: italic;
+}
