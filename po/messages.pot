@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-23 15:42+0300\n"
+"POT-Creation-Date: 2015-07-24 14:19+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,75 +21,43 @@ msgstr ""
 msgid "Authentication required"
 msgstr ""
 
-#: src/agent.c:121 src/connections/wireless.c:184
+#: src/agent.c:121 src/connections/wireless.c:206
 msgid "_OK"
 msgstr ""
 
-#: src/agent.c:122 src/connections/wireless.c:185
+#: src/agent.c:122 src/connections/wireless.c:207
 msgid "_Cancel"
 msgstr ""
 
-#: src/main.c:460 src/settings.c:508
+#: src/main.c:460 src/settings.c:514
 msgid "Network Settings"
 msgstr ""
 
-#: src/service.c:330
-msgid "On"
-msgstr ""
-
-#: src/service.c:331
-msgid "Off"
-msgstr ""
-
-#: src/service.c:344 src/settings.c:344
+#: src/service.c:346 src/settings.c:347
 msgid "Direct"
 msgstr ""
 
-#: src/service.c:346 src/settings.c:237 src/settings.c:240 src/settings.c:346
+#: src/service.c:348 src/settings.c:237 src/settings.c:240 src/settings.c:349
 msgid "Automatic"
 msgstr ""
 
-#: src/service.c:348 src/settings.c:131 src/settings.c:234
+#: src/service.c:350 src/settings.c:131 src/settings.c:234
 msgid "None"
 msgstr ""
 
-#: src/service.c:515 src/util.c:116
-msgid "Idle"
+#: src/service.c:362
+msgid "On"
 msgstr ""
 
-#: src/service.c:517 src/util.c:118
-msgid "Failure"
-msgstr ""
-
-#: src/service.c:519 src/util.c:120
-msgid "Association"
-msgstr ""
-
-#: src/service.c:521 src/util.c:122
-msgid "Configuration"
-msgstr ""
-
-#: src/service.c:523 src/util.c:124
-msgid "Ready"
-msgstr ""
-
-#: src/service.c:525 src/util.c:126
-msgid "Disconnected"
-msgstr ""
-
-#: src/service.c:527 src/util.c:128
-msgid "Online"
-msgstr ""
-
-#: src/service.c:529 src/util.c:130
-msgid "Error"
+#: src/service.c:363
+msgid "Off"
 msgstr ""
 
 #: src/settings.c:131 src/settings.c:135
 msgid "Security"
 msgstr ""
 
-#: src/settings.c:144 src/settings.c:365
+#: src/settings.c:144 src/settings.c:368
 msgid "Info"
 msgstr ""
 
@@ -97,11 +65,11 @@ msgstr ""
 msgid "Autoconnect"
 msgstr ""
 
-#: src/settings.c:150 src/settings.c:368
+#: src/settings.c:150 src/settings.c:371
 msgid "Name"
 msgstr ""
 
-#: src/settings.c:151 src/settings.c:369
+#: src/settings.c:151 src/settings.c:372
 msgid "State"
 msgstr ""
 
@@ -113,16 +81,16 @@ msgstr ""
 msgid "Interface"
 msgstr ""
 
-#: src/settings.c:155 src/settings.c:371 src/connections/ethernet.c:79
+#: src/settings.c:155 src/settings.c:374 src/connections/ethernet.c:79
 msgid "IPv4 address"
 msgstr ""
 
-#: src/settings.c:156 src/settings.c:372 src/connections/ethernet.c:81
+#: src/settings.c:156 src/settings.c:375 src/connections/ethernet.c:81
 msgid "IPv6 address"
 msgstr ""
 
 #: src/settings.c:157 src/settings.c:293 src/settings.c:316 src/settings.c:317
-#: src/settings.c:373
+#: src/settings.c:376
 msgid "Nameservers"
 msgstr ""
 
@@ -139,7 +107,7 @@ msgid "Address"
 msgstr ""
 
 #: src/settings.c:185 src/settings.c:191 src/settings.c:249 src/settings.c:259
-#: src/settings_content.c:629
+#: src/settings_content.c:628
 msgid "Gateway"
 msgstr ""
 
@@ -155,19 +123,19 @@ msgstr ""
 msgid "IPv6"
 msgstr ""
 
-#: src/settings.c:231 src/settings.c:341
+#: src/settings.c:231 src/settings.c:344
 msgid "Method"
 msgstr ""
 
-#: src/settings.c:242 src/settings.c:348
+#: src/settings.c:242 src/settings.c:351
 msgid "Manual"
 msgstr ""
 
-#: src/settings.c:251 src/settings.c:263 src/settings_content.c:627
+#: src/settings.c:251 src/settings.c:263 src/settings_content.c:626
 msgid "Netmask"
 msgstr ""
 
-#: src/settings.c:253 src/settings.c:267 src/settings_content.c:628
+#: src/settings.c:253 src/settings.c:267 src/settings_content.c:627
 msgid "Prefix length"
 msgstr ""
 
@@ -175,7 +143,7 @@ msgstr ""
 msgid "Privacy"
 msgstr ""
 
-#: src/settings.c:277 src/technology.c:136
+#: src/settings.c:277 src/technology.c:135
 msgid "Disabled"
 msgstr ""
 
@@ -187,7 +155,7 @@ msgstr ""
 msgid "Prefered"
 msgstr ""
 
-#: src/settings.c:291 src/settings.c:302 src/settings.c:357
+#: src/settings.c:291 src/settings.c:302 src/settings.c:360
 msgid "Servers"
 msgstr ""
 
@@ -195,7 +163,7 @@ msgstr ""
 msgid "Timeservers"
 msgstr ""
 
-#: src/settings.c:295 src/settings.c:326 src/settings.c:327
+#: src/settings.c:295 src/settings.c:329 src/settings.c:330
 msgid "Domains"
 msgstr ""
 
@@ -203,88 +171,152 @@ msgstr ""
 msgid "Proxy method"
 msgstr ""
 
-#: src/settings.c:300 src/settings.c:354
+#: src/settings.c:300 src/settings.c:357
 msgid "URL"
 msgstr ""
 
-#: src/settings.c:304 src/settings.c:359
+#: src/settings.c:304 src/settings.c:362
 msgid "Excludes"
 msgstr ""
 
-#: src/settings.c:339
+#: src/settings.c:325
+msgid "Custom Timeservers"
+msgstr ""
+
+#: src/settings.c:342
 msgid "Proxy"
 msgstr ""
 
-#: src/settings.c:370
+#: src/settings.c:373
 msgid "Host"
 msgstr ""
 
-#: src/settings.c:380
+#: src/settings.c:383
 msgid "Server routes"
 msgstr ""
 
-#: src/settings.c:383
+#: src/settings.c:386
 msgid "User routes"
 msgstr ""
 
-#: src/settings.c:402
+#: src/settings.c:405
 msgid "Clear settings"
 msgstr ""
 
-#: src/settings.c:404
+#: src/settings.c:407
 msgid "_Reset"
 msgstr ""
 
-#: src/settings.c:405
+#: src/settings.c:408
 msgid "_Forget"
 msgstr ""
 
-#: src/settings.c:406
+#: src/settings.c:409
 msgid "Set all properties to defaults."
 msgstr ""
 
-#: src/settings.c:407
+#: src/settings.c:410
 msgid "Remove this service."
 msgstr ""
 
-#: src/settings.c:518
+#: src/settings.c:524
 msgid "_Apply"
 msgstr ""
 
-#: src/settings_content.c:623
+#: src/settings_content.c:622
 msgid "IP version"
 msgstr ""
 
-#: src/settings_content.c:626
+#: src/settings_content.c:625
 msgid "Network"
 msgstr ""
 
-#: src/technology.c:127
+#: src/technology.c:126
 msgid "Connected"
 msgstr ""
 
-#: src/technology.c:131
+#: src/technology.c:130
 msgid "Not connected"
 msgstr ""
 
-#: src/technology.c:219
+#: src/technology.c:218
 msgid "Disable _tethering"
 msgstr ""
 
-#: src/technology.c:221 src/technology.c:305
+#: src/technology.c:220 src/technology.c:304
 msgid "Enable _tethering"
 msgstr ""
 
-#: src/technology.c:239 src/technology.c:300 src/technology.c:532
+#: src/technology.c:238 src/technology.c:299 src/technology.c:531
 msgid "_Connect"
 msgstr ""
 
-#: src/technology.c:241 src/technology.c:534
+#: src/technology.c:240 src/technology.c:533
 msgid "Re_connect"
 msgstr ""
 
-#: src/technology.c:243 src/technology.c:536
+#: src/technology.c:242 src/technology.c:535
 msgid "Dis_connect"
+msgstr ""
+
+#: src/util.c:116
+msgid "Idle"
+msgstr ""
+
+#: src/util.c:118
+msgid "Failure"
+msgstr ""
+
+#: src/util.c:120
+msgid "Association"
+msgstr ""
+
+#: src/util.c:122
+msgid "Configuration"
+msgstr ""
+
+#: src/util.c:124
+msgid "Ready"
+msgstr ""
+
+#: src/util.c:126
+msgid "Disconnected"
+msgstr ""
+
+#: src/util.c:128
+msgid "Online"
+msgstr ""
+
+#: src/util.c:130
+msgid "Error"
+msgstr ""
+
+#: src/util.c:136
+msgid "Out of range"
+msgstr ""
+
+#: src/util.c:138
+msgid "PIN missing"
+msgstr ""
+
+#: src/util.c:140
+msgid "DHCP failed"
+msgstr ""
+
+#: src/util.c:142
+msgid "Connecting failed"
+msgstr ""
+
+#: src/util.c:144
+msgid "Login failed"
+msgstr ""
+
+#: src/util.c:146
+msgid "Authentication failed"
+msgstr ""
+
+#: src/util.c:148
+msgid "Invalid key"
 msgstr ""
 
 #: src/vpn.c:91 src/vpn.c:99
@@ -299,18 +331,22 @@ msgstr ""
 msgid "IPv6 gateway"
 msgstr ""
 
-#: src/connections/wireless.c:116
+#: src/connections/wireless.c:118
 msgid "Connect to Hidden Network..."
 msgstr ""
 
-#: src/connections/wireless.c:162
+#: src/connections/wireless.c:197
 msgid "SSID"
 msgstr ""
 
-#: src/connections/wireless.c:164
+#: src/connections/wireless.c:199
 msgid "Passphrase"
 msgstr ""
 
-#: src/connections/wireless.c:180
+#: src/connections/wireless.c:201
+msgid "_Show password"
+msgstr ""
+
+#: src/connections/wireless.c:202
 msgid "Set Access Point SSID and passphrase"
 msgstr ""
