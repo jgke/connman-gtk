@@ -130,6 +130,26 @@ const gchar *status_localized(const gchar *state)
 		return _("Error");
 }
 
+const gchar *failure_localized(const gchar *state)
+{
+	if(!strcmp(state, "out-of-range"))
+		return _("Out of range");
+	else if(!strcmp(state, "pin-missing"))
+		return _("PIN missing");
+	else if(!strcmp(state, "dhcp-failed"))
+		return _("DHCP failed");
+	else if(!strcmp(state, "connect-failed"))
+		return _("Connecting failed");
+	else if(!strcmp(state, "login-failed"))
+		return _("Login failed");
+	else if(!strcmp(state, "auth-failed"))
+		return _("Authentication failed");
+	else if(!strcmp(state, "invalid-key"))
+		return _("Invalid key");
+	else
+		return "";
+}
+
 gboolean valid_ipv4(const gchar *address)
 {
 	char str[INET_ADDRSTRLEN];

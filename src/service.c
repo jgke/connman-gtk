@@ -57,7 +57,7 @@ void service_update_property(struct service *serv, const gchar *key,
 		hash_table_set_dual_key(serv->properties, key, NULL,
 		                        g_variant_ref(value));
 		if(!strcmp(key, "Name") || !strcmp(key, "State")) {
-			gchar *name, *state, *title;
+			gchar *name, *state, *state_r, *title, *error;
 			name = service_get_property_string(serv, "Name", NULL);
 			if(!strlen(name)) {
 				g_free(name);
@@ -67,10 +67,24 @@ void service_update_property(struct service *serv, const gchar *key,
 			}
 			state = service_get_property_string(serv, "State",
 							    NULL);
-			title = g_strdup_printf("%s - %s", name, state);
+			state_r = service_get_property_string_raw(serv, "State",
+								  NULL);
+			if(!strcmp(state_r, "failure")) {
+				const gchar *failure;
+				error = service_get_property_string(serv,
+								    "Error",
+								    NULL);
+				failure = failure_localized(error);
+				title = g_strdup_printf("%s - %s: %s", name,
+							state, failure);
+				g_free(error);
+			}
+			else
+				title = g_strdup_printf("%s - %s", name, state);
 			gtk_label_set_text(GTK_LABEL(serv->title), title);
 			g_free(name);
 			g_free(state);
+			g_free(state_r);
 			g_free(title);
 		}
 		if(serv->sett)
@@ -503,30 +517,4 @@ void service_set_properties(struct service *serv, GVariant *properties)
 	while(g_variant_iter_loop(iter, "{sv}", &key, &value))
 		service_set_property(serv, key, value);
 	g_variant_iter_free(iter);
-}
-
-const gchar *service_status_localized(struct service *serv)
-{
-	const gchar *out;
-	gchar *state;
-
-	state = service_get_property_string(serv, "State", NULL);
-	if(!strcmp(state, "idle"))
-		out = _("Idle");
-	else if(!strcmp(state, "failure"))
-		out = _("Failure");
-	else if(!strcmp(state, "association"))
-		out = _("Association");
-	else if(!strcmp(state, "configuration"))
-		out = _("Configuration");
-	else if(!strcmp(state, "ready"))
-		out = _("Ready");
-	else if(!strcmp(state, "disconnect"))
-		out = _("Disconnected");
-	else if(!strcmp(state, "online"))
-		out = _("Online");
-	else
-		out = _("Error");
-	g_free(state);
-	return out;
 }
