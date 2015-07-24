@@ -152,18 +152,35 @@ void technology_wireless_init(struct technology *tech, GVariant *properties,
 
 }
 
+static void toggle_entry_mode(GtkToggleButton *button, gpointer user_data)
+{
+	GtkEntry *entry = GTK_ENTRY(user_data);
+	gboolean mode = gtk_toggle_button_get_active(button);
+
+	if(mode) {
+		gtk_entry_set_visibility(entry, TRUE);
+		gtk_entry_set_input_purpose(entry, GTK_INPUT_PURPOSE_FREE_FORM);
+	} else {
+		gtk_entry_set_visibility(entry, FALSE);
+		gtk_entry_set_input_purpose(entry, GTK_INPUT_PURPOSE_PASSWORD);
+	}
+}
+
 void technology_wireless_tether(struct technology *tech)
 {
 	const gchar *title;
 	const gchar *ssid, *pass;
 	GVariant *old_ssid, *old_pass;
 	int flags, status;
-	GtkWidget *window, *area;
-	GtkWidget *grid = gtk_grid_new();
-	GtkWidget *ssid_l = gtk_label_new(_("SSID"));
-	GtkWidget *ssid_e = gtk_entry_new();
-	GtkWidget *passphrase_l = gtk_label_new(_("Passphrase"));
-	GtkWidget *passphrase_e = gtk_entry_new();
+	GtkWidget *window, *area, *grid, *ssid_l, *ssid_e, *passphrase_l,
+		  *passphrase_e, *toggle;
+
+	grid = gtk_grid_new();
+	ssid_l = gtk_label_new(_("SSID"));
+	ssid_e = gtk_entry_new();
+	passphrase_l = gtk_label_new(_("Passphrase"));
+	passphrase_e = gtk_entry_new();
+	toggle = gtk_check_button_new_with_mnemonic(_("_Show password"));
 
 	old_ssid = g_hash_table_lookup(tech->settings->properties,
 				       "TetheringIdentifier");
@@ -177,17 +194,30 @@ void technology_wireless_tether(struct technology *tech)
 		gtk_entry_set_text(GTK_ENTRY(passphrase_e),
 				   g_variant_get_string(old_pass, NULL));
 
+	gtk_entry_set_visibility(GTK_ENTRY(passphrase_e), FALSE);
+	gtk_entry_set_input_purpose(GTK_ENTRY(passphrase_e),
+				    GTK_INPUT_PURPOSE_PASSWORD);
+
+	g_signal_connect(toggle, "toggled", G_CALLBACK(toggle_entry_mode),
+			 passphrase_e);
+
+	gtk_widget_set_halign(ssid_l, GTK_ALIGN_END);
+	gtk_widget_set_halign(passphrase_l, GTK_ALIGN_END);
 	STYLE_ADD_MARGIN(ssid_l, MARGIN_LARGE);
 	STYLE_ADD_MARGIN(ssid_e, MARGIN_LARGE);
 	gtk_widget_set_margin_bottom(ssid_l, 0);
 	gtk_widget_set_margin_bottom(ssid_e, 0);
 	STYLE_ADD_MARGIN(passphrase_l, MARGIN_LARGE);
 	STYLE_ADD_MARGIN(passphrase_e, MARGIN_LARGE);
+	gtk_widget_set_margin_bottom(passphrase_e, 0);
+	STYLE_ADD_MARGIN(toggle, MARGIN_LARGE);
+	gtk_widget_set_margin_top(toggle, MARGIN_SMALL);
 
 	gtk_grid_attach(GTK_GRID(grid), ssid_l, 0, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(grid), ssid_e, 1, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(grid), passphrase_l, 0, 1, 1, 1);
 	gtk_grid_attach(GTK_GRID(grid), passphrase_e, 1, 1, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), toggle, 1, 2, 1, 1);
 	gtk_widget_show_all(grid);
 
 	title = _("Set Access Point SSID and passphrase");
