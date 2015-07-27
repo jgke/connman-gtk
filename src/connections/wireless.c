@@ -28,12 +28,6 @@
 #include "technology.h"
 #include "wireless.h"
 
-struct wireless_technology {
-	struct technology parent;
-
-	guint scan_id;
-};
-
 struct wireless_service {
 	struct service parent;
 
@@ -56,46 +50,33 @@ static void scan_cb_cb(GObject *source, GAsyncResult *res, gpointer user_data)
 
 static gboolean scan_cb(gpointer user_data)
 {
-	struct wireless_technology *tech = user_data;
-	GHashTable *properties = tech->parent.settings->properties;
+	struct technology *tech = user_data;
+	GHashTable *properties = tech->settings->properties;
 	if(!variant_to_bool(g_hash_table_lookup(properties, "Powered")))
 		return TRUE;
 	if(!variant_to_bool(g_hash_table_lookup(properties, "Tethering")))
 		return TRUE;
 
-	g_dbus_proxy_call(tech->parent.settings->proxy, "Scan", NULL,
+	g_dbus_proxy_call(tech->settings->proxy, "Scan", NULL,
 	                  G_DBUS_CALL_FLAGS_NONE, -1, NULL, scan_cb_cb,
-	                  tech->parent.settings->proxy);
+	                  tech->settings->proxy);
 	return TRUE;
-}
-
-struct technology *technology_wireless_create(void)
-{
-	struct wireless_technology *tech = g_malloc(sizeof(*tech));
-	return (struct technology *)tech;
 }
 
 void technology_wireless_free(struct technology *tech)
 {
-	struct wireless_technology *item = (struct wireless_technology *)tech;
-
-	g_source_remove(item->scan_id);
-	g_free(item);
+	g_source_remove(GPOINTER_TO_INT(tech->data));
 }
 
 void technology_wireless_init(struct technology *tech, GVariant *properties,
                               GDBusProxy *proxy)
 {
-	struct wireless_technology *item = (struct wireless_technology *)tech;
-	gtk_image_set_from_icon_name(GTK_IMAGE(tech->list_item->icon),
-	                             "network-wireless-symbolic",
-	                             GTK_ICON_SIZE_LARGE_TOOLBAR);
-	gtk_image_set_from_icon_name(GTK_IMAGE(tech->settings->icon),
-	                             "network-wireless", GTK_ICON_SIZE_DIALOG);
+	int id;
 
-	scan_cb(item);
-	item->scan_id = g_timeout_add_seconds(WIRELESS_SCAN_INTERVAL,
-	                                      scan_cb, item);
+	scan_cb(tech);
+	id = g_timeout_add_seconds(WIRELESS_SCAN_INTERVAL,
+				   scan_cb, tech);
+	tech->data = GINT_TO_POINTER(id);
 
 }
 

@@ -31,31 +31,8 @@
 #include "style.h"
 #include "technology.h"
 #include "vpn.h"
-#include "connections/bluetooth.h"
-#include "connections/cellular.h"
 #include "connections/ethernet.h"
-#include "connections/p2p.h"
 #include "connections/wireless.h"
-
-static struct {
-	void (*init)(struct technology *tech, GVariant *properties,
-	             GDBusProxy *proxy);
-	struct technology *(*create)(void);
-	void (*free)(struct technology *tech);
-	void (*services_updated)(struct technology *tech);
-	void (*property_changed)(struct technology *tech, const gchar *name);
-} functions[CONNECTION_TYPE_COUNT] = {
-	{},
-	{technology_ethernet_init},
-	{
-		technology_wireless_init, technology_wireless_create,
-		technology_wireless_free
-	},
-	{technology_bluetooth_init},
-	{technology_cellular_init},
-	{},
-	{}
-};
 
 struct technology_list_item *technology_create_item(struct technology *tech,
                 const gchar *name)
@@ -68,8 +45,7 @@ struct technology_list_item *technology_create_item(struct technology *tech,
 
 	grid = gtk_grid_new();
 	item->item = gtk_list_box_row_new();
-	item->icon = gtk_image_new_from_icon_name("network-transmit-symbolic",
-	                GTK_ICON_SIZE_LARGE_TOOLBAR);
+	item->icon = gtk_image_new();
 	item->label = gtk_label_new(name);
 
 	g_object_ref(item->item);
@@ -288,8 +264,7 @@ struct technology_settings *technology_create_settings(struct technology *tech,
 	                 item);
 
 	item->grid = gtk_grid_new();
-	item->icon = gtk_image_new_from_icon_name("preferences-system-network",
-	                GTK_ICON_SIZE_DIALOG);
+	item->icon = gtk_image_new();
 	item->title = gtk_label_new(name);
 	item->status = gtk_label_new(NULL);
 	item->power_switch = gtk_switch_new();
@@ -417,22 +392,12 @@ void technology_property_changed(struct technology *item, const gchar *key)
 		update_status(item->settings);
 	else if(!strcmp(key, "Tethering"))
 		update_tethering(item->settings);
-
-	if(functions[item->type].property_changed)
-		functions[item->type].property_changed(item, key);
-}
-
-void technology_services_updated(struct technology *item)
-{
-	if(functions[item->type].services_updated)
-		functions[item->type].services_updated(item);
 }
 
 void technology_add_service(struct technology *item, struct service *serv)
 {
 	gtk_container_add(GTK_CONTAINER(item->settings->services), serv->item);
 	g_hash_table_insert(item->services, g_strdup(serv->path), serv);
-	technology_services_updated(item);
 }
 
 void technology_update_service(struct technology *item, struct service *serv,
@@ -441,7 +406,6 @@ void technology_update_service(struct technology *item, struct service *serv,
 	service_update(serv, properties);
 	if(item->settings->selected == serv);
 	update_connect_button(item->settings);
-	technology_services_updated(item);
 }
 
 void technology_remove_service(struct technology *item, const gchar *path)
@@ -452,7 +416,6 @@ void technology_remove_service(struct technology *item, const gchar *path)
 		update_connect_button(item->settings);
 	}
 	g_hash_table_remove(item->services, path);
-	technology_services_updated(item);
 }
 
 void technology_free(struct technology *item)
@@ -467,10 +430,9 @@ void technology_free(struct technology *item)
 	free_technology_settings(item->settings);
 	g_hash_table_unref(item->services);
 	g_free(item->path);
-	if(functions[item->type].free)
-		functions[item->type].free(item);
-	else
-		g_free(item);
+	if(item->type == CONNECTION_TYPE_WIRELESS)
+		technology_wireless_free(item);
+	g_free(item);
 }
 
 void technology_init(struct technology *tech, GVariant *properties_v,
@@ -495,10 +457,48 @@ void technology_init(struct technology *tech, GVariant *properties_v,
 	tech->settings = technology_create_settings(tech, properties_v,
 	                 proxy);
 	tech->list_item = technology_create_item(tech, name);
-	technology_services_updated(tech);
 
 	g_variant_unref(name_v);
 	g_variant_unref(type_v);
+}
+
+static void set_icons(struct technology *tech)
+{
+	const gchar *list_icon = "";
+	const gchar *settings_icon = "";
+
+	switch(tech->type) {
+		case CONNECTION_TYPE_ETHERNET:
+			list_icon = "network-wired-symbolic";
+			settings_icon = "network-wired";
+			break;
+		case CONNECTION_TYPE_WIRELESS:
+			list_icon = "network-wireless-symbolic";
+			settings_icon = "network-wireless";
+			break;
+		case CONNECTION_TYPE_BLUETOOTH:
+			list_icon = "bluetooth-symbolic";
+			settings_icon = "bluetooth-symbolic";
+			break;
+		case CONNECTION_TYPE_CELLULAR:
+			list_icon = "emblem-system-symbolic";
+			settings_icon = "network-cellular-connected";
+			break;
+		case CONNECTION_TYPE_P2P:
+			settings_icon = "preferences-system-network";
+			list_icon = "network-transmit-symbolic";
+			break;
+		case CONNECTION_TYPE_UNKNOWN:
+		case CONNECTION_TYPE_VPN:
+		case CONNECTION_TYPE_COUNT:
+			break;
+	}
+
+	gtk_image_set_from_icon_name(GTK_IMAGE(tech->list_item->icon),
+				     list_icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
+	gtk_image_set_from_icon_name(GTK_IMAGE(tech->settings->icon),
+	                             settings_icon, GTK_ICON_SIZE_DIALOG);
+
 }
 
 struct technology *technology_create(GDBusProxy *proxy, const gchar *path,
@@ -515,16 +515,14 @@ struct technology *technology_create(GDBusProxy *proxy, const gchar *path,
 	g_variant_unref(type_v);
 	g_variant_dict_unref(properties_d);
 
-	if(functions[type].create)
-		item = functions[type].create();
-	else
-		item = g_malloc(sizeof(*item));
+	item = g_malloc(sizeof(*item));
 	item->type = type;
 	item->path = g_strdup(path);
 
 	technology_init(item, properties, proxy);
-	if(functions[type].init)
-		functions[type].init(item, properties, proxy);
+	set_icons(item);
+	if(type == CONNECTION_TYPE_WIRELESS)
+		technology_wireless_init(item, properties, proxy);
 
 	/* XXX: hack to fix window width with variable text length */
 	gtk_button_set_label(GTK_BUTTON(item->settings->connect_button),

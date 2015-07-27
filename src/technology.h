@@ -69,6 +69,7 @@ struct technology {
 	GHashTable *services;
 	gchar *path;
 	enum connection_type type;
+	void *data;
 };
 
 struct technology_list_item *technology_create_item(struct technology *tech,

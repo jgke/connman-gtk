@@ -37,16 +37,6 @@ struct ethernet_service {
 	GtkWidget *mac;
 };
 
-void technology_ethernet_init(struct technology *item, GVariant *properties,
-                              GDBusProxy *proxy)
-{
-	gtk_image_set_from_icon_name(GTK_IMAGE(item->list_item->icon),
-	                             "network-wired-symbolic",
-	                             GTK_ICON_SIZE_LARGE_TOOLBAR);
-	gtk_image_set_from_icon_name(GTK_IMAGE(item->settings->icon),
-	                             "network-wired", GTK_ICON_SIZE_DIALOG);
-}
-
 static GtkWidget *add_label(GtkWidget *grid, gint y, const gchar *text)
 {
 	GtkWidget *label, *value;
