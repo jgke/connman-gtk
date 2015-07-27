@@ -3,19 +3,14 @@ ui_DATA = stylesheet.css
 bin_PROGRAMS = connman-gtk
 connman_gtk_SOURCES = main.c agent.c style.c technology.c service.c util.c \
 		      settings.c settings_content.c settings_content_callback.c \
-		      vpn.c \
-		      connection.c \
-			connections/ethernet.c \
-			connections/wireless.c
+		      connection.c vpn.c wireless.c
 connman_gtk_LDADD = @GTK_LIBS@ @GLIB_LIBS@
 connman_gtk_CPPFLAGS = @GTK_CFLAGS@ @GLIB_CFLAGS@ \
 		       -DCONNMAN_GTK_LOCALEDIR=\"${CONNMAN_GTK_LOCALEDIR}\" \
 		       -DCONNMAN_GTK_UIDIR=\""$(uidir)"\"
 
 EXTRA_DIST =  agent.h interfaces.h main.h technology.h style.h service.h \
-	      util.h vpn.h \
+	      util.h \
 	      settings.h settings_content.h settings_content_callback.h \
-	      connection.h \
-		connections/ethernet.h \
-		connections/wireless.h \
+	      connection.h vpn.h wireless.h \
 	      stylesheet.css

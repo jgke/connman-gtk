@@ -33,6 +33,7 @@
 struct service {
 	enum connection_type type;
 	struct technology *tech;
+	struct settings *sett;
 	GDBusProxy *proxy;
 	gchar *path;
 	DualHashTable *properties;
@@ -41,7 +42,12 @@ struct service {
 	GtkWidget *title;
 	GtkWidget *contents;
 	GtkWidget *settings_button;
-	struct settings *sett;
+	GtkWidget *ipv4;
+	GtkWidget *ipv4gateway;
+	GtkWidget *ipv6;
+	GtkWidget *ipv6gateway;
+	GtkWidget *mac;
+	void *data;
 };
 
 #define SIGNAL_TO_ICON(type, strength) \

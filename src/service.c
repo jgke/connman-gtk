@@ -29,26 +29,7 @@
 #include "settings.h"
 #include "util.h"
 #include "vpn.h"
-#include "connections/ethernet.h"
-#include "connections/wireless.h"
-
-static struct {
-	void (*init)(struct service *serv, GDBusProxy *proxy, const gchar *path,
-	             GVariant *properties);
-	struct service *(*create)(void);
-	void (*free)(struct service *serv);
-	void (*update)(struct service *serv);
-} functions[CONNECTION_TYPE_COUNT] = {
-	{},
-	{
-		service_ethernet_init, service_ethernet_create,
-		service_ethernet_free, service_ethernet_update
-	},
-	{
-		service_wireless_init, service_wireless_create,
-		service_wireless_free, service_wireless_update
-	}
-};
+#include "wireless.h"
 
 static void update_name(struct service *serv)
 {
@@ -71,6 +52,15 @@ static void update_name(struct service *serv)
 	g_free(state_r);
 	g_free(title);
 }
+
+static void set_label(struct service *serv, GtkWidget *label,
+		      const gchar *key, const gchar *subkey)
+{
+	gchar *value = service_get_property_string_raw(serv, key, subkey);
+	gtk_label_set_text(GTK_LABEL(label), value);
+	g_free(value);
+}
+
 
 void service_update_property(struct service *serv, const gchar *key,
                              GVariant *value)
@@ -96,6 +86,15 @@ void service_update_property(struct service *serv, const gchar *key,
 		}
 		g_variant_iter_free(iter);
 	}
+
+	if(serv->type == CONNECTION_TYPE_WIRELESS)
+		return;
+
+	set_label(serv, serv->ipv4, "IPv4", "Address");
+	set_label(serv, serv->ipv4gateway, "IPv4", "Gateway");
+	set_label(serv, serv->ipv6, "IPv6", "Address");
+	set_label(serv, serv->ipv6gateway, "IPv6", "Gateway");
+	set_label(serv, serv->mac, "Ethernet", "Address");
 }
 
 void service_update(struct service *serv, GVariant *properties)
@@ -109,10 +108,9 @@ void service_update(struct service *serv, GVariant *properties)
 		service_update_property(serv, key, value);
 	g_variant_iter_free(iter);
 	update_name(serv);
-	if(functions[serv->type].update)
-		functions[serv->type].update(serv);
 	// TODO: horribly inefficient
 	if(serv->type == CONNECTION_TYPE_WIRELESS) {
+		service_wireless_update(serv);
 		gchar *name;
 		GtkStyleContext *context;
 
@@ -168,6 +166,28 @@ static void settings_button_cb(GtkButton *button, gpointer user_data)
 	serv->sett = settings_create(serv, settings_closed);
 }
 
+static GtkWidget *add_label(GtkWidget *grid, gint y, const gchar *text)
+{
+	GtkWidget *label, *value;
+
+	label = gtk_label_new(text);
+	value = gtk_label_new(NULL);
+
+	STYLE_ADD_MARGIN(label, MARGIN_SMALL);
+	gtk_widget_set_margin_start(label, MARGIN_LARGE);
+	gtk_style_context_add_class(gtk_widget_get_style_context(label),
+	                            "dim-label");
+
+	gtk_widget_set_hexpand(label, TRUE);
+	gtk_widget_set_halign(label, GTK_ALIGN_START);
+	gtk_widget_set_halign(value, GTK_ALIGN_START);
+
+	gtk_grid_attach(GTK_GRID(grid), label, 0, y, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), value, 1, y, 1, 1);
+
+	return value;
+}
+
 void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
                   GVariant *properties)
 {
@@ -219,6 +239,16 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 	gtk_grid_attach(item_grid, serv->header, 0, 0, 1, 1);
 	gtk_grid_attach(item_grid, serv->contents, 0, 1, 1, 1);
 	gtk_container_add(GTK_CONTAINER(serv->item), GTK_WIDGET(item_grid));
+	if(serv->type == CONNECTION_TYPE_WIRELESS) {
+		gtk_widget_show_all(serv->item);
+		return;
+	}
+
+	serv->ipv4 = add_label(serv->contents, 0, _("IPv4 address"));
+	serv->ipv4gateway = add_label(serv->contents, 1, _("IPv4 gateway"));
+	serv->ipv6 = add_label(serv->contents, 2, _("IPv6 address"));
+	serv->ipv6gateway = add_label(serv->contents, 3, _("IPv6 gateway"));
+	serv->mac = add_label(serv->contents, 4, _("MAC address"));
 
 	gtk_widget_show_all(serv->item);
 }
@@ -239,18 +269,14 @@ struct service *service_create(struct technology *tech, GDBusProxy *proxy,
 	g_variant_unref(type_v);
 	g_variant_dict_unref(properties_d);
 
-	if(functions[type].create)
-		serv = functions[type].create();
-	else
-		serv = g_malloc(sizeof(*serv));
-
+	serv = g_malloc(sizeof(*serv));
 	serv->type = type;
 	serv->tech = tech;
 	serv->sett = NULL;
 
 	service_init(serv, proxy, path, properties);
-	if(functions[type].init)
-		functions[type].init(serv, proxy, path, properties);
+	if(serv->type == CONNECTION_TYPE_WIRELESS)
+		service_wireless_init(serv, proxy, path, properties);
 
 	service_update(serv, properties);
 
@@ -270,10 +296,9 @@ void service_free(struct service *serv)
 	dual_hash_table_unref(serv->properties);
 	gtk_widget_destroy(serv->item);
 	g_object_unref(serv->item);
-	if(functions[serv->type].free)
-		functions[serv->type].free(serv);
-	else
-		g_free(serv);
+	if(serv->type == CONNECTION_TYPE_WIRELESS)
+		service_wireless_free(serv);
+	g_free(serv);
 }
 
 static void service_toggle_connection_cb(GObject *source, GAsyncResult *res,

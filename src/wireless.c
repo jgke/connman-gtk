@@ -29,7 +29,7 @@
 #include "wireless.h"
 
 struct wireless_service {
-	struct service parent;
+	struct service *parent;
 
 	GtkWidget *security;
 	GtkWidget *signal;
@@ -78,6 +78,11 @@ void technology_wireless_init(struct technology *tech, GVariant *properties,
 				   scan_cb, tech);
 	tech->data = GINT_TO_POINTER(id);
 
+}
+
+void service_wireless_free(struct service *tech)
+{
+	g_free(tech->data);
 }
 
 static void check_passphrase(GtkWidget *entry, gpointer user_data)
@@ -192,31 +197,15 @@ out:
 	gtk_widget_destroy(window);
 }
 
-struct service *service_wireless_create(void)
-{
-	struct wireless_service *serv = g_malloc(sizeof(*serv));
-	return (struct service *)serv;
-}
-
-void service_wireless_free(struct service *serv)
-{
-	struct wireless_service *item = (struct wireless_service *)serv;
-
-	g_object_unref(item->security);
-	g_object_unref(item->signal);
-	g_free(item);
-}
-
 void service_wireless_init(struct service *serv, GDBusProxy *proxy,
                            const gchar *path, GVariant *properties)
 {
-	struct wireless_service *item = (struct wireless_service *)serv;
+	struct wireless_service *item = g_malloc(sizeof(*serv));
 
+	serv->data = item;
+	item->parent = serv;
 	item->security = gtk_image_new_from_icon_name("", GTK_ICON_SIZE_MENU);
 	item->signal = gtk_image_new_from_icon_name("", GTK_ICON_SIZE_MENU);
-
-	g_object_ref(item->security);
-	g_object_ref(item->signal);
 
 	STYLE_ADD_MARGIN(item->security, MARGIN_SMALL);
 	STYLE_ADD_MARGIN(item->signal, MARGIN_SMALL);
@@ -239,7 +228,7 @@ void service_wireless_init(struct service *serv, GDBusProxy *proxy,
 
 void service_wireless_update(struct service *serv)
 {
-	struct wireless_service *item = (struct wireless_service *)serv;
+	struct wireless_service *item = serv->data;
 
 	GVariant *variant;
 	gchar *name, *state;

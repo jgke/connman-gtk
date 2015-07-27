@@ -31,8 +31,7 @@
 #include "style.h"
 #include "technology.h"
 #include "vpn.h"
-#include "connections/ethernet.h"
-#include "connections/wireless.h"
+#include "wireless.h"
 
 struct technology_list_item *technology_create_item(struct technology *tech,
                 const gchar *name)

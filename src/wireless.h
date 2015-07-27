@@ -18,23 +18,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CONNMAN_GTK_ETHERNET_H
-#define _CONNMAN_GTK_ETHERNET_H
+#ifndef _CONNMAN_GTK_WIRELESS_H
+#define _CONNMAN_GTK_WIRELESS_H
 
 #include <gio/gio.h>
-#include <glib.h>
 #include <gtk/gtk.h>
 
 #include "technology.h"
 
-void technology_ethernet_init(struct technology *tech, GVariant *properties,
+#define WIRELESS_SCAN_INTERVAL 30
+
+void technology_wireless_free(struct technology *serv);
+void technology_wireless_init(struct technology *item, GVariant *properties,
                               GDBusProxy *proxy);
+void technology_wireless_tether(struct technology *item);
 
-void service_ethernet_init(struct service *serv, GDBusProxy *proxy,
+void service_wireless_free(struct service *serv);
+void service_wireless_init(struct service *serv, GDBusProxy *proxy,
                            const gchar *path, GVariant *properties);
-struct service *service_ethernet_create(void);
-void service_ethernet_free(struct service *serv);
-void service_ethernet_update(struct service *serv);
+void service_wireless_update(struct service *serv);
 
-#endif /* _CONNMAN_GTK_ETHERNET_H */
+#endif /* _CONNMAN_GTK_WIRELESS_H */
 
