@@ -6,11 +6,9 @@ GTK GUI for ConnMan.
 Dependencies
 ------------
 
- * autoconf
  * intltool
  * GLib
- * GTK
- * C compiler
+ * GTK >= 3.14
 
 Installation
 ------------
