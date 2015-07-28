@@ -231,6 +231,12 @@ static void service_selected(GtkListBox *box, GtkListBoxRow *row,
 	update_connect_button(tech);
 }
 
+void service_evented(GtkWidget *widget, GdkEvent *event, gpointer user_data)
+{
+	if(event->type == GDK_2BUTTON_PRESS)
+		connect_button_cb(NULL, user_data);
+}
+
 struct technology_settings *technology_create_settings(struct technology *tech,
                 GVariant *properties, GDBusProxy *proxy)
 {
@@ -240,7 +246,7 @@ struct technology_settings *technology_create_settings(struct technology *tech,
 	gchar *key;
 	GVariant *value;
 	const gchar *name;
-	GtkWidget *powerbox, *frame, *scrolled_window;
+	GtkWidget *powerbox, *frame, *scrolled_window, *eventbox;
 
 	item->technology = tech;
 	item->properties = g_hash_table_new_full(g_str_hash, g_str_equal,
@@ -276,6 +282,7 @@ struct technology_settings *technology_create_settings(struct technology *tech,
 	frame = gtk_frame_new(NULL);
 	scrolled_window = gtk_scrolled_window_new(NULL, NULL);
 	item->tethering = gtk_button_new_with_mnemonic(_("Enable _tethering"));
+	eventbox = gtk_event_box_new();
 
 	g_object_ref(item->grid);
 	g_object_ref(item->icon);
@@ -297,6 +304,8 @@ struct technology_settings *technology_create_settings(struct technology *tech,
 	                             update_service_separator, NULL, NULL);
 	g_signal_connect(item->services, "row-selected",
 	                 G_CALLBACK(service_selected), item);
+	g_signal_connect(eventbox, "button-press-event",
+	                 G_CALLBACK(service_evented), item);
 	g_signal_connect(item->connect_button, "clicked",
 	                 G_CALLBACK(connect_button_cb), item);
 	g_signal_connect(item->tethering, "clicked",
@@ -337,7 +346,8 @@ struct technology_settings *technology_create_settings(struct technology *tech,
 	gtk_widget_set_halign(item->connect_button, GTK_ALIGN_END);
 
 	gtk_grid_attach(GTK_GRID(powerbox), item->power_switch, 0, 0, 1, 1);
-	gtk_container_add(GTK_CONTAINER(scrolled_window), item->services);
+	gtk_container_add(GTK_CONTAINER(eventbox), item->services);
+	gtk_container_add(GTK_CONTAINER(scrolled_window), eventbox);
 	gtk_container_add(GTK_CONTAINER(frame), scrolled_window);
 	gtk_grid_attach(GTK_GRID(item->contents), frame, 0, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(item->buttons), item->tethering, 0, 0, 1, 1);
@@ -381,7 +391,6 @@ void free_technology_settings(struct technology_settings *item)
 
 	g_free(item);
 }
-
 
 void technology_property_changed(struct technology *item, const gchar *key)
 {
