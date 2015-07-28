@@ -29,6 +29,7 @@
 static struct technology tech;
 static GDBusProxy *proxy;
 static GDBusConnection *connection;
+int connection_count;
 
 static void add_connection(GDBusConnection *connection, GVariant *parameters)
 {
@@ -39,6 +40,9 @@ static void add_connection(GDBusConnection *connection, GVariant *parameters)
 	properties = g_variant_get_child_value(parameters, 1);
 	path = g_variant_get_string(path_v, NULL);
 
+	gtk_widget_show(tech.list_item->item);
+	gtk_widget_show(tech.settings->grid);
+	connection_count++;
 	modify_service(g_dbus_proxy_get_connection(proxy), path,
 		       properties);
 
@@ -53,6 +57,12 @@ static void remove_connection(GVariant *parameters)
 
 	path_v = g_variant_get_child_value(parameters, 0);
 	path = g_variant_get_string(path_v, NULL);
+	connection_count--;
+
+	if(!connection_count) {
+		gtk_widget_hide(tech.list_item->item);
+		gtk_widget_hide(tech.settings->grid);
+	}
 
 	remove_service(path);
 
@@ -104,6 +114,8 @@ static void init_vpn_technology(void)
 	                             "network-vpn", GTK_ICON_SIZE_DIALOG);
 	gtk_widget_hide(tech.settings->power_switch);
 	gtk_widget_hide(tech.settings->tethering);
+	gtk_widget_hide(tech.list_item->item);
+	gtk_widget_hide(tech.settings->grid);
 	g_variant_unref(properties);
 	g_variant_builder_unref(b);
 }
@@ -173,4 +185,5 @@ void vpn_get_connections(void)
 void vpn_release(void)
 {
 	g_object_unref(proxy);
+	connection_count = 0;
 }
