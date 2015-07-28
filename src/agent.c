@@ -41,18 +41,21 @@ void release(struct agent *agent, GDBusMethodInvocation *invocation)
 	g_dbus_method_invocation_return_value(invocation, NULL);
 }
 
-void report_error(struct agent *agent, GDBusMethodInvocation *invocation, GVariant *parameters)
+void report_error(struct agent *agent, GDBusMethodInvocation *invocation,
+		  GVariant *parameters)
 {
 	g_dbus_method_invocation_return_dbus_error(invocation,
 	                "net.connman.Agent.Error.Retry", "");
 }
 
-void report_peer_error(struct agent *agent, GDBusMethodInvocation *invocation, GVariant *parameters)
+void report_peer_error(struct agent *agent, GDBusMethodInvocation *invocation,
+		       GVariant *parameters)
 {
 	g_dbus_method_invocation_return_value(invocation, NULL);
 }
 
-void request_browser(struct agent *agent, GDBusMethodInvocation *invocation, GVariant *parameters)
+void request_browser(struct agent *agent, GDBusMethodInvocation *invocation,
+		     GVariant *parameters)
 {
 	g_dbus_method_invocation_return_dbus_error(invocation,
 	                "net.connman.Agent.Error.Canceled",
@@ -63,6 +66,53 @@ struct token_entry {
 	GtkWidget *label;
 	GtkWidget *entry;
 };
+
+static GVariantDict *get_tokens(GPtrArray *entries) {
+	GtkDialog *dialog;
+	GtkWidget *grid, *window;
+	GVariantDict *dict = NULL;
+	int i;
+	int flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
+
+	grid = gtk_grid_new();
+	window = gtk_dialog_new_with_buttons(_("Authentication required"),
+					     GTK_WINDOW(main_window), flags,
+					     _("_OK"), GTK_RESPONSE_ACCEPT,
+					     _("_Cancel"), GTK_RESPONSE_CANCEL,
+					     NULL);
+	for(i = 0; i < entries->len; i++) {
+		struct token_entry *entry = g_ptr_array_index(entries, i);
+		gtk_grid_attach(GTK_GRID(grid), entry->label, 0, i, 1, 1);
+		gtk_grid_attach(GTK_GRID(grid), entry->entry, 1, i, 1, 1);
+	}
+
+	gtk_widget_show_all(grid);
+	dialog = GTK_DIALOG(window);
+	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(dialog)),
+	                  grid);
+
+	i = gtk_dialog_run(GTK_DIALOG(window));
+	if(i != GTK_RESPONSE_ACCEPT)
+		goto out;
+
+	dict = g_variant_dict_new(NULL);
+	for(i = 0; i < entries->len; i++) {
+		struct token_entry *entry;
+		GtkEntryBuffer *buf;
+		const gchar *key;
+		const gchar *value;
+
+		entry = g_ptr_array_index(entries, i);
+		buf = gtk_entry_get_buffer(GTK_ENTRY(entry->entry));
+		key = gtk_label_get_text(GTK_LABEL(entry->label));
+		value = gtk_entry_buffer_get_text(buf);
+		g_variant_dict_insert(dict, key, "s", value);
+	}
+
+out:
+	gtk_widget_destroy(window);
+	return dict;
+}
 
 static void add_field(GPtrArray *array, const char *label, gboolean secret)
 {
@@ -108,58 +158,31 @@ static GPtrArray *generate_entries(GVariant *args)
 	return array;
 }
 
-void request_input(struct agent *agent, GDBusMethodInvocation *invocation, GVariant *parameters)
+void request_input(struct agent *agent, GDBusMethodInvocation *invocation,
+		   GVariant *parameters)
 {
-	GtkDialog *dialog;
-	GtkWidget *grid = gtk_grid_new();
+	GVariantDict *dict;
+	GVariant *ret, *ret_v;
 	GPtrArray *entries;
-	int i;
-	int flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
-	GtkWidget *window = gtk_dialog_new_with_buttons(
-	                            _("Authentication required"),
-	                            GTK_WINDOW(main_window), flags,
-	                            _("_OK"), GTK_RESPONSE_ACCEPT,
-	                            _("_Cancel"), GTK_RESPONSE_CANCEL, NULL);
+
 	entries = generate_entries(parameters);
-	for(i = 0; i < entries->len; i++) {
-		struct token_entry *entry = g_ptr_array_index(entries, i);
-		gtk_grid_attach(GTK_GRID(grid), entry->label, 0, i, 1, 1);
-		gtk_grid_attach(GTK_GRID(grid), entry->entry, 1, i, 1, 1);
-	}
-	gtk_widget_show_all(grid);
-	dialog = GTK_DIALOG(window);
-	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(dialog)),
-	                  grid);
-	i = gtk_dialog_run(GTK_DIALOG(window));
-	if(i == GTK_RESPONSE_ACCEPT) {
-		GVariantDict *dict = g_variant_dict_new(NULL);
-		GVariant *out_v, *out;
-		for(i = 0; i < entries->len; i++) {
-			struct token_entry *entry;
-			GtkEntryBuffer *buf;
-			const gchar *key;
-			const gchar *value;
+	dict = get_tokens(entries);
 
-			entry = g_ptr_array_index(entries, i);
-			buf = gtk_entry_get_buffer(GTK_ENTRY(entry->entry));
-			key = gtk_label_get_text(GTK_LABEL(entry->label));
-			value = gtk_entry_buffer_get_text(buf);
-			g_variant_dict_insert(dict, key, "s", value);
-		}
-		g_variant_dict_insert(dict, "foo", "s", "bar");
-		out = g_variant_dict_end(dict);
-		out_v = g_variant_new("(@a{sv})", out);
-		g_variant_ref_sink(out_v);
-		g_dbus_method_invocation_return_value(invocation, out_v);
-		g_variant_unref(out_v);
-		g_variant_dict_unref(dict);
-	} else
+	if(!dict) {
 		g_dbus_method_invocation_return_dbus_error(invocation,
-							   agent->cancel,
-		                "User canceled password dialog");
+				agent->cancel, "User canceled password dialog");
+		goto out;
+	}
 
+	ret = g_variant_dict_end(dict);
+	ret_v = g_variant_new("(@a{sv})", ret);
+	g_variant_ref_sink(ret_v);
+	g_dbus_method_invocation_return_value(invocation, ret_v);
+	g_variant_unref(ret_v);
+	g_variant_dict_unref(dict);
+
+out:
 	g_ptr_array_free(entries, TRUE);
-	gtk_widget_destroy(window);
 }
 
 void request_peer_authorization(struct agent *agent, GDBusMethodInvocation *invocation,
