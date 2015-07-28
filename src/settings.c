@@ -76,7 +76,7 @@ static struct settings_page *add_page_to_settings(struct settings *sett,
 
 	g_object_set_data(G_OBJECT(item), "content", page->item);
 
-	STYLE_ADD_MARGIN(label, MARGIN_SMALL);
+	style_add_margin(label, MARGIN_SMALL);
 	gtk_widget_set_margin_start(label, MARGIN_LARGE);
 	gtk_widget_set_margin_end(label, MARGIN_LARGE);
 
@@ -414,8 +414,8 @@ static void add_clear_page(struct settings *sett)
 
 	gtk_widget_set_halign(clear_l, GTK_ALIGN_START);
 	gtk_widget_set_halign(remove_l, GTK_ALIGN_START);
-	STYLE_ADD_MARGIN(clear, MARGIN_LARGE);
-	STYLE_ADD_MARGIN(remove, MARGIN_LARGE);
+	style_add_margin(clear, MARGIN_LARGE);
+	style_add_margin(remove, MARGIN_LARGE);
 
 	gtk_grid_attach(GTK_GRID(page->grid), clear, 0, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(page->grid), clear_l, 1, 0, 1, 1);
@@ -535,7 +535,7 @@ static void init_settings(struct settings *sett)
 	g_signal_connect(sett->apply, "clicked",
 	                 G_CALLBACK(apply_cb), sett);
 
-	STYLE_ADD_MARGIN(GTK_WIDGET(grid), MARGIN_LARGE);
+	style_add_margin(GTK_WIDGET(grid), MARGIN_LARGE);
 	gtk_widget_set_margin_top(sett->apply, MARGIN_LARGE);
 
 	gtk_widget_set_size_request(sett->list, SETTINGS_LIST_WIDTH, -1);

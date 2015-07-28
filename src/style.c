@@ -39,7 +39,6 @@ void style_init()
 	}
 }
 
-
 void label_align_text_left(GtkLabel *label)
 {
 	gtk_label_set_line_wrap(label, TRUE);
@@ -51,4 +50,19 @@ void label_align_text_left(GtkLabel *label)
 #endif
 		/* deprecated at 3.14, but above only implemented at 3.16 */
 		gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+}
+
+void style_add_context(GtkWidget *widget)
+{
+	gtk_style_context_add_provider(gtk_widget_get_style_context(widget),
+				       GTK_STYLE_PROVIDER(css_provider),
+				       GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+}
+
+void style_add_margin(GtkWidget *widget, gint margin)
+{
+	gtk_widget_set_margin_start(widget, margin);
+	gtk_widget_set_margin_end(widget, margin);
+	gtk_widget_set_margin_top(widget, margin);
+	gtk_widget_set_margin_bottom(widget, margin);
 }

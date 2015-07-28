@@ -56,7 +56,7 @@ struct technology_list_item *technology_create_item(struct technology *tech,
 	g_object_set_data(G_OBJECT(item->item), "technology-type",
 	                  &tech->type);
 
-	STYLE_ADD_MARGIN(grid, MARGIN_SMALL);
+	style_add_margin(grid, MARGIN_SMALL);
 	gtk_widget_set_margin_start(item->label, MARGIN_SMALL);
 
 	gtk_container_add(GTK_CONTAINER(grid), item->icon);
@@ -315,7 +315,7 @@ struct technology_settings *technology_create_settings(struct technology *tech,
 	gtk_widget_set_margin_end(item->grid, MARGIN_LARGE);
 	gtk_widget_set_margin_start(item->title, MARGIN_MEDIUM);
 	gtk_widget_set_margin_end(item->title, MARGIN_MEDIUM);
-	STYLE_ADD_CONTEXT(item->title);
+	style_add_context(item->title);
 	gtk_style_context_add_class(gtk_widget_get_style_context(item->title),
 	                            "cm-header-title");
 	gtk_widget_set_margin_start(item->status, MARGIN_MEDIUM);

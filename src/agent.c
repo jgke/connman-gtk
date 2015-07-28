@@ -119,8 +119,8 @@ static void add_field(GPtrArray *array, const char *label, gboolean secret)
 	struct token_entry *entry = g_malloc(sizeof(*entry));
 	entry->label = gtk_label_new(label);
 	entry->entry = gtk_entry_new();
-	STYLE_ADD_MARGIN(entry->label, MARGIN_LARGE);
-	STYLE_ADD_MARGIN(entry->entry, MARGIN_LARGE);
+	style_add_margin(entry->label, MARGIN_LARGE);
+	style_add_margin(entry->entry, MARGIN_LARGE);
 	gtk_entry_set_visibility(GTK_ENTRY(entry->entry), FALSE);
 	g_ptr_array_add(array, entry);
 }

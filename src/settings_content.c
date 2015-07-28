@@ -111,7 +111,7 @@ static GtkWidget *create_label(const gchar *text)
 	GtkWidget *label;
 	label = gtk_label_new(text);
 
-	STYLE_ADD_CONTEXT(label);
+	style_add_context(label);
 	gtk_style_context_add_class(gtk_widget_get_style_context(label),
 	                            "dim-label");
 	gtk_widget_set_valign(label, GTK_ALIGN_CENTER);
@@ -427,7 +427,7 @@ void content_add_entry_to_list(GtkWidget *list, const gchar *value)
 	g_object_set_data(G_OBJECT(row), "destroy", destroy_entry);
 	g_signal_connect(rem, "clicked", G_CALLBACK(destroy_entry), row);
 
-	STYLE_ADD_MARGIN(entry, MARGIN_SMALL);
+	style_add_margin(entry, MARGIN_SMALL);
 	gtk_widget_set_hexpand(entry, TRUE);
 	gtk_widget_set_hexpand(row, TRUE);
 	gtk_widget_set_vexpand(rem, FALSE);
@@ -559,7 +559,7 @@ static void set_entry_value(GtkWidget *entry, GVariantDict *dict,
 	                 G_CALLBACK(entry_changed), content);
 	g_object_set_data(G_OBJECT(entry), "validator", always_valid);
 	gtk_widget_set_hexpand(entry, TRUE);
-	STYLE_ADD_MARGIN(entry, MARGIN_SMALL);
+	style_add_margin(entry, MARGIN_SMALL);
 }
 
 static void set_label_value(GtkWidget *label, GVariantDict *dict,
@@ -576,7 +576,7 @@ static void set_label_value(GtkWidget *label, GVariantDict *dict,
 	}
 
 	gtk_widget_set_hexpand(label, TRUE);
-	STYLE_ADD_MARGIN(label, MARGIN_SMALL);
+	style_add_margin(label, MARGIN_SMALL);
 }
 
 void route_ipv_changed(GtkComboBox *box, gpointer user_data)
@@ -684,15 +684,15 @@ void content_add_route_to_list(GtkWidget *list, GVariant *properties)
 		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ipv), "IPv4");
 		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(ipv), "IPv6");
 
-		STYLE_ADD_MARGIN(ipv_l, MARGIN_SMALL);
-		STYLE_ADD_MARGIN(ipv, MARGIN_SMALL);
-		STYLE_ADD_MARGIN(rem, MARGIN_LARGE);
+		style_add_margin(ipv_l, MARGIN_SMALL);
+		style_add_margin(ipv, MARGIN_SMALL);
+		style_add_margin(rem, MARGIN_LARGE);
 	}
 
-	STYLE_ADD_MARGIN(network_l, MARGIN_SMALL);
-	STYLE_ADD_MARGIN(netmask_l, MARGIN_SMALL);
-	STYLE_ADD_MARGIN(prefix_l, MARGIN_SMALL);
-	STYLE_ADD_MARGIN(gateway_l, MARGIN_SMALL);
+	style_add_margin(network_l, MARGIN_SMALL);
+	style_add_margin(netmask_l, MARGIN_SMALL);
+	style_add_margin(prefix_l, MARGIN_SMALL);
+	style_add_margin(gateway_l, MARGIN_SMALL);
 	gtk_widget_set_hexpand(row, TRUE);
 
 	if(!labels) {

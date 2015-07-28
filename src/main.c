@@ -55,7 +55,7 @@ static void create_content(void)
 	GtkWidget *frame, *grid;
 
 	grid = gtk_grid_new();
-	STYLE_ADD_MARGIN(grid, MARGIN_LARGE);
+	style_add_margin(grid, MARGIN_LARGE);
 	gtk_widget_set_hexpand(grid, TRUE);
 	gtk_widget_set_vexpand(grid, TRUE);
 

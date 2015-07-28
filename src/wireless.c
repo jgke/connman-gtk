@@ -162,14 +162,14 @@ void technology_wireless_tether(struct technology *tech)
 
 	gtk_widget_set_halign(ssid_l, GTK_ALIGN_END);
 	gtk_widget_set_halign(passphrase_l, GTK_ALIGN_END);
-	STYLE_ADD_MARGIN(ssid_l, MARGIN_LARGE);
-	STYLE_ADD_MARGIN(ssid_e, MARGIN_LARGE);
+	style_add_margin(ssid_l, MARGIN_LARGE);
+	style_add_margin(ssid_e, MARGIN_LARGE);
 	gtk_widget_set_margin_bottom(ssid_l, 0);
 	gtk_widget_set_margin_bottom(ssid_e, 0);
-	STYLE_ADD_MARGIN(passphrase_l, MARGIN_LARGE);
-	STYLE_ADD_MARGIN(passphrase_e, MARGIN_LARGE);
+	style_add_margin(passphrase_l, MARGIN_LARGE);
+	style_add_margin(passphrase_e, MARGIN_LARGE);
 	gtk_widget_set_margin_bottom(passphrase_e, 0);
-	STYLE_ADD_MARGIN(toggle, MARGIN_LARGE);
+	style_add_margin(toggle, MARGIN_LARGE);
 	gtk_widget_set_margin_top(toggle, MARGIN_SMALL);
 
 	gtk_grid_attach(GTK_GRID(grid), ssid_l, 0, 0, 1, 1);
@@ -207,8 +207,8 @@ void service_wireless_init(struct service *serv, GDBusProxy *proxy,
 	item->security = gtk_image_new_from_icon_name("", GTK_ICON_SIZE_MENU);
 	item->signal = gtk_image_new_from_icon_name("", GTK_ICON_SIZE_MENU);
 
-	STYLE_ADD_MARGIN(item->security, MARGIN_SMALL);
-	STYLE_ADD_MARGIN(item->signal, MARGIN_SMALL);
+	style_add_margin(item->security, MARGIN_SMALL);
+	style_add_margin(item->signal, MARGIN_SMALL);
 
 	gtk_widget_set_halign(item->signal, GTK_ALIGN_END);
 	gtk_widget_set_halign(item->security, GTK_ALIGN_END);
