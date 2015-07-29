@@ -430,10 +430,6 @@ void technology_free(struct technology *item)
 {
 	if(!item)
 		return;
-	if(item->type == CONNECTION_TYPE_VPN) {
-		vpn_free(item);
-		return;
-	}
 	free_list_item(item->list_item);
 	free_technology_settings(item->settings);
 	g_hash_table_unref(item->services);
@@ -493,11 +489,14 @@ static void set_icons(struct technology *tech)
 			settings_icon = "network-cellular-connected";
 			break;
 		case CONNECTION_TYPE_P2P:
-			settings_icon = "preferences-system-network";
 			list_icon = "network-transmit-symbolic";
+			settings_icon = "preferences-system-network";
+			break;
+		case CONNECTION_TYPE_VPN:
+			list_icon = "network-vpn-symbolic";
+			settings_icon = "network-vpn";
 			break;
 		case CONNECTION_TYPE_UNKNOWN:
-		case CONNECTION_TYPE_VPN:
 		case CONNECTION_TYPE_COUNT:
 			break;
 	}

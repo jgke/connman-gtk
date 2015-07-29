@@ -26,9 +26,9 @@
 #include "technology.h"
 #include "vpn.h"
 
-static struct technology tech;
-static GDBusProxy *proxy;
+static struct technology *tech;
 static GDBusConnection *connection;
+static GDBusProxy *proxy;
 int connection_count;
 
 static void add_connection(GDBusConnection *connection, GVariant *parameters)
@@ -40,8 +40,8 @@ static void add_connection(GDBusConnection *connection, GVariant *parameters)
 	properties = g_variant_get_child_value(parameters, 1);
 	path = g_variant_get_string(path_v, NULL);
 
-	gtk_widget_show(tech.list_item->item);
-	gtk_widget_show(tech.settings->grid);
+	gtk_widget_show(tech->list_item->item);
+	gtk_widget_show(tech->settings->grid);
 	connection_count++;
 	modify_service(g_dbus_proxy_get_connection(proxy), path,
 		       properties);
@@ -60,8 +60,8 @@ static void remove_connection(GVariant *parameters)
 	connection_count--;
 
 	if(!connection_count) {
-		gtk_widget_hide(tech.list_item->item);
-		gtk_widget_hide(tech.settings->grid);
+		gtk_widget_hide(tech->list_item->item);
+		gtk_widget_hide(tech->settings->grid);
 	}
 
 	remove_service(path);
@@ -90,44 +90,36 @@ static void add_all_connections(GDBusConnection *Connection,
 	}
 }
 
-static void init_vpn_technology(void)
+static struct technology *create_vpn_technology(void)
 {
 	GVariant *properties;
 	GVariantBuilder *b;
-	tech.services = g_hash_table_new_full(g_str_hash, g_str_equal,
-	                                      g_free, NULL);
+
 	b = g_variant_builder_new(G_VARIANT_TYPE("a{sv}"));
 	g_variant_builder_add(b, "{sv}", "Name",
 	                      g_variant_new_string(_("VPN")));
+	g_variant_builder_add(b, "{sv}", "Type",
+	                      g_variant_new_string("vpn"));
 	g_variant_builder_add(b, "{sv}", "Connected",
 	                      g_variant_new_boolean(FALSE));
 	g_variant_builder_add(b, "{sv}", "Powered",
 	                      g_variant_new_boolean(TRUE));
 	properties = g_variant_builder_end(b);
-	tech.type = CONNECTION_TYPE_VPN;
-	tech.settings = technology_create_settings(&tech, properties, proxy);
-	tech.list_item = technology_create_item(&tech, _("VPN"));
-	gtk_image_set_from_icon_name(GTK_IMAGE(tech.list_item->icon),
-	                             "network-vpn-symbolic",
-	                             GTK_ICON_SIZE_LARGE_TOOLBAR);
-	gtk_image_set_from_icon_name(GTK_IMAGE(tech.settings->icon),
-	                             "network-vpn", GTK_ICON_SIZE_DIALOG);
-	gtk_widget_hide(tech.settings->power_switch);
-	gtk_widget_hide(tech.settings->tethering);
-	gtk_widget_hide(tech.list_item->item);
-	gtk_widget_hide(tech.settings->grid);
+	tech = technology_create(proxy, "/net/connman/technologies/vpn",
+				 properties);
+	gtk_widget_hide(tech->settings->power_switch);
+	gtk_widget_hide(tech->settings->tethering);
+	gtk_widget_hide(tech->list_item->item);
+	gtk_widget_hide(tech->settings->grid);
 	g_variant_unref(properties);
 	g_variant_builder_unref(b);
+
+	return tech;
 }
 
 void vpn_clear_properties(struct service *serv)
 {
 
-}
-
-void vpn_free(struct technology *tech)
-{
-	g_hash_table_unref(tech->services);
 }
 
 struct technology *vpn_register(GDBusConnection *conn, GtkWidget *list,
@@ -159,14 +151,15 @@ struct technology *vpn_register(GDBusConnection *conn, GtkWidget *list,
 	}
 
 	g_signal_connect(proxy, "g-signal", G_CALLBACK(vpn_signal), NULL);
-	init_vpn_technology();
-	return &tech;
+	tech = create_vpn_technology();
+	return tech;
 }
 
-void vpn_get_connections(void)
+void vpn_get_connections(GDBusProxy *manager_proxy)
 {
 	GVariant *data, *child;
 	GError *error = NULL;
+	proxy = manager_proxy;
 	data = g_dbus_proxy_call_sync(proxy, "GetConnections", NULL,
 	                              G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
 	if(error) {
@@ -184,6 +177,7 @@ void vpn_get_connections(void)
 
 void vpn_release(void)
 {
-	g_object_unref(proxy);
 	connection_count = 0;
+	proxy = NULL;
+	tech = NULL;
 }

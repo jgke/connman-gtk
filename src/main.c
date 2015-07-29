@@ -35,6 +35,7 @@
 
 GtkWidget *list, *notebook, *main_window;
 GHashTable *technology_types, *services;
+GDBusProxy *manager_proxy, *vpn_manager_proxy;
 struct technology *technologies[CONNECTION_TYPE_COUNT];
 gboolean shutting_down = FALSE;
 const gchar *default_page;
@@ -233,7 +234,8 @@ void remove_service(const gchar *path)
 	if(type != CONNECTION_TYPE_UNKNOWN && technologies[type])
 		technology_remove_service(technologies[type], path);
 	service_free(g_hash_table_lookup(services, path));
-	g_hash_table_lookup_extended(services, path, &spath, NULL);
+	if(!g_hash_table_lookup_extended(services, path, &spath, NULL))
+		return;
 	g_hash_table_steal(services, path);
 	g_free(spath);
 }
@@ -336,25 +338,45 @@ static void add_all_services(GDBusConnection *connection, GVariant *services_v)
 	}
 }
 
-static GDBusProxy *manager_register(GDBusConnection *connection)
+static GDBusProxy *manager_create(GDBusConnection *connection,
+				  const gchar *interface_data,
+				  const gchar *path, const gchar *connman_path)
 {
 	GDBusNodeInfo *info;
+	GDBusInterfaceInfo *interface;
 	GError *error = NULL;
-	GVariant *data, *child;
 	GDBusProxy *proxy;
 
-	info = g_dbus_node_info_new_for_xml(MANAGER_INTERFACE, &error);
+	info = g_dbus_node_info_new_for_xml(interface_data, &error);
 	if(error)
 		goto out;
 
+	interface = g_dbus_node_info_lookup_interface(info, path);
 	proxy = g_dbus_proxy_new_sync(connection, G_DBUS_PROXY_FLAGS_NONE,
-	                              g_dbus_node_info_lookup_interface(info,
-	                                              "net.connman.Manager"),
-	                              "net.connman", "/", "net.connman.Manager",
-	                              NULL, &error);
+				      interface, connman_path, "/", path, NULL,
+				      &error);
 	g_dbus_node_info_unref(info);
 	if(error)
 		goto out;
+
+	return proxy;
+
+out:
+	g_critical("Failed to connect to connman: %s", error->message);
+	g_error_free(error);
+	return NULL;
+}
+
+static GDBusProxy *manager_register(GDBusConnection *connection)
+{
+	GError *error = NULL;
+	GDBusProxy *proxy;
+	GVariant *data, *child;
+
+	proxy = manager_create(connection, MANAGER_INTERFACE, MANAGER_NAME,
+			       CONNMAN_PATH);
+	if(!proxy)
+		return NULL;
 
 	data = g_dbus_proxy_call_sync(proxy, "GetTechnologies", NULL,
 	                              G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
@@ -392,32 +414,84 @@ out:
 	return NULL;
 }
 
+static GDBusProxy *vpn_manager_register(GDBusConnection *connection)
+{
+	GDBusProxy *proxy;
+
+	proxy = manager_create(connection, VPN_MANAGER_INTERFACE,
+			       VPN_MANAGER_NAME, CONNMAN_VPN_PATH);
+	if(!proxy)
+		return NULL;
+
+	vpn_get_connections(proxy);
+	return proxy;
+}
+
 static void connman_appeared(GDBusConnection *connection, const gchar *name,
                              const gchar *name_owner, gpointer user_data)
 {
-	struct technology *vpn = vpn_register(connection, list, notebook);
-	technologies[CONNECTION_TYPE_VPN] = vpn;
-	gtk_container_add(GTK_CONTAINER(list), vpn->list_item->item);
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
-	                         vpn->settings->grid, NULL);
-	GDBusProxy *proxy = manager_register(connection);
-	vpn_get_connections();
-	register_agents(connection, proxy, vpn->settings->proxy);
+	manager_proxy = manager_register(connection);
+	register_agent(connection, manager_proxy);
+}
+
+static gboolean is_service(gpointer key, gpointer value, gpointer user_data)
+{
+	return key && !strstr(key, "/vpn");
 }
 
 static void connman_disappeared(GDBusConnection *connection, const gchar *name,
                                 gpointer user_data)
 {
 	int i;
+	g_hash_table_foreach_remove(services, is_service, NULL);
 	for(i = CONNECTION_TYPE_ETHERNET; i < CONNECTION_TYPE_COUNT; i++) {
-		if(technologies[i]) {
-			if(technologies[i]->path)
-				remove_technology_by_path(technologies[i]->path);
-			technologies[i] = NULL;
-		}
+		if(i == CONNECTION_TYPE_VPN)
+			continue;
+
+		if(technologies[i] && technologies[i]->path)
+			remove_technology_by_path(technologies[i]->path);
+
+		technologies[i] = NULL;
 	}
-	g_hash_table_remove_all(services);
+
 	agent_release();
+	g_object_unref(manager_proxy);
+	manager_proxy = NULL;
+}
+
+static void connman_vpn_appeared(GDBusConnection *connection, const gchar *name,
+				 const gchar *name_owner, gpointer user_data)
+{
+	if(technologies[CONNECTION_TYPE_VPN])
+		return;
+	struct technology *vpn = vpn_register(connection, list, notebook);
+	technologies[CONNECTION_TYPE_VPN] = vpn;
+	gtk_container_add(GTK_CONTAINER(list), vpn->list_item->item);
+	gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
+	                         vpn->settings->grid, NULL);
+	vpn_manager_proxy = vpn_manager_register(connection);
+	register_vpn_agent(connection, vpn_manager_proxy);
+}
+
+static gboolean is_connection(gpointer key, gpointer value, gpointer user_data)
+{
+	return key && strstr(key, "/vpn");
+}
+
+static void connman_vpn_disappeared(GDBusConnection *connection,
+				    const gchar *name, gpointer user_data)
+{
+	enum connection_type type = CONNECTION_TYPE_VPN;
+
+	g_hash_table_foreach_remove(services, is_connection, NULL);
+
+	if(technologies[type])
+		technology_free(technologies[type]);
+
+	technologies[type] = NULL;
+	vpn_agent_release();
+	g_object_unref(vpn_manager_proxy);
+	vpn_manager_proxy = NULL;
 }
 
 static void dbus_connected(GObject *source, GAsyncResult *res,
@@ -439,6 +513,11 @@ static void dbus_connected(GObject *source, GAsyncResult *res,
 	g_bus_watch_name_on_connection(connection, "net.connman",
 	                               G_BUS_NAME_WATCHER_FLAGS_NONE,
 	                               connman_appeared, connman_disappeared,
+	                               NULL, NULL);
+	g_bus_watch_name_on_connection(connection, "net.connman.vpn",
+	                               G_BUS_NAME_WATCHER_FLAGS_NONE,
+	                               connman_vpn_appeared,
+				       connman_vpn_disappeared,
 	                               NULL, NULL);
 }
 

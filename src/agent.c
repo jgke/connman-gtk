@@ -294,12 +294,15 @@ static struct agent *agent_create(GDBusConnection *connection,
 }
 
 
-void register_agents(GDBusConnection *connection, GDBusProxy *manager,
-		     GDBusProxy *vpn_manager)
+void register_agent(GDBusConnection *connection, GDBusProxy *manager)
 {
 	normal_agent = agent_create(connection, manager, AGENT_INTERFACE,
 				    AGENT_NAME, agent_path(),
 				    "net.connman.Agent.Error.Canceled");
+}
+
+void register_vpn_agent(GDBusConnection *connection, GDBusProxy *vpn_manager)
+{
 	vpn_agent  = agent_create(connection, vpn_manager, VPN_AGENT_INTERFACE,
 				  VPN_AGENT_NAME, vpn_agent_path(),
 				  "net.connman.vpn.Agent.Error.Canceled");
@@ -307,13 +310,18 @@ void register_agents(GDBusConnection *connection, GDBusProxy *manager,
 
 void agent_release(void)
 {
-	if(conn && normal_agent)
+	if(conn && normal_agent) {
 		g_dbus_connection_unregister_object(conn, normal_agent->id);
-	if(conn && vpn_agent)
-		g_dbus_connection_unregister_object(conn, vpn_agent->id);
-	conn = NULL;
-	g_free(normal_agent);
-	g_free(vpn_agent);
+		g_free(normal_agent);
+	}
 	normal_agent = NULL;
+}
+
+void vpn_agent_release(void)
+{
+	if(conn && vpn_agent) {
+		g_dbus_connection_unregister_object(conn, vpn_agent->id);
+		g_free(vpn_agent);
+	}
 	vpn_agent = NULL;
 }
