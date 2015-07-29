@@ -231,7 +231,7 @@ void modify_service(GDBusConnection *connection, const gchar *path,
 			add_service(connection, path, properties);
 			return;
 		}
-		technology_update_service(technologies[type], serv, properties);
+		service_update(serv, properties);
 	}
 }
 

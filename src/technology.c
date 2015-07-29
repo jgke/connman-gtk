@@ -417,12 +417,10 @@ void technology_add_service(struct technology *item, struct service *serv)
 	g_hash_table_insert(item->services, g_strdup(serv->path), serv);
 }
 
-void technology_update_service(struct technology *item, struct service *serv,
-                               GVariant *properties)
+void technology_service_updated(struct technology *item, struct service *serv)
 {
-	service_update(serv, properties);
-	if(item->settings->selected == serv);
-	update_connect_button(item->settings);
+	if(item->settings->selected == serv)
+		update_connect_button(item->settings);
 }
 
 void technology_remove_service(struct technology *item, const gchar *path)

@@ -95,6 +95,8 @@ void service_update_property(struct service *serv, const gchar *key,
 	set_label(serv, serv->ipv6, "IPv6", "Address");
 	set_label(serv, serv->ipv6gateway, "IPv6", "Gateway");
 	set_label(serv, serv->mac, "Ethernet", "Address");
+
+	technology_service_updated(serv->tech, serv);
 }
 
 void service_update(struct service *serv, GVariant *properties)
