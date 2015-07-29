@@ -67,7 +67,8 @@ struct token_entry {
 	GtkWidget *entry;
 };
 
-static GVariantDict *get_tokens(GPtrArray *entries) {
+static GVariantDict *get_tokens(GPtrArray *entries)
+{
 	GtkDialog *dialog;
 	GtkWidget *grid, *window;
 	GVariantDict *dict = NULL;
@@ -80,9 +81,12 @@ static GVariantDict *get_tokens(GPtrArray *entries) {
 					     _("_OK"), GTK_RESPONSE_ACCEPT,
 					     _("_Cancel"), GTK_RESPONSE_CANCEL,
 					     NULL);
+	gtk_dialog_set_default_response(GTK_DIALOG(window),
+					GTK_RESPONSE_ACCEPT);
 	for(i = 0; i < entries->len; i++) {
 		struct token_entry *entry = g_ptr_array_index(entries, i);
 		gtk_grid_attach(GTK_GRID(grid), entry->label, 0, i, 1, 1);
+		gtk_entry_set_activates_default(GTK_ENTRY(entry->entry), TRUE);
 		gtk_grid_attach(GTK_GRID(grid), entry->entry, 1, i, 1, 1);
 	}
 
