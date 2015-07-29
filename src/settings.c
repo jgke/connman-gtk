@@ -26,7 +26,6 @@
 #include "service.h"
 #include "settings.h"
 #include "settings_content.h"
-#include "settings_content_callback.h"
 #include "style.h"
 #include "util.h"
 

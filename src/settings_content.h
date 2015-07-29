@@ -86,4 +86,23 @@ void content_add_entry_to_list(GtkWidget *list, const gchar *value);
 
 void free_content(GtkWidget *widget, gpointer user_data);
 
+enum content_callback_type {
+	CONTENT_CALLBACK_TYPE_UNKNOWN,
+	CONTENT_CALLBACK_TYPE_TEXT,
+	CONTENT_CALLBACK_TYPE_LIST,
+	CONTENT_CALLBACK_TYPE_ENTRY_LIST,
+	CONTENT_CALLBACK_TYPE_ROUTE_LIST,
+};
+
+struct content_callback {
+	enum content_callback_type type;
+	void *data;
+};
+
+struct content_callback *create_callback(GtkWidget *label,
+					 enum content_callback_type type);
+void handle_content_callback(GVariant *value, const gchar *key,
+                             const gchar *subkey, struct content_callback *cb);
+void content_callback_free(void *cb);
+
 #endif /* _CONNMAN_GTK_SETTINGS_CONTENT_H */

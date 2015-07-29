@@ -21,10 +21,10 @@
 #include <glib.h>
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
+#include <string.h>
 
 #include "settings.h"
 #include "settings_content.h"
-#include "settings_content_callback.h"
 #include "style.h"
 #include "util.h"
 
@@ -844,4 +844,77 @@ GtkWidget *settings_add_route_list(struct settings *sett,
 	g_signal_connect(content->data, "destroy",
 	                 G_CALLBACK(free_content), content);
 	return box;
+}
+
+struct content_callback *create_callback(GtkWidget *label,
+					 enum content_callback_type type)
+{
+	struct content_callback *cb = g_malloc(sizeof(*cb));
+	cb->type = type;
+	cb->data = label;
+	return cb;
+}
+
+void handle_content_callback(GVariant *value, const gchar *key,
+                             const gchar *subkey, struct content_callback *cb)
+{
+	switch(cb->type) {
+	case CONTENT_CALLBACK_TYPE_TEXT: {
+		GtkWidget *label = cb->data;
+		gchar *str = variant_to_str(value);
+		if(!strcmp(key, "State"))
+			gtk_label_set_text(GTK_LABEL(label),
+			                   status_localized(str));
+		else
+			gtk_label_set_text(GTK_LABEL(label), str);
+		g_free(str);
+		break;
+	}
+	case CONTENT_CALLBACK_TYPE_LIST: {
+		GtkWidget *list = cb->data;
+		gchar *str = variant_to_str(value);
+		gtk_combo_box_set_active_id(GTK_COMBO_BOX(list), str);
+		g_free(str);
+		return;
+	}
+	case CONTENT_CALLBACK_TYPE_ENTRY_LIST: {
+		GtkWidget *child;
+		gchar **values, **iter;
+		GList *children, *l;
+		void (*destroy)(GtkWidget *list, void *user_data);
+
+		values = variant_to_strv(value);
+		children = gtk_container_get_children(GTK_CONTAINER(cb->data));
+		for(l = children; l != NULL; l = l->next) {
+			child = l->data;
+			destroy = g_object_get_data(G_OBJECT(child), "destroy");
+			destroy(NULL, child);
+		}
+		g_list_free(children);
+
+		if(!*values)
+			content_add_entry_to_list(cb->data, NULL);
+		for(iter = values; *iter; iter++)
+			content_add_entry_to_list(cb->data, *iter);
+		g_strfreev(values);
+		return;
+	}
+	default:
+		g_warning("Unknown callback type");
+	}
+}
+
+void content_callback_free(void *cb_v)
+{
+	struct content_callback *cb = cb_v;
+	switch(cb->type) {
+	case CONTENT_CALLBACK_TYPE_TEXT:
+	case CONTENT_CALLBACK_TYPE_LIST:
+	case CONTENT_CALLBACK_TYPE_ENTRY_LIST:
+	case CONTENT_CALLBACK_TYPE_ROUTE_LIST:
+		break;
+	default:
+		g_warning("Unknown callback type");
+	}
+	g_free(cb);
 }

@@ -24,9 +24,10 @@
 #include <glib.h>
 
 struct settings;
+struct settings_page;
 
 #include "service.h"
-#include "settings_content_callback.h"
+#include "settings_content.h"
 #include "util.h"
 
 struct settings {
