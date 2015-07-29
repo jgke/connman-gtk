@@ -125,7 +125,12 @@ static void add_field(GPtrArray *array, const char *label, gboolean secret)
 	entry->entry = gtk_entry_new();
 	style_add_margin(entry->label, MARGIN_LARGE);
 	style_add_margin(entry->entry, MARGIN_LARGE);
-	gtk_entry_set_visibility(GTK_ENTRY(entry->entry), FALSE);
+	if(strcmp(label, "Name") && strcmp(label, "Identity") &&
+	   strcmp(label, "WPS") && strcmp(label, "Username") &&
+	   strcmp(label, "Host") && strcmp(label, "OpenConnect.CACert") &&
+	   strcmp(label, "OpenConnect.ServerCert") &&
+	   strcmp(label, "OpenConnect.VPNHost"))
+		gtk_entry_set_visibility(GTK_ENTRY(entry->entry), FALSE);
 	g_ptr_array_add(array, entry);
 }
 
