@@ -33,6 +33,7 @@
 
 static void update_name(struct service *serv)
 {
+	enum connection_type type = serv->type;
 	gchar *name, *state, *state_r, *title, *error;
 	name = service_get_property_string(serv, "Name", NULL);
 	state = service_get_property_string(serv, "State", NULL);
@@ -44,6 +45,8 @@ static void update_name(struct service *serv)
 		title = g_strdup_printf("%s - %s: %s", name, state, failure);
 		g_free(error);
 	}
+	else if(type == CONNECTION_TYPE_WIRELESS && !strcmp(state_r, "idle"))
+		title = g_strdup_printf("%s", name);
 	else
 		title = g_strdup_printf("%s - %s", name, state);
 	gtk_label_set_text(GTK_LABEL(serv->title), title);
@@ -61,31 +64,28 @@ static void set_label(struct service *serv, GtkWidget *label,
 	g_free(value);
 }
 
+void service_update_property_value(struct service *serv, const gchar *key,
+				   const gchar *subkey, GVariant *value)
+{
+	hash_table_set_dual_key(serv->properties, key, subkey,
+				g_variant_ref(value));
+	if(serv->sett)
+		settings_update(serv->sett, key, subkey, value);
+}
 
 void service_update_property(struct service *serv, const gchar *key,
                              GVariant *value)
 {
-	if(strcmp(g_variant_get_type_string(value), "a{sv}")) {
-		hash_table_set_dual_key(serv->properties, key, NULL,
-		                        g_variant_ref(value));
-		if(!strcmp(key, "Name") || !strcmp(key, "State") ||
-		   (serv->type == CONNECTION_TYPE_ETHERNET &&
-		    !strcmp(key, "Ethernet"))) {
-			update_name(serv);
-		}
-		if(serv->sett)
-			settings_update(serv->sett, key, NULL, value);
-	} else {
+	if(!strcmp(g_variant_get_type_string(value), "a{sv}")) {
 		gchar *subkey;
 		GVariantIter *iter = g_variant_iter_new(value);
-		while(g_variant_iter_loop(iter, "{sv}", &subkey, &value)) {
-			hash_table_set_dual_key(serv->properties, key, subkey,
-			                        g_variant_ref(value));
-			if(serv->sett)
-				settings_update(serv->sett, key, subkey, value);
-		}
+		while(g_variant_iter_loop(iter, "{sv}", &subkey, &value))
+			service_update_property_value(serv, key, subkey, value);
 		g_variant_iter_free(iter);
-	}
+	} else
+		service_update_property_value(serv, key, NULL, value);
+
+	update_name(serv);
 
 	if(serv->type == CONNECTION_TYPE_WIRELESS)
 		return;
