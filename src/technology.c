@@ -96,10 +96,19 @@ static void update_status(struct technology_settings *item)
 	                             item->properties, "Connected"));
 	gboolean powered = g_variant_get_boolean(g_hash_table_lookup(
 	                           item->properties, "Powered"));
-	if(connected)
+	if(connected) {
 		gtk_label_set_text(GTK_LABEL(item->status),
 		                   _("Connected"));
+		if(item->technology->type == CONNECTION_TYPE_ETHERNET)
+			gtk_image_set_from_icon_name(GTK_IMAGE(item->icon),
+						     "network-wired",
+						     GTK_ICON_SIZE_DIALOG);
+	}
 	else {
+		if(item->technology->type == CONNECTION_TYPE_ETHERNET)
+			gtk_image_set_from_icon_name(GTK_IMAGE(item->icon),
+						     "network-wired-disconnected",
+						     GTK_ICON_SIZE_DIALOG);
 		if(powered) {
 			gtk_label_set_text(GTK_LABEL(item->status),
 			                   _("Not connected"));
