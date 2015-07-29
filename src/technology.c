@@ -542,11 +542,11 @@ struct technology *technology_create(GDBusProxy *proxy, const gchar *path,
 
 	/* XXX: hack to fix window width with variable text length */
 	gtk_button_set_label(GTK_BUTTON(item->settings->connect_button),
-			     _("_Connect"));
-	gtk_button_set_label(GTK_BUTTON(item->settings->connect_button),
 			     _("Re_connect"));
 	gtk_button_set_label(GTK_BUTTON(item->settings->connect_button),
 			     _("Dis_connect"));
+	gtk_button_set_label(GTK_BUTTON(item->settings->connect_button),
+			     _("_Connect"));
 	update_connect_button(item->settings);
 
 	return item;
