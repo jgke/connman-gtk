@@ -33,6 +33,6 @@ enum connection_type {
 };
 
 enum connection_type connection_type_from_string(const gchar *str);
-enum connection_type connection_type_from_path(const gchar *str);
+enum connection_type connection_type_from_properties(GVariant *properties);
 
 #endif /* _CONNMAN_GTK_CONNECTION_H */

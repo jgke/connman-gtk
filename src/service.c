@@ -264,8 +264,6 @@ struct service *service_create(struct technology *tech, GDBusProxy *proxy,
 	properties_d = g_variant_dict_new(properties);
 	type_v = g_variant_dict_lookup_value(properties_d, "Type", NULL);
 	type = connection_type_from_string(g_variant_get_string(type_v, NULL));
-	if(type == CONNECTION_TYPE_UNKNOWN)
-		type = connection_type_from_path(path);
 	g_variant_unref(type_v);
 	g_variant_dict_unref(properties_d);
 

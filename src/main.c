@@ -174,7 +174,7 @@ static void add_service(GDBusConnection *connection, const gchar *path,
 	const char *connman_name;
 	const char *interface_name;
 
-	type = connection_type_from_path(path);
+	type = connection_type_from_properties(properties);
 	if(type == CONNECTION_TYPE_VPN) {
 		interface_xml = VPN_CONNECTION_INTERFACE;
 		connman_name = CONNMAN_VPN_PATH;
@@ -216,26 +216,44 @@ out:
 void modify_service(GDBusConnection *connection, const gchar *path,
                            GVariant *properties)
 {
-	enum connection_type type = connection_type_from_path(path);
+	enum connection_type type;
+	struct service *serv;
+
+	serv = g_hash_table_lookup(services, path);
+
+	if(serv)
+		type = serv->type;
+	else
+		type = connection_type_from_properties(properties);
+
 	if(type != CONNECTION_TYPE_UNKNOWN) {
-		if(!g_hash_table_contains(services, path)) {
+		if(!serv) {
 			add_service(connection, path, properties);
 			return;
 		}
-		struct service *serv = g_hash_table_lookup(services, path);
 		technology_update_service(technologies[type], serv, properties);
 	}
 }
 
 void remove_service(const gchar *path)
 {
-	enum connection_type type = connection_type_from_path(path);
+	enum connection_type type;
+	struct service *serv;
 	void *spath;
+
+	serv = g_hash_table_lookup(services, path);
+	if(!serv)
+		return;
+
+	type = serv->type;
 	if(type != CONNECTION_TYPE_UNKNOWN && technologies[type])
 		technology_remove_service(technologies[type], path);
+
 	service_free(g_hash_table_lookup(services, path));
+
 	if(!g_hash_table_lookup_extended(services, path, &spath, NULL))
 		return;
+
 	g_hash_table_steal(services, path);
 	g_free(spath);
 }

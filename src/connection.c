@@ -37,16 +37,25 @@ enum connection_type connection_type_from_string(const gchar *str)
 		return CONNECTION_TYPE_P2P;
 	if(!strcmp(str, "vpn"))
 		return CONNECTION_TYPE_VPN;
+	if(!strcmp(str, "openconnect") || !strcmp(str, "openvpn") ||
+	   !strcmp(str, "vpnc") || !strcmp(str, "l2tp") || !strcmp(str, "pptp"))
+		return CONNECTION_TYPE_VPN;
 	return CONNECTION_TYPE_UNKNOWN;
 }
 
-enum connection_type connection_type_from_path(const gchar *str)
+enum connection_type connection_type_from_properties(GVariant *properties)
 {
-	gchar *path = g_strdup(str);
-	/* find and replace first _ with 0 */
-	*strchr(path, '_') = '\0';
-	str = strrchr(path, '/') + 1;
-	enum connection_type type = connection_type_from_string(str);
-	g_free(path);
+	enum connection_type type = CONNECTION_TYPE_UNKNOWN;
+	GVariantDict *dict = g_variant_dict_new(properties);
+	GVariant *type_v = g_variant_dict_lookup_value(dict, "Type", NULL);
+	if(type_v) {
+		const gchar *type_s;
+
+		type_s = g_variant_get_string(type_v, NULL);
+		type = connection_type_from_string(type_s);
+		g_variant_unref(type_v);
+	}
+	g_variant_dict_unref(dict);
+
 	return type;
 }
