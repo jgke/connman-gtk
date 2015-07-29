@@ -137,6 +137,8 @@ void technology_wireless_tether(struct technology *tech)
 	                                     _("_OK"), GTK_RESPONSE_ACCEPT,
 	                                     _("_Cancel"), GTK_RESPONSE_CANCEL,
 	                                     NULL);
+	gtk_dialog_set_default_response(GTK_DIALOG(window),
+					GTK_RESPONSE_ACCEPT);
 
 	old_ssid = g_hash_table_lookup(tech->settings->properties,
 				       "TetheringIdentifier");
@@ -150,6 +152,8 @@ void technology_wireless_tether(struct technology *tech)
 		gtk_entry_set_text(GTK_ENTRY(passphrase_e),
 				   g_variant_get_string(old_pass, NULL));
 
+	gtk_entry_set_activates_default(GTK_ENTRY(ssid_e), TRUE);
+	gtk_entry_set_activates_default(GTK_ENTRY(passphrase_e), TRUE);
 	gtk_entry_set_visibility(GTK_ENTRY(passphrase_e), FALSE);
 	gtk_entry_set_input_purpose(GTK_ENTRY(passphrase_e),
 				    GTK_INPUT_PURPOSE_PASSWORD);
