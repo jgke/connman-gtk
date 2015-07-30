@@ -81,6 +81,9 @@ GtkWidget *settings_add_route_list(struct settings *sett,
 				   struct settings_page *page,
 				   const gchar *key, gboolean labels,
 				   settings_writable writable);
+GtkWidget *settings_add_prefix_entry(struct settings *sett,
+				     struct settings_page *page,
+				     settings_writable writable);
 
 void content_add_entry_to_list(GtkWidget *list, const gchar *value);
 
@@ -92,6 +95,7 @@ enum content_callback_type {
 	CONTENT_CALLBACK_TYPE_LIST,
 	CONTENT_CALLBACK_TYPE_ENTRY_LIST,
 	CONTENT_CALLBACK_TYPE_ROUTE_LIST,
+	CONTENT_CALLBACK_TYPE_PREFIX_ENTRY,
 };
 
 struct content_callback {

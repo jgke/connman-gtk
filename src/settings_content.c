@@ -100,6 +100,14 @@ static GVariant *content_value_entry_list(struct settings_content *content)
 	return var;
 }
 
+static GVariant *content_value_prefix_entry(struct settings_content *content)
+{
+	GtkWidget *entry = content->data;
+	gint value = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(entry));
+	GVariant *var = g_variant_new("y", value);
+	return var;
+}
+
 void free_content(GtkWidget *widget, gpointer user_data)
 {
 	struct settings_content *content = user_data;
@@ -848,6 +856,47 @@ GtkWidget *settings_add_route_list(struct settings *sett,
 	return box;
 }
 
+GtkWidget *settings_add_prefix_entry(struct settings *sett,
+				     struct settings_page *page,
+				     settings_writable writable)
+{
+	GtkWidget *label, *entry;
+	guint value;
+	struct settings_content *content;
+	struct content_callback *cb;
+
+	content = create_base_content(sett, writable, "IPv6.Configuration",
+				      "PrefixLength", "IPv6");
+	content->free = g_free;
+	content->value = content_value_prefix_entry;
+
+	label = create_label(_("Prefix length"));
+	entry = gtk_spin_button_new_with_range(0, 128, 1);
+	g_object_set_data(G_OBJECT(entry), "validator", always_valid);
+
+	value = service_get_property_int(page->sett->serv, "IPv6.Configuration",
+					 "PrefixLength");
+	if(!value)
+		value = service_get_property_int(page->sett->serv,
+						 "IPv6", "PrefixLength");
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry), value);
+
+	add_left_aligned(GTK_GRID(page->grid), label, entry, page->index++);
+	gtk_widget_show_all(page->grid);
+
+	hash_table_set_dual_key(sett->contents, "IPv6.Configuration",
+				"PrefixLength", content);
+
+	cb = create_callback(entry, CONTENT_CALLBACK_TYPE_PREFIX_ENTRY);
+	settings_set_callback(page->sett, "IPv6.Configuration", "PrefixLength",
+			      cb);
+
+	content->data = entry;
+	g_signal_connect(content->data, "destroy",
+	                 G_CALLBACK(free_content), content);
+	return entry;
+}
+
 struct content_callback *create_callback(GtkWidget *label,
 					 enum content_callback_type type)
 {
@@ -863,7 +912,15 @@ void handle_content_callback(GVariant *value, const gchar *key,
 	switch(cb->type) {
 	case CONTENT_CALLBACK_TYPE_TEXT: {
 		GtkWidget *label = cb->data;
-		gchar *str = variant_to_str(value);
+		gchar *str;
+		if(key && subkey && !strcmp(subkey, "PrefixLength") &&
+		   !(strcmp(key, "IPv6") &&
+		     strcmp(key, "IPv6.Configuration"))) {
+			guchar len = g_variant_get_byte(value);
+			str = g_strdup_printf("%d", len);
+		}
+		else
+			str = variant_to_str(value);
 		if(!strcmp(key, "State"))
 			gtk_label_set_text(GTK_LABEL(label),
 			                   status_localized(str));
@@ -901,6 +958,12 @@ void handle_content_callback(GVariant *value, const gchar *key,
 		g_strfreev(values);
 		return;
 	}
+	case CONTENT_CALLBACK_TYPE_PREFIX_ENTRY: {
+		GtkWidget *entry = cb->data;
+		gint val = variant_to_int(value);
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry), val);
+		break;
+	}
 	default:
 		g_warning("Unknown callback type");
 	}
@@ -914,6 +977,7 @@ void content_callback_free(void *cb_v)
 	case CONTENT_CALLBACK_TYPE_LIST:
 	case CONTENT_CALLBACK_TYPE_ENTRY_LIST:
 	case CONTENT_CALLBACK_TYPE_ROUTE_LIST:
+	case CONTENT_CALLBACK_TYPE_PREFIX_ENTRY:
 		break;
 	default:
 		g_warning("Unknown callback type");
