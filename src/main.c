@@ -85,7 +85,7 @@ static void create_content(void)
 static void tech_item_mnemonic(GtkWidget *widget, gboolean arg1,
 			       gpointer user_data)
 {
-	list_item_selected(NULL, widget, user_data);
+	list_item_selected(NULL, GTK_LIST_BOX_ROW(widget), user_data);
 }
 
 static void add_technology(GDBusConnection *connection, GVariant *technology)
