@@ -28,7 +28,6 @@ PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.0], [], [AC_MSG_ERROR(glib >= 2.0 is re
 AC_CONFIG_FILES([
   Makefile
   po/Makefile.in
-  src/Makefile
   connman-gtk.desktop
 ])
 AC_OUTPUT
