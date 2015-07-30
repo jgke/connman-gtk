@@ -35,8 +35,7 @@ static void free_page(GtkWidget *widget, gpointer user_data)
 	g_free(page);
 }
 
-static struct settings_page *create_page(GtkWidget *notebook, const gchar *name,
-					 gboolean scrolled)
+static struct settings_page *create_page(GtkWidget *notebook, gboolean scrolled)
 {
 	struct settings_page *page = g_malloc(sizeof(*page));
 
@@ -61,18 +60,25 @@ static struct settings_page *create_page(GtkWidget *notebook, const gchar *name,
 	return page;
 }
 
+void page_mnemonic(GtkWidget *widget, gboolean arg1, gpointer user_data)
+{
+	list_item_selected(NULL, GTK_LIST_BOX_ROW(widget), user_data);
+}
+
 static struct settings_page *add_page_to_settings(struct settings *sett,
                 const gchar *name, gboolean scrolled)
 {
 	struct settings_page *page;
 	GtkWidget *item, *label;
 
-	page = create_page(sett->notebook, name, scrolled);
+	page = create_page(sett->notebook, scrolled);
 	page->sett = sett;
 
 	item = gtk_list_box_row_new();
-	label = gtk_label_new(name);
+	label = gtk_label_new_with_mnemonic(name);
 
+	g_signal_connect(item, "mnemonic-activate", G_CALLBACK(page_mnemonic),
+			 sett->notebook);
 	g_object_set_data(G_OBJECT(item), "content", page->item);
 
 	style_add_margin(label, MARGIN_SMALL);
@@ -97,7 +103,7 @@ static struct settings_page *add_page_to_combo_box(struct settings *sett,
 {
 	GtkWidget *notebook = g_object_get_data(G_OBJECT(box), "notebook");
 	GHashTable *items = g_object_get_data(G_OBJECT(box), "items");
-	struct settings_page *page = create_page(notebook, name, FALSE);
+	struct settings_page *page = create_page(notebook, FALSE);
 	page->sett = sett;
 	g_hash_table_insert(items, g_strdup(name), page->item);
 	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(box), id, name);
@@ -140,7 +146,7 @@ out:
 
 static void add_info_page(struct settings *sett)
  {
-	struct settings_page *page = add_page_to_settings(sett, _("Info"),
+	struct settings_page *page = add_page_to_settings(sett, _("_Info"),
 							  FALSE);
 
 	settings_add_switch(sett, page, always_write, _("Autoconnect"),
@@ -178,7 +184,7 @@ static void add_immutable_ipv_page(struct settings *sett)
 {
 	struct settings_page *page;
 
-	page = add_page_to_settings(sett, _("IP details"), FALSE);
+	page = add_page_to_settings(sett, _("IP _details"), FALSE);
 	settings_add_text(page, _("IPv4 method"), "IPv4", "Method");
 	settings_add_text(page, _("Address"), "IPv4", "Address");
 	settings_add_text(page, _("Gateway"), "IPv4", "Gateway");
@@ -206,12 +212,12 @@ static void add_ipv_page(struct settings *sett, int ipv)
 	GtkWidget *ipv6_privacy;
 
 	if(ipv == 4) {
-		local = _("IPv4");
+		local = _("IPv_4");
 		validator = valid_ipv4_entry;
 		conf = "IPv4.Configuration";
 		ipvs = "IPv4";
 	} else {
-		local = _("IPv6");
+		local = _("IPv_6");
 		validator = valid_ipv6_entry;
 		conf = "IPv6.Configuration";
 		ipvs = "IPv6";
@@ -287,7 +293,7 @@ static void add_immutable_server_page(struct settings *sett)
 	struct settings_page *page;
 	gchar *cur = service_get_property_string_raw(sett->serv,
 						     "Proxy", "Method");
-	page = add_page_to_settings(sett, _("Servers"), TRUE);
+	page = add_page_to_settings(sett, _("_Servers"), TRUE);
 
 	settings_add_text(page, _("Nameservers"), "Nameservers", NULL);
 	settings_add_text(page, _("Timeservers"), "Timeservers", NULL);
@@ -312,12 +318,12 @@ static void add_server_page(struct settings *sett)
 {
 	struct settings_page *page;
 
-	page = add_page_to_settings(sett, _("Nameservers"), TRUE);
+	page = add_page_to_settings(sett, _("_Nameservers"), TRUE);
 	settings_add_entry_list(sett, page, always_write, _("Nameservers"),
 				"Nameservers.Configuration", NULL,
 				"Nameservers", valid_address_entry);
 
-	page = add_page_to_settings(sett, _("Timeservers"), TRUE);
+	page = add_page_to_settings(sett, _("_Timeservers"), TRUE);
 	settings_add_text(page, _("Timeservers"), "Timeservers", NULL);
 	settings_add_static_text(page, "", "");;
 	settings_add_entry_list(sett, page, always_write,
@@ -325,7 +331,7 @@ static void add_server_page(struct settings *sett)
 				"Timeservers.Configuration", NULL,
 				NULL, always_valid);
 
-	page = add_page_to_settings(sett, _("Domains"), TRUE);
+	page = add_page_to_settings(sett, _("_Domains"), TRUE);
 	settings_add_entry_list(sett, page, always_write, _("Domains"),
 				"Domains.Configuration", NULL,
 				"Domains", always_valid);
@@ -338,7 +344,7 @@ static void add_proxy_page(struct settings *sett)
 	const gchar *conf = "Proxy.Configuration";
 	gchar *cur;
 
-	page = add_page_to_settings(sett, _("Proxy"), TRUE);
+	page = add_page_to_settings(sett, _("_Proxy"), TRUE);
 	cur = service_get_property_string_raw(sett->serv, "Proxy", "Method");
 	box = settings_add_combo_box(sett, page, always_write, _("Method"),
 	                             conf, "Method", "Proxy");
@@ -364,7 +370,7 @@ static void add_proxy_page(struct settings *sett)
 
 static void add_vpn_info_page(struct settings *sett)
 {
-	struct settings_page *page = add_page_to_settings(sett, _("Info"),
+	struct settings_page *page = add_page_to_settings(sett, _("_Info"),
 							  FALSE);
 
 	settings_add_text(page, _("Name"), "Name", NULL);
@@ -379,10 +385,10 @@ static void add_route_pages(struct settings *sett)
 {
 	struct settings_page *page;
 
-	page = add_page_to_settings(sett, _("Server routes"), TRUE);
+	page = add_page_to_settings(sett, _("_Server routes"), TRUE);
 	settings_add_route_list(sett, page, "ServerRoutes", TRUE, always_write);
 
-	page = add_page_to_settings(sett, _("User routes"), TRUE);
+	page = add_page_to_settings(sett, _("_User routes"), TRUE);
 	settings_add_route_list(sett, page, "UserRoutes", FALSE, always_write);
 }
 
@@ -401,7 +407,7 @@ static void add_clear_page(struct settings *sett)
 	struct settings_page *page;
 	GtkWidget *clear, *clear_l, *remove, *remove_l;
 
-	page = add_page_to_settings(sett, _("Clear settings"), TRUE);
+	page = add_page_to_settings(sett, _("_Clear settings"), TRUE);
 
 	clear = gtk_button_new_with_mnemonic(_("_Reset"));
 	remove = gtk_button_new_with_mnemonic(_("_Forget"));
