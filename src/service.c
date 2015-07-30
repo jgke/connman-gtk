@@ -179,6 +179,7 @@ static GtkWidget *add_label(GtkWidget *grid, gint y, const gchar *text)
 	gtk_widget_set_margin_start(label, MARGIN_LARGE);
 	gtk_style_context_add_class(gtk_widget_get_style_context(label),
 	                            "dim-label");
+	gtk_label_set_selectable(GTK_LABEL(value), TRUE);
 
 	gtk_widget_set_hexpand(label, TRUE);
 	gtk_widget_set_halign(label, GTK_ALIGN_START);
@@ -250,7 +251,10 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 	serv->ipv4gateway = add_label(serv->contents, 1, _("IPv4 gateway"));
 	serv->ipv6 = add_label(serv->contents, 2, _("IPv6 address"));
 	serv->ipv6gateway = add_label(serv->contents, 3, _("IPv6 gateway"));
-	serv->mac = add_label(serv->contents, 4, _("MAC address"));
+	if(serv->type != CONNECTION_TYPE_VPN)
+		serv->mac = add_label(serv->contents, 4, _("MAC address"));
+	else
+		serv->mac = gtk_label_new(NULL);
 
 	gtk_widget_show_all(serv->item);
 }
