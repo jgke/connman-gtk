@@ -29,6 +29,10 @@
 #include "main.h"
 #include "style.h"
 
+#ifdef USE_OPENCONNECT
+#include "openconnect.h"
+#endif
+
 GDBusConnection *conn = NULL;
 
 struct agent {
@@ -167,15 +171,68 @@ static GPtrArray *generate_entries(GVariant *args)
 	return array;
 }
 
+gchar *get_token(const gchar *label, gboolean hidden)
+{
+	GVariant *value_v;
+	gchar *value;
+	GPtrArray *array;
+	GVariantDict *dict;
+
+	array = g_ptr_array_new_full(1, g_free);
+	add_field(array, label, hidden);
+	dict = get_tokens(array);
+	g_ptr_array_free(array, TRUE);
+	if(!dict)
+		return NULL;
+	value_v = g_variant_dict_lookup_value(dict, label, NULL);
+	value = g_variant_dup_string(value_v, NULL);
+	g_variant_unref(value_v);
+	g_variant_dict_unref(dict);
+	return value;
+}
+
+#ifdef USE_OPENCONNECT
+static gboolean is_openconnect(GVariant *args)
+{
+	GVariantIter *iter;
+	gchar *path;
+	GVariant *value, *service, *parameters;
+	gboolean openconnect = FALSE;
+
+	service = g_variant_get_child_value(args, 0);
+	parameters = g_variant_get_child_value(args, 1);
+
+	iter = g_variant_iter_new(parameters);
+
+	while(g_variant_iter_loop(iter, "{sv}", &path, &value))
+		openconnect = openconnect || strstr(path, "OpenConnect");
+	g_variant_iter_free(iter);
+
+	g_variant_unref(service);
+	g_variant_unref(parameters);
+
+	return openconnect;
+}
+#endif
+
 void request_input(struct agent *agent, GDBusMethodInvocation *invocation,
 		   GVariant *parameters)
 {
 	GVariantDict *dict;
 	GVariant *ret, *ret_v;
-	GPtrArray *entries;
+	GPtrArray *entries = NULL;
 
+#ifdef USE_OPENCONNECT
+	if(!is_openconnect(parameters)) {
+		entries = generate_entries(parameters);
+		dict = get_tokens(entries);
+	}
+	else
+		dict = openconnect_handle(invocation, parameters, get_token);
+#else
 	entries = generate_entries(parameters);
 	dict = get_tokens(entries);
+#endif
 
 	if(!dict) {
 		g_dbus_method_invocation_return_dbus_error(invocation,
@@ -188,10 +245,10 @@ void request_input(struct agent *agent, GDBusMethodInvocation *invocation,
 	g_variant_ref_sink(ret_v);
 	g_dbus_method_invocation_return_value(invocation, ret_v);
 	g_variant_unref(ret_v);
-	g_variant_dict_unref(dict);
-
 out:
-	g_ptr_array_free(entries, TRUE);
+	g_variant_dict_unref(dict);
+	if(entries)
+		g_ptr_array_free(entries, TRUE);
 }
 
 void request_peer_authorization(struct agent *agent, GDBusMethodInvocation *invocation,

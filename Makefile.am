@@ -23,7 +23,7 @@ EXTRA_DIST = src/agent.h src/interfaces.h src/main.h src/technology.h \
 if USE_OPENCONNECT
 connman_gtk_SOURCES += lib/openconnect.c
 connman_gtk_LDADD += @openconnect_LIBS@
-connman_gtk_CPPFLAGS += @openconnect_CFLAGS@
+connman_gtk_CPPFLAGS += @openconnect_CFLAGS@ -DUSE_OPENCONNECT=1 -I$(builddir)/lib
 EXTRA_DIST += lib/openconnect.h
 endif
 

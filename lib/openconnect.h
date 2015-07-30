@@ -21,4 +21,12 @@
 #ifndef _CONNMAN_GTK_OPENCONNECT_H
 #define _CONNMAN_GTK_OPENCONNECT_H
 
+#include <glib.h>
+#include <gio/gio.h>
+
+GVariantDict *openconnect_handle(GDBusMethodInvocation *invocation,
+				 GVariant *args,
+				 gchar *(*ask_token)(const gchar *label,
+						     gboolean hidden));
+
 #endif /* _CONNMAN_GTK_OPENCONNECT_H */
