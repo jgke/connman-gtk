@@ -99,6 +99,47 @@ void service_update_property(struct service *serv, const gchar *key,
 	technology_service_updated(serv->tech, serv);
 }
 
+void show_field(GtkWidget *entry)
+{
+	GtkWidget *label = g_object_get_data(G_OBJECT(entry), "label");
+	if(!label)
+		return;
+
+	gtk_widget_show(entry);
+	gtk_widget_show(label);
+}
+
+void hide_field(GtkWidget *entry)
+{
+	GtkWidget *label = g_object_get_data(G_OBJECT(entry), "label");
+	if(!label)
+		return;
+
+	gtk_widget_hide(entry);
+	gtk_widget_hide(label);
+}
+
+void update_fields(struct service *serv)
+{
+	gchar *state = service_get_property_string_raw(serv, "State", NULL);
+	if(!strcmp(state, "idle") || !strcmp(state, "failure") ||
+	   !strcmp(state, "disconnect")) {
+		hide_field(serv->ipv4);
+		hide_field(serv->ipv4gateway);
+		hide_field(serv->ipv6);
+		hide_field(serv->ipv6gateway);
+		hide_field(serv->mac);
+	}
+	else {
+		show_field(serv->ipv4);
+		show_field(serv->ipv4gateway);
+		show_field(serv->ipv6);
+		show_field(serv->ipv6gateway);
+		show_field(serv->mac);
+	}
+	g_free(state);
+}
+
 void service_update(struct service *serv, GVariant *properties)
 {
 	GVariantIter *iter;
@@ -110,25 +151,30 @@ void service_update(struct service *serv, GVariant *properties)
 		service_update_property(serv, key, value);
 	g_variant_iter_free(iter);
 	update_name(serv);
-	// TODO: horribly inefficient
-	if(serv->type == CONNECTION_TYPE_WIRELESS) {
-		service_wireless_update(serv);
-		gchar *name;
-		GtkStyleContext *context;
 
-		name = service_get_property_string_raw(serv, "Name", NULL);
-		if(strlen(name)) {
-			g_free(name);
-			return;
-		}
-
-		style_add_context(serv->title);
-		context = gtk_widget_get_style_context(serv->title);
-		gtk_style_context_add_class(context, "cm-wireless-hidden");
-		gtk_widget_hide(serv->settings_button);
-
-		g_free(name);
+	if(serv->type != CONNECTION_TYPE_WIRELESS) {
+		update_fields(serv);
+		return;
 	}
+
+	// TODO: horribly inefficient
+	service_wireless_update(serv);
+	gchar *name;
+	GtkStyleContext *context;
+
+	name = service_get_property_string_raw(serv, "Name", NULL);
+	if(strlen(name)) {
+		g_free(name);
+		return;
+	}
+
+	style_add_context(serv->title);
+	context = gtk_widget_get_style_context(serv->title);
+	gtk_style_context_add_class(context, "cm-wireless-hidden");
+	gtk_widget_hide(serv->settings_button);
+
+	g_free(name);
+
 }
 
 static void service_proxy_signal(GDBusProxy *proxy, gchar *sender,
@@ -176,6 +222,7 @@ static GtkWidget *add_label(GtkWidget *grid, gint y, const gchar *text)
 	value = gtk_label_new(NULL);
 
 	style_add_margin(label, MARGIN_SMALL);
+	g_object_set_data(G_OBJECT(value), "label", label);
 	gtk_widget_set_margin_start(label, MARGIN_LARGE);
 	gtk_style_context_add_class(gtk_widget_get_style_context(label),
 	                            "dim-label");
