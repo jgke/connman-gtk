@@ -82,6 +82,12 @@ static void create_content(void)
 	gtk_container_add(GTK_CONTAINER(main_window), grid);
 }
 
+static void tech_item_mnemonic(GtkWidget *widget, gboolean arg1,
+			       gpointer user_data)
+{
+	list_item_selected(NULL, widget, user_data);
+}
+
 static void add_technology(GDBusConnection *connection, GVariant *technology)
 {
 	GVariant *path;
@@ -120,6 +126,8 @@ static void add_technology(GDBusConnection *connection, GVariant *technology)
 	}
 
 	item = technology_create(proxy, object_path, properties);
+	g_signal_connect(item->list_item->item, "mnemonic-activate",
+			 G_CALLBACK(tech_item_mnemonic), notebook);
 
 	g_hash_table_insert(technology_types, g_strdup(object_path),
 	                    &item->type);

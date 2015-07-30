@@ -33,19 +33,20 @@
 #include "vpn.h"
 #include "wireless.h"
 
-struct technology_list_item *technology_create_item(struct technology *tech,
-                const gchar *name)
+struct technology_list_item *technology_create_item(struct technology *tech)
 {
 	GtkWidget *grid;
 	struct technology_list_item *item;
+	const gchar *name;
 
 	item = g_malloc(sizeof(*item));
 	item->technology = tech;
+	name = mnemonic_tech_name(tech->type);
 
 	grid = gtk_grid_new();
 	item->item = gtk_list_box_row_new();
 	item->icon = gtk_image_new();
-	item->label = gtk_label_new(name);
+	item->label = gtk_label_new_with_mnemonic(name);
 
 	g_object_ref(item->item);
 	g_object_ref(item->icon);
@@ -449,15 +450,11 @@ void technology_free(struct technology *item)
 void technology_init(struct technology *tech, GVariant *properties_v,
                      GDBusProxy *proxy)
 {
-	GVariant *name_v;
-	const gchar *name;
 	GVariant *type_v;
 	const gchar *type;
 	GVariantDict *properties;
 
 	properties = g_variant_dict_new(properties_v);
-	name_v = g_variant_dict_lookup_value(properties, "Name", NULL);
-	name = g_variant_get_string(name_v, NULL);
 	type_v = g_variant_dict_lookup_value(properties, "Type", NULL);
 	type = g_variant_get_string(type_v, NULL);
 	g_variant_dict_unref(properties);
@@ -467,9 +464,8 @@ void technology_init(struct technology *tech, GVariant *properties_v,
 	                                       g_free, NULL);
 	tech->settings = technology_create_settings(tech, properties_v,
 	                 proxy);
-	tech->list_item = technology_create_item(tech, name);
+	tech->list_item = technology_create_item(tech);
 
-	g_variant_unref(name_v);
 	g_variant_unref(type_v);
 }
 

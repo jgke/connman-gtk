@@ -19,6 +19,7 @@
  */
 
 #include <glib.h>
+#include <glib/gi18n.h>
 #include <string.h>
 
 #include "connection.h"
@@ -58,4 +59,27 @@ enum connection_type connection_type_from_properties(GVariant *properties)
 	g_variant_dict_unref(dict);
 
 	return type;
+}
+
+const gchar *mnemonic_tech_name(enum connection_type type)
+{
+	switch(type) {
+	case CONNECTION_TYPE_ETHERNET:
+		return _("W_ired");
+	case CONNECTION_TYPE_WIRELESS:
+		return _("_Wireless");
+	case CONNECTION_TYPE_BLUETOOTH:
+		return _("_Bluetooth");
+	case CONNECTION_TYPE_CELLULAR:
+		return _("_Cellular");
+	case CONNECTION_TYPE_P2P:
+		return _("_P2P");
+	case CONNECTION_TYPE_VPN:
+		return _("_VPN");
+	case CONNECTION_TYPE_UNKNOWN:
+		return _("_Unknown");
+	case CONNECTION_TYPE_COUNT:
+		return "";
+	}
+	return "";
 }

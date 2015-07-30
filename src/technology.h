@@ -72,11 +72,6 @@ struct technology {
 	void *data;
 };
 
-struct technology_list_item *technology_create_item(struct technology *tech,
-                const gchar *name);
-struct technology_settings *technology_create_settings(struct technology *tech,
-                GVariant *properties,
-                GDBusProxy *proxy);
 struct technology *technology_create(GDBusProxy *proxy, const gchar *path,
                                      GVariant *properties);
 void technology_init(struct technology *tech, GVariant *properties_v,
