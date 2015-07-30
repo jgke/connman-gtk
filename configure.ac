@@ -23,7 +23,17 @@ AX_CFLAGS_WARN_ALL
 
 PKG_PROG_PKG_CONFIG([0.22])
 PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.14], [], [AC_MSG_ERROR(gtk+ >= 3.14 is required)])
-PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.0], [], [AC_MSG_ERROR(glib >= 2.0 is required)])
+PKG_CHECK_MODULES([GLib], [glib-2.0 >= 2.0], [], [AC_MSG_ERROR(glib >= 2.0 is required)])
+AC_ARG_WITH([openconnect],
+            [AS_HELP_STRING([--with-openconnect],
+                            [support easier authentication to AnyConnect VPNs @<:@default=check@:>@])],
+            [],
+            [with_openconnect=check])
+AS_CASE(["$with_openconnect"],
+        [yes], [PKG_CHECK_MODULES([openconnect], [openconnect], [HAVE_OPENCONNECT=1])],
+        [no], [HAVE_OPENCONNECT=0],
+        [PKG_CHECK_MODULES([openconnect], [openconnect], [HAVE_OPENCONNECT=1], [HAVE_OPENCONNECT=0])])
+AM_CONDITIONAL([USE_OPENCONNECT], [test "$with_openconnect" != no -a "$HAVE_OPENCONNECT" -eq 1])
 
 AC_CONFIG_FILES([
   Makefile

@@ -10,8 +10,8 @@ connman_gtk_SOURCES = src/main.c src/agent.c src/style.c src/technology.c \
 		      src/service.c src/util.c src/settings.c \
 		      src/settings_content.c src/connection.c src/vpn.c \
 		      src/wireless.c
-connman_gtk_LDADD = @GTK_LIBS@ @GLIB_LIBS@
-connman_gtk_CPPFLAGS = @GTK_CFLAGS@ @GLIB_CFLAGS@ \
+connman_gtk_LDADD = @GTK_LIBS@ @GLib_LIBS@
+connman_gtk_CPPFLAGS = @GTK_CFLAGS@ @GLib_CFLAGS@ \
 		       -DCONNMAN_GTK_LOCALEDIR=\"${CONNMAN_GTK_LOCALEDIR}\" \
 		       -DCONNMAN_GTK_UIDIR=\""$(uidir)"\"
 
@@ -19,6 +19,13 @@ EXTRA_DIST = src/agent.h src/interfaces.h src/main.h src/technology.h \
 	     src/style.h src/service.h src/util.h src/settings.h \
 	     src/settings_content.h src/connection.h src/vpn.h src/wireless.h \
 	     src/stylesheet.css README.md
+
+if USE_OPENCONNECT
+connman_gtk_SOURCES += lib/openconnect.c
+connman_gtk_LDADD += @openconnect_LIBS@
+connman_gtk_CPPFLAGS += @openconnect_CFLAGS@
+EXTRA_DIST += lib/openconnect.h
+endif
 
 SUBDIRS = po
 
