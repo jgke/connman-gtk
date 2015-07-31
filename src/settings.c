@@ -373,6 +373,7 @@ static void add_vpn_info_page(struct settings *sett)
 							  FALSE);
 
 	settings_add_text(page, _("Name"), "Name", NULL);
+	settings_add_text(page, _("Type"), "Type", NULL);
 	settings_add_text(page, _("State"), "State", NULL);
 	settings_add_text(page, _("Host"), "Host", NULL);
 	settings_add_text(page, _("IPv4 address"), "IPv4", "Address");
@@ -389,6 +390,21 @@ static void add_route_pages(struct settings *sett)
 
 	page = add_page_to_settings(sett, _("_User routes"), TRUE);
 	settings_add_route_list(sett, page, "UserRoutes", FALSE, always_write);
+}
+
+static void add_immutable_openconnect_page(struct settings *sett)
+{
+	struct settings_page *page;
+
+	page = add_page_to_settings(sett, "Openconnect", TRUE);
+	settings_add_text(page, _("Server fingerprint"),
+			  "OpenConnect.ServerCert", NULL);
+	settings_add_text(page, _("Certificate Authority file"),
+			  "OpenConnect.CACert", NULL);
+	settings_add_text(page, _("Client certificate file"),
+			  "OpenConnect.ClientCert", NULL);
+	settings_add_text(page, _("VPN host"),
+			  "OpenConnect.VPNHost", NULL);
 }
 
 static void clear_cb(GtkWidget *button, gpointer user_data)
@@ -439,12 +455,21 @@ static void add_pages(struct settings *sett)
 	gboolean immutable = service_get_property_boolean(sett->serv,
 							  "Immutable", NULL);
 	if(immutable) {
+		gchar *type;
 		if(sett->serv->type != CONNECTION_TYPE_VPN)
 			add_info_page(sett);
 		else
 			add_vpn_info_page(sett);
 		add_immutable_ipv_page(sett);
 		add_immutable_server_page(sett);
+		if(sett->serv->type != CONNECTION_TYPE_VPN)
+			return;
+
+		type = service_get_property_string_raw(sett->serv,
+						       "Type", NULL);
+		if(!strcmp(type, "openconnect"))
+			add_immutable_openconnect_page(sett);
+		g_free(type);
 		return;
 	}
 
