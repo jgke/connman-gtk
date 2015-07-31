@@ -24,9 +24,14 @@
 #include <glib.h>
 #include <gio/gio.h>
 
+struct auth_token {
+	const gchar *label;
+	gchar *value;
+	gboolean hidden;
+};
+
+typedef GPtrArray *(*token_asker)(GPtrArray *tokens);
 GVariantDict *openconnect_handle(GDBusMethodInvocation *invocation,
-				 GVariant *args,
-				 gchar *(*ask_token)(const gchar *label,
-						     gboolean hidden));
+				 GVariant *args, token_asker ask_token);
 
 #endif /* _CONNMAN_GTK_OPENCONNECT_H */

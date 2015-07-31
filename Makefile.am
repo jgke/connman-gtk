@@ -21,10 +21,10 @@ EXTRA_DIST = src/agent.h src/interfaces.h src/main.h src/technology.h \
 	     src/stylesheet.css README.md
 
 if USE_OPENCONNECT
-connman_gtk_SOURCES += lib/openconnect.c
+connman_gtk_SOURCES += lib/openconnect_helper.c
 connman_gtk_LDADD += @openconnect_LIBS@
 connman_gtk_CPPFLAGS += @openconnect_CFLAGS@ -DUSE_OPENCONNECT=1 -I$(builddir)/lib
-EXTRA_DIST += lib/openconnect.h
+EXTRA_DIST += lib/openconnect_helper.h
 endif
 
 SUBDIRS = po

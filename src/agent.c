@@ -30,7 +30,7 @@
 #include "style.h"
 
 #ifdef USE_OPENCONNECT
-#include "openconnect.h"
+#include "openconnect_helper.h"
 #endif
 
 GDBusConnection *conn = NULL;
@@ -71,7 +71,7 @@ struct token_entry {
 	GtkWidget *entry;
 };
 
-static GVariantDict *get_tokens(GPtrArray *entries)
+static GVariantDict *ask_tokens_window(GPtrArray *entries)
 {
 	GtkDialog *dialog;
 	GtkWidget *grid, *window;
@@ -129,7 +129,7 @@ static void add_field(GPtrArray *array, const char *label, gboolean secret)
 	entry->entry = gtk_entry_new();
 	style_add_margin(entry->label, MARGIN_LARGE);
 	style_add_margin(entry->entry, MARGIN_LARGE);
-	if(strcmp(label, "Name") && strcmp(label, "Identity") &&
+	if(secret && strcmp(label, "Name") && strcmp(label, "Identity") &&
 	   strcmp(label, "WPS") && strcmp(label, "Username") &&
 	   strcmp(label, "Host") && strcmp(label, "OpenConnect.CACert") &&
 	   strcmp(label, "OpenConnect.ServerCert") &&
@@ -171,24 +171,34 @@ static GPtrArray *generate_entries(GVariant *args)
 	return array;
 }
 
-gchar *get_token(const gchar *label, gboolean hidden)
+static GPtrArray *get_tokens(GPtrArray *tokens)
 {
-	GVariant *value_v;
-	gchar *value;
 	GPtrArray *array;
 	GVariantDict *dict;
+	int i;
 
 	array = g_ptr_array_new_full(1, g_free);
-	add_field(array, label, hidden);
-	dict = get_tokens(array);
+	for(i = 0; i < tokens->len; i++) {
+		struct auth_token *token = tokens->pdata[i];
+		add_field(array, token->label, token->hidden);
+	}
+	dict = ask_tokens_window(array);
 	g_ptr_array_free(array, TRUE);
 	if(!dict)
 		return NULL;
-	value_v = g_variant_dict_lookup_value(dict, label, NULL);
-	value = g_variant_dup_string(value_v, NULL);
-	g_variant_unref(value_v);
+	for(i = 0; i < tokens->len; i++) {
+		GVariant *value_v;
+		struct auth_token *token = tokens->pdata[i];
+		value_v = g_variant_dict_lookup_value(dict, token->label, NULL);
+		if(value_v) {
+			token->value = g_variant_dup_string(value_v, NULL);
+			g_variant_unref(value_v);
+		}
+		else
+			token->value = g_strdup("");
+	}
 	g_variant_dict_unref(dict);
-	return value;
+	return tokens;
 }
 
 #ifdef USE_OPENCONNECT
@@ -225,13 +235,13 @@ void request_input(struct agent *agent, GDBusMethodInvocation *invocation,
 #ifdef USE_OPENCONNECT
 	if(!is_openconnect(parameters)) {
 		entries = generate_entries(parameters);
-		dict = get_tokens(entries);
+		dict = ask_tokens_window(entries);
 	}
 	else
-		dict = openconnect_handle(invocation, parameters, get_token);
+		dict = openconnect_handle(invocation, parameters, get_tokens);
 #else
 	entries = generate_entries(parameters);
-	dict = get_tokens(entries);
+	dict = ask_tokens_window(entries);
 #endif
 
 	if(!dict) {
@@ -245,8 +255,8 @@ void request_input(struct agent *agent, GDBusMethodInvocation *invocation,
 	g_variant_ref_sink(ret_v);
 	g_dbus_method_invocation_return_value(invocation, ret_v);
 	g_variant_unref(ret_v);
-out:
 	g_variant_dict_unref(dict);
+out:
 	if(entries)
 		g_ptr_array_free(entries, TRUE);
 }
