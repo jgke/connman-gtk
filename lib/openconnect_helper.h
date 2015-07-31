@@ -25,8 +25,10 @@
 #include <gio/gio.h>
 
 struct auth_token {
+	gboolean list;
 	const gchar *label;
 	gchar *value;
+	GPtrArray *options;
 	gboolean hidden;
 };
 

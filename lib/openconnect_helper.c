@@ -40,13 +40,21 @@ static int new_config(void *data, const char *buf, int buflen)
 	return 0;
 }
 
+static void free_token(void *token) {
+	struct auth_token *t = token;
+
+	if(t->list)
+		g_ptr_array_free(t->options, TRUE);
+	g_free(t);
+}
+
 static int ask_pass(void *data, struct oc_auth_form *form)
 {
 	struct oc_form_opt *opt;
 	GPtrArray *tokens;
 	int i;
 
-	tokens = g_ptr_array_new_full(0, g_free);
+	tokens = g_ptr_array_new_full(0, free_token);
 
 	for(opt = form->opts; opt; opt = opt->next) {
 		struct auth_token *token = NULL;
@@ -54,17 +62,27 @@ static int ask_pass(void *data, struct oc_auth_form *form)
 		if(opt->flags & OC_FORM_OPT_IGNORE)
 			continue;
 
+		if(opt->type != OC_FORM_OPT_TOKEN)
+			token = g_malloc0(sizeof(*token));
+
 		switch(opt->type) {
-		case OC_FORM_OPT_SELECT:
-			printf("Select option\n");
+		case OC_FORM_OPT_SELECT: {
+			struct oc_form_opt_select *select;
+			int i;
+
+			select = (struct oc_form_opt_select *)opt;
+			token->list = TRUE;
+			token->label = select->form.label;
+			token->options = g_ptr_array_new();
+			for(i = 0; i < select->nr_choices; i++)
+				g_ptr_array_add(token->options,
+						select->choices[i]->label);
 			break;
+		}
 		case OC_FORM_OPT_TEXT:
-			token = g_malloc(sizeof(*token));
 			token->label = opt->name;
-			token->hidden = FALSE;
 			break;
 		case OC_FORM_OPT_PASSWORD:
-			token = g_malloc(sizeof(*token));
 			token->label = opt->name;
 			token->hidden = TRUE;
 			break;
@@ -89,8 +107,6 @@ static int ask_pass(void *data, struct oc_auth_form *form)
 
 		switch(opt->type) {
 		case OC_FORM_OPT_SELECT:
-			printf("Select option\n");
-			break;
 		case OC_FORM_OPT_TEXT:
 		case OC_FORM_OPT_PASSWORD:
 			token = tokens->pdata[i++];

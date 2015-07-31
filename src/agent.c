@@ -71,6 +71,32 @@ struct token_entry {
 	GtkWidget *entry;
 };
 
+static void add_token_entry(GtkGrid *grid, struct token_entry *entry, int y)
+{
+	if(GTK_IS_ENTRY(entry->entry))
+		gtk_entry_set_activates_default(GTK_ENTRY(entry->entry), TRUE);
+	gtk_grid_attach(GTK_GRID(grid), entry->label, 0, y, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), entry->entry, 1, y, 1, 1);
+}
+
+static gchar *get_token_entry_value(struct token_entry *entry)
+{
+	gchar *value;
+	GtkWidget *e = entry->entry;
+
+	if(GTK_IS_ENTRY(e)) {
+		GtkEntryBuffer *buf;
+
+		buf = gtk_entry_get_buffer(GTK_ENTRY(e));
+		value = g_strdup(gtk_entry_buffer_get_text(buf));
+	} else {
+		GtkComboBoxText *box = GTK_COMBO_BOX_TEXT(e);
+		value = gtk_combo_box_text_get_active_text(box);
+	}
+
+	return value;
+}
+
 static GVariantDict *ask_tokens_window(GPtrArray *entries)
 {
 	GtkDialog *dialog;
@@ -89,9 +115,7 @@ static GVariantDict *ask_tokens_window(GPtrArray *entries)
 					GTK_RESPONSE_ACCEPT);
 	for(i = 0; i < entries->len; i++) {
 		struct token_entry *entry = g_ptr_array_index(entries, i);
-		gtk_grid_attach(GTK_GRID(grid), entry->label, 0, i, 1, 1);
-		gtk_entry_set_activates_default(GTK_ENTRY(entry->entry), TRUE);
-		gtk_grid_attach(GTK_GRID(grid), entry->entry, 1, i, 1, 1);
+		add_token_entry(GTK_GRID(grid), entry, i);
 	}
 
 	gtk_widget_show_all(grid);
@@ -106,15 +130,14 @@ static GVariantDict *ask_tokens_window(GPtrArray *entries)
 	dict = g_variant_dict_new(NULL);
 	for(i = 0; i < entries->len; i++) {
 		struct token_entry *entry;
-		GtkEntryBuffer *buf;
 		const gchar *key;
-		const gchar *value;
+		gchar *value;
 
 		entry = g_ptr_array_index(entries, i);
-		buf = gtk_entry_get_buffer(GTK_ENTRY(entry->entry));
 		key = gtk_label_get_text(GTK_LABEL(entry->label));
-		value = gtk_entry_buffer_get_text(buf);
+		value = get_token_entry_value(entry);
 		g_variant_dict_insert(dict, key, "s", value);
+		g_free(value);
 	}
 
 out:
@@ -180,7 +203,26 @@ static GPtrArray *get_tokens(GPtrArray *tokens)
 	array = g_ptr_array_new_full(1, g_free);
 	for(i = 0; i < tokens->len; i++) {
 		struct auth_token *token = tokens->pdata[i];
-		add_field(array, token->label, token->hidden);
+		if(!token->list)
+			add_field(array, token->label, token->hidden);
+		else {
+			struct token_entry *entry = g_malloc(sizeof(*entry));
+			GtkComboBoxText *box;
+			int i;
+
+			entry->label = gtk_label_new(token->label);
+			entry->entry = gtk_combo_box_text_new();
+			box = GTK_COMBO_BOX_TEXT(entry->entry);
+			style_add_margin(entry->label, MARGIN_LARGE);
+			style_add_margin(entry->entry, MARGIN_LARGE);
+
+			for(i = 0; i < token->options->len; i++) {
+				const gchar *opt = token->options->pdata[i];
+				gtk_combo_box_text_append_text(box, opt);
+			}
+
+			g_ptr_array_add(array, entry);
+		}
 	}
 	dict = ask_tokens_window(array);
 	g_ptr_array_free(array, TRUE);
