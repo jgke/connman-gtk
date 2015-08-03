@@ -243,32 +243,20 @@ void modify_service(GDBusConnection *connection, const gchar *path,
 	}
 }
 
-void remove_service(const gchar *path)
+static void remove_service_struct(struct service *serv)
 {
 	enum connection_type type;
-	struct service *serv;
-	void *spath;
-
-	serv = g_hash_table_lookup(services, path);
-	if(!serv)
-		return;
 
 	type = serv->type;
 	if(type != CONNECTION_TYPE_UNKNOWN && technologies[type])
-		technology_remove_service(technologies[type], path);
+		technology_remove_service(technologies[type], serv->path);
 
-	service_free(g_hash_table_lookup(services, path));
-
-	if(!g_hash_table_lookup_extended(services, path, &spath, NULL))
-		return;
-
-	g_hash_table_steal(services, path);
-	g_free(spath);
+	service_free(serv);
 }
 
-static void remove_service_struct(void *serv)
+void remove_service(const gchar *path)
 {
-	remove_service(((struct service *)serv)->path);
+	g_hash_table_remove(services, path);
 }
 
 static void services_changed(GDBusConnection *connection, GVariant *parameters)
@@ -591,8 +579,8 @@ int main(int argc, char *argv[])
 
 	technology_types = g_hash_table_new_full(g_str_hash, g_str_equal,
 	                   g_free, NULL);
-	services = g_hash_table_new_full(g_str_hash, g_str_equal,
-	                                 g_free, remove_service_struct);
+	services = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
+					 (GDestroyNotify)remove_service_struct);
 
 	app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
 	g_application_add_main_option_entries(G_APPLICATION(app), options);
