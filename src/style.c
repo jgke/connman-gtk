@@ -39,17 +39,23 @@ void style_init()
 	}
 }
 
-void label_align_text_left(GtkLabel *label)
+void label_align_text(GtkLabel *label, gfloat xalign, gfloat yalign)
 {
 	gtk_label_set_line_wrap(label, TRUE);
 	gtk_label_set_justify(label, GTK_JUSTIFY_LEFT);
 #if (GTK_MAJOR_VERSION > 3) || (GTK_MINOR_VERSION >= 16)
-	if(gtk_get_major_version() > 3 || gtk_get_minor_version() >= 16)
-		gtk_label_set_xalign(label, 0);
-	else
+	if(xalign >= 0)
+		gtk_label_set_xalign(label, xalign);
+	if(yalign >= 0)
+		gtk_label_set_xalign(label, yalign);
+#else
+	/* deprecated at 3.14, but above only implemented at 3.16 */
+	if(xalign < 0)
+		gtk_misc_get_alignment(GTK_MISC(label), &xalign, NULL);
+	if(yalign < 0)
+		gtk_misc_get_alignment(GTK_MISC(label), &yalign, NULL);
+	gtk_misc_set_alignment(GTK_MISC(label), xalign, yalign);
 #endif
-		/* deprecated at 3.14, but above only implemented at 3.16 */
-		gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
 }
 
 void style_add_context(GtkWidget *widget)

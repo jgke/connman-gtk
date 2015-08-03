@@ -177,7 +177,7 @@ GtkWidget *settings_add_static_text(struct settings_page *page,
 	value_w = gtk_label_new(text);
 
 	gtk_label_set_selectable(GTK_LABEL(value_w), TRUE);
-	label_align_text_left(GTK_LABEL(value_w));
+	label_align_text(GTK_LABEL(value_w), 0, 0);
 
 	add_left_aligned(GTK_GRID(page->grid), label_w, value_w, page->index++);
 	gtk_widget_show_all(page->grid);
@@ -205,7 +205,7 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 	g_free(value);
 
 	gtk_label_set_selectable(GTK_LABEL(value_w), TRUE);
-	label_align_text_left(GTK_LABEL(value_w));
+	label_align_text(GTK_LABEL(value_w), 0, 0);
 
 	add_left_aligned(GTK_GRID(page->grid), label_w, value_w, page->index++);
 	gtk_widget_show_all(page->grid);

@@ -352,9 +352,9 @@ static gboolean show_error_sync(gpointer data)
 				    "cm-log");
 	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(box),
 					    GTK_SHADOW_IN);
-	label_align_text_left(GTK_LABEL(text));
-	label_align_text_left(GTK_LABEL(logl));
-	label_align_text_left(GTK_LABEL(log));
+	gtk_widget_set_halign(text, GTK_ALIGN_START);
+	label_align_text(GTK_LABEL(logl), 0, 0);
+	label_align_text(GTK_LABEL(log), 0, 0);
 	style_add_margin(text, MARGIN_LARGE);
 	style_add_margin(logl, MARGIN_LARGE);
 	style_add_margin(box, MARGIN_LARGE);
