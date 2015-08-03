@@ -28,8 +28,8 @@
 
 #include "openconnect_helper.h"
 #include "../src/util.h"
+#include "../src/dialog.h"
 
-token_asker ask_tokens;
 GString *progress;
 
 static int invalid_cert(void *data, const char *reason)
@@ -43,73 +43,60 @@ static int new_config(void *data, const char *buf, int buflen)
 	return 0;
 }
 
-static void free_token(void *token) {
-	struct auth_token *t = token;
-
-	if(t->list)
-		g_ptr_array_free(t->options, TRUE);
-	g_free(t);
-}
-
 static int ask_pass(void *data, struct oc_auth_form *form)
 {
 	struct oc_form_opt *opt;
 	GPtrArray *tokens;
 	int i;
 
-	tokens = g_ptr_array_new_full(0, free_token);
+	tokens = g_ptr_array_new_full(0, (GDestroyNotify)free_token_element);
 
 	for(opt = form->opts; opt; opt = opt->next) {
-		struct auth_token *token = NULL;
+		struct token_element *elem = NULL;
 
 		if(opt->flags & OC_FORM_OPT_IGNORE)
 			continue;
 
-		if(opt->type != OC_FORM_OPT_TOKEN)
-			token = g_malloc0(sizeof(*token));
-
 		switch(opt->type) {
 		case OC_FORM_OPT_SELECT: {
 			struct oc_form_opt_select *select;
+			GPtrArray *options = g_ptr_array_new();
 			int i;
 
 			select = (struct oc_form_opt_select *)opt;
-			token->list = TRUE;
-			token->label = select->form.label;
-			token->options = g_ptr_array_new();
 			for(i = 0; i < select->nr_choices; i++)
-				g_ptr_array_add(token->options,
+				g_ptr_array_add(options,
 						select->choices[i]->label);
+			elem = token_new_list(select->form.label, options);
 			break;
 		}
 		case OC_FORM_OPT_TEXT:
 			if(!strcmp(opt->name, "username"))
-				token->label = _("Username");
+				elem = token_new_entry(_("Username"), FALSE);
 			else
-				token->label = opt->name;
+				elem = token_new_entry(opt->name, FALSE);
 			break;
 		case OC_FORM_OPT_PASSWORD:
 			if(!strcmp(opt->name, "password"))
-				token->label = _("Password");
+				elem = token_new_entry(_("Password"), TRUE);
 			else
-				token->label = opt->name;
-			token->hidden = TRUE;
+				elem = token_new_entry(opt->name, TRUE);
 			break;
 		case OC_FORM_OPT_TOKEN:
 			break;
 		}
-		if(token)
-			g_ptr_array_add(tokens, token);
+		if(elem)
+			g_ptr_array_add(tokens, elem);
 	}
 
-	if(!ask_tokens(tokens)) {
+	if(!dialog_ask_tokens(_("Enter AnyConnect credintials"), tokens)) {
 		g_ptr_array_free(tokens, TRUE);
 		return OC_FORM_RESULT_CANCELLED;
 	}
 
 	i = 0;
 	for(opt = form->opts; opt; opt = opt->next) {
-		struct auth_token *token = NULL;
+		struct token_element  *elem = NULL;
 
 		if(opt->flags & OC_FORM_OPT_IGNORE)
 			continue;
@@ -118,8 +105,9 @@ static int ask_pass(void *data, struct oc_auth_form *form)
 		case OC_FORM_OPT_SELECT:
 		case OC_FORM_OPT_TEXT:
 		case OC_FORM_OPT_PASSWORD:
-			token = tokens->pdata[i++];
-			opt->_value = token->value;
+			elem = tokens->pdata[i++];
+			opt->_value = elem->value;
+			elem->value = NULL;
 			break;
 		case OC_FORM_OPT_TOKEN:
 			break;
@@ -190,7 +178,7 @@ out:
 }
 
 GVariantDict *openconnect_handle(GDBusMethodInvocation *invocation,
-				 GVariant *args, token_asker asker)
+				 GVariant *args)
 {
 	GHashTable *info, *required;
 	GVariantDict *out;
@@ -199,7 +187,6 @@ GVariantDict *openconnect_handle(GDBusMethodInvocation *invocation,
 	GVariant *value;
 	GVariant *parameters;
 
-	ask_tokens = asker;
 	parameters = g_variant_get_child_value(args, 1);
 
 	info = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);

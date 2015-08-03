@@ -18,13 +18,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CONNMAN_GTK_OPENCONNECT_H
-#define _CONNMAN_GTK_OPENCONNECT_H
+#ifndef _CONNMAN_GTK_DIALOG_H
+#define _CONNMAN_GTK_DIALOG_H
 
 #include <glib.h>
-#include <gio/gio.h>
 
-GVariantDict *openconnect_handle(GDBusMethodInvocation *invocation,
-				 GVariant *args);
+enum token_element_type {
+	TOKEN_ELEMENT_INVALID,
+	TOKEN_ELEMENT_TEXT,
+	TOKEN_ELEMENT_ENTRY,
+	TOKEN_ELEMENT_LIST
+};
 
-#endif /* _CONNMAN_GTK_OPENCONNECT_H */
+struct token_element {
+	enum token_element_type type;
+	GtkWidget *label, *content;
+	gchar *name, *value;
+};
+
+struct token_element *token_new_text(const gchar *name, const gchar *content);
+struct token_element *token_new_entry(const gchar *name, gboolean secret);
+struct token_element *token_new_list(const gchar *name, GPtrArray *options);
+void free_token_element(struct token_element *elem);
+
+gboolean dialog_ask_tokens(const gchar *title, GPtrArray *elements);
+
+#endif /* _CONNMAN_GTK_DIALOG_H */

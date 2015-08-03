@@ -25,6 +25,7 @@
 #include <unistd.h>
 
 #include "agent.h"
+#include "dialog.h"
 #include "interfaces.h"
 #include "main.h"
 #include "style.h"
@@ -66,147 +67,15 @@ void request_browser(struct agent *agent, GDBusMethodInvocation *invocation,
 	                "User canceled browser");
 }
 
-struct token_entry {
-	GtkWidget *label;
-	GtkWidget *entry;
-};
-
-static void add_token_entry(GtkGrid *grid, struct token_entry *entry, int y)
-{
-	if(GTK_IS_ENTRY(entry->entry))
-		gtk_entry_set_activates_default(GTK_ENTRY(entry->entry), TRUE);
-	gtk_grid_attach(GTK_GRID(grid), entry->label, 0, y, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), entry->entry, 1, y, 1, 1);
-}
-
-static gchar *get_token_entry_value(struct token_entry *entry)
-{
-	gchar *value;
-	GtkWidget *e = entry->entry;
-
-	if(GTK_IS_ENTRY(e)) {
-		GtkEntryBuffer *buf;
-
-		buf = gtk_entry_get_buffer(GTK_ENTRY(e));
-		value = g_strdup(gtk_entry_buffer_get_text(buf));
-	} else {
-		GtkComboBoxText *box = GTK_COMBO_BOX_TEXT(e);
-		value = gtk_combo_box_text_get_active_text(box);
-	}
-
-	return value;
-}
-
-struct token_window_params {
-	GPtrArray *entries;
-	GCond *cond;
-	GMutex *mutex;
-	GVariantDict *tokens;
-	gboolean returned;
-};
-
-static gboolean ask_tokens_window_sync(void *data)
-{
-	struct token_window_params *params = data;
-	GPtrArray *entries = params->entries;
-
-	GtkDialog *dialog;
-	GtkWidget *grid, *window;
-	GVariantDict *dict = NULL;
-	int i;
-	int flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
-
-	grid = gtk_grid_new();
-	window = gtk_dialog_new_with_buttons(_("Authentication required"),
-					     GTK_WINDOW(main_window), flags,
-					     _("_OK"), GTK_RESPONSE_ACCEPT,
-					     _("_Cancel"), GTK_RESPONSE_CANCEL,
-					     NULL);
-	gtk_dialog_set_default_response(GTK_DIALOG(window),
-					GTK_RESPONSE_ACCEPT);
-	for(i = 0; i < entries->len; i++) {
-		struct token_entry *entry = g_ptr_array_index(entries, i);
-		add_token_entry(GTK_GRID(grid), entry, i);
-	}
-
-	gtk_widget_show_all(grid);
-	dialog = GTK_DIALOG(window);
-	gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(dialog)),
-	                  grid);
-
-	i = gtk_dialog_run(GTK_DIALOG(window));
-	if(i != GTK_RESPONSE_ACCEPT)
-		goto out;
-
-	dict = g_variant_dict_new(NULL);
-	for(i = 0; i < entries->len; i++) {
-		struct token_entry *entry;
-		const gchar *key;
-		gchar *value;
-
-		entry = g_ptr_array_index(entries, i);
-		key = gtk_label_get_text(GTK_LABEL(entry->label));
-		value = get_token_entry_value(entry);
-		g_variant_dict_insert(dict, key, "s", value);
-		g_free(value);
-	}
-
-out:
-	gtk_widget_destroy(window);
-	g_mutex_lock(params->mutex);
-	params->tokens = dict;
-	params->returned = TRUE;
-	g_cond_signal(params->cond);
-	g_mutex_unlock(params->mutex);
-	return FALSE;
-}
-
-static GVariantDict *ask_tokens_window_lock(GPtrArray *entries)
-{
-	struct token_window_params params = {};
-	GMutex mutex;
-	GCond cond;
-
-	params.entries = entries;
-	params.mutex = &mutex;
-	params.cond = &cond;
-	g_mutex_init(&mutex);
-	g_cond_init(&cond);
-	g_main_context_invoke(NULL, (GSourceFunc)ask_tokens_window_sync,
-			      &params);
-	g_mutex_lock(&mutex);
-	while(!params.returned)
-		g_cond_wait(&cond, &mutex);
-	g_mutex_unlock(&mutex);
-	g_mutex_clear(&mutex);
-	g_cond_clear(&cond);
-	return params.tokens;
-}
-
-static void add_field(GPtrArray *array, const char *label, gboolean secret)
-{
-	struct token_entry *entry = g_malloc(sizeof(*entry));
-	entry->label = gtk_label_new(label);
-	entry->entry = gtk_entry_new();
-	style_add_margin(entry->label, MARGIN_LARGE);
-	style_add_margin(entry->entry, MARGIN_LARGE);
-	if(secret && strcmp(label, "Name") && strcmp(label, "Identity") &&
-	   strcmp(label, "WPS") && strcmp(label, "Username") &&
-	   strcmp(label, "Host") && strcmp(label, "OpenConnect.CACert") &&
-	   strcmp(label, "OpenConnect.ServerCert") &&
-	   strcmp(label, "OpenConnect.VPNHost"))
-		gtk_entry_set_visibility(GTK_ENTRY(entry->entry), FALSE);
-	g_ptr_array_add(array, entry);
-}
-
 static GPtrArray *generate_entries(GVariant *args)
 {
 	gchar *key;
 	GVariant *value;
 	GVariant *service, *parameters;
 	GVariantIter *iter;
-	GPtrArray *array = g_ptr_array_new_full(1, g_free);
+	GPtrArray *array;
 
+	array = g_ptr_array_new_full(1, (GDestroyNotify)free_token_element);
 	service = g_variant_get_child_value(args, 0);
 	parameters = g_variant_get_child_value(args, 1);
 	iter = g_variant_iter_new(parameters);
@@ -218,7 +87,10 @@ static GPtrArray *generate_entries(GVariant *args)
 			if(!strcmp(prop, "Requirement")) {
 				const gchar *req = g_variant_get_string(val, NULL);
 				if(!strcmp(req, "mandatory")) {
-					add_field(array, key, TRUE);
+					struct token_element *elem;
+
+					elem = token_new_entry(key, TRUE);
+					g_ptr_array_add(array, elem);
 				}
 
 			}
@@ -232,56 +104,22 @@ static GPtrArray *generate_entries(GVariant *args)
 	return array;
 }
 
-#ifdef USE_OPENCONNECT
-static GPtrArray *get_tokens(GPtrArray *tokens)
+static GVariantDict *generate_dict(GPtrArray *elements)
 {
-	GPtrArray *array;
 	GVariantDict *dict;
 	int i;
 
-	array = g_ptr_array_new_full(1, g_free);
-	for(i = 0; i < tokens->len; i++) {
-		struct auth_token *token = tokens->pdata[i];
-		if(!token->list)
-			add_field(array, token->label, token->hidden);
-		else {
-			struct token_entry *entry = g_malloc(sizeof(*entry));
-			GtkComboBoxText *box;
-			int i;
-
-			entry->label = gtk_label_new(token->label);
-			entry->entry = gtk_combo_box_text_new();
-			box = GTK_COMBO_BOX_TEXT(entry->entry);
-			style_add_margin(entry->label, MARGIN_LARGE);
-			style_add_margin(entry->entry, MARGIN_LARGE);
-
-			for(i = 0; i < token->options->len; i++) {
-				const gchar *opt = token->options->pdata[i];
-				gtk_combo_box_text_append_text(box, opt);
-			}
-
-			g_ptr_array_add(array, entry);
-		}
+	dict = g_variant_dict_new(NULL);
+	for(i = 0; i < elements->len; i++) {
+		struct token_element *elem = elements->pdata[i];
+		if(elem->type > TOKEN_ELEMENT_TEXT)
+			g_variant_dict_insert(dict, elem->name, "s",
+					      elem->value);
 	}
-	dict = ask_tokens_window_lock(array);
-	g_ptr_array_free(array, TRUE);
-	if(!dict)
-		return NULL;
-	for(i = 0; i < tokens->len; i++) {
-		GVariant *value_v;
-		struct auth_token *token = tokens->pdata[i];
-		value_v = g_variant_dict_lookup_value(dict, token->label, NULL);
-		if(value_v) {
-			token->value = g_variant_dup_string(value_v, NULL);
-			g_variant_unref(value_v);
-		}
-		else
-			token->value = g_strdup("");
-	}
-	g_variant_dict_unref(dict);
-	return tokens;
+	return dict;
 }
 
+#ifdef USE_OPENCONNECT
 static gboolean is_openconnect(GVariant *args)
 {
 	GVariantIter *iter;
@@ -317,20 +155,26 @@ gpointer request_input(gpointer data)
 	struct agent *agent = params->agent;
 	GDBusMethodInvocation *invocation = params->invocation;
 	GVariant *parameters = params->parameters;;
-	GVariantDict *dict;
+	GVariantDict *dict = NULL;
 	GVariant *ret, *ret_v;
 	GPtrArray *entries = NULL;
+	int success = 0;
 
 #ifdef USE_OPENCONNECT
 	if(!is_openconnect(parameters)) {
 		entries = generate_entries(parameters);
-		dict = ask_tokens_window_lock(entries);
+		success = dialog_ask_tokens(_("Authentication required"),
+					   entries);
+		if(success)
+			dict = generate_dict(entries);
 	}
 	else
-		dict = openconnect_handle(invocation, parameters, get_tokens);
+		dict = openconnect_handle(invocation, parameters);
 #else
 	entries = generate_entries(parameters);
-	dict = ask_tokens_window_lock(entries);
+	success = dialog_ask_tokens(entries);
+	if(success)
+		dict = generate_dict(entries);
 #endif
 
 	if(!dict) {
