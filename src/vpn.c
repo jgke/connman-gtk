@@ -132,7 +132,6 @@ struct technology *vpn_register(GDBusConnection *conn, GtkWidget *list,
 	connection = conn;
 	info = g_dbus_node_info_new_for_xml(VPN_MANAGER_INTERFACE, &error);
 	if(error) {
-		/* TODO: show user error message */
 		g_critical("Failed to load VPN manager interface: %s",
 		           error->message);
 		g_error_free(error);
@@ -145,7 +144,8 @@ struct technology *vpn_register(GDBusConnection *conn, GtkWidget *list,
 	                              VPN_MANAGER_NAME, NULL, &error);
 	g_dbus_node_info_unref(info);
 	if(error) {
-		g_warning("failed to connect to ConnMan: %s", error->message);
+		g_warning("Failed to connect to ConnMan: %s", error->message);
+		show_error(_("Failed to connect to ConnMan."), error->message);
 		g_error_free(error);
 		return NULL;
 	}
