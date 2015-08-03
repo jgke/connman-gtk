@@ -95,8 +95,6 @@ void service_update_property(struct service *serv, const gchar *key,
 	set_label(serv, serv->ipv6, "IPv6", "Address");
 	set_label(serv, serv->ipv6gateway, "IPv6", "Gateway");
 	set_label(serv, serv->mac, "Ethernet", "Address");
-
-	technology_service_updated(serv->tech, serv);
 }
 
 void show_field(GtkWidget *entry)
@@ -152,6 +150,8 @@ void service_update(struct service *serv, GVariant *properties)
 	g_variant_iter_free(iter);
 	update_name(serv);
 
+	technology_service_updated(serv->tech, serv);
+
 	if(serv->type != CONNECTION_TYPE_WIRELESS) {
 		update_fields(serv);
 		return;
@@ -196,6 +196,8 @@ static void service_proxy_signal(GDBusProxy *proxy, gchar *sender,
 		g_variant_unref(value);
 		g_variant_unref(name_v);
 		g_variant_unref(value_v);
+
+		technology_service_updated(serv->tech, serv);
 	}
 }
 
