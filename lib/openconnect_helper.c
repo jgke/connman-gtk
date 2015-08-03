@@ -27,8 +27,10 @@
 #include <string.h>
 
 #include "openconnect_helper.h"
+#include "../src/util.h"
 
 token_asker ask_tokens;
+GString *progress;
 
 static int invalid_cert(void *data, const char *reason)
 {
@@ -131,27 +133,28 @@ static int ask_pass(void *data, struct oc_auth_form *form)
 
 static void show_progress(void *data, int level, const char *fmt, ...)
 {
+	gchar *msg;
 	va_list argp;
 
 	va_start(argp, fmt);
-	vprintf(fmt, argp);
+	msg = g_strdup_vprintf(fmt, argp);
 	va_end(argp);
+	printf("%s", msg);
+	g_string_append(progress, msg);
 }
 
 static GVariantDict *get_tokens(GHashTable *info)
 {
-	// TODO: error checking and reporting
-	GVariantDict *tokens;
+	GVariantDict *tokens = NULL;
 	gchar *host, *cert;
 	struct openconnect_info *vpninfo;
 
+	progress = g_string_new(NULL);
 	openconnect_init_ssl();
 	vpninfo = openconnect_vpninfo_new("linux-64", invalid_cert, new_config,
 					  ask_pass, show_progress, NULL);
 
 	host = g_hash_table_lookup(info, "Host");
-	if(!host)
-		return NULL;
 
 	cert = g_hash_table_lookup(info, "OpenConnect.ClientCert");
 	openconnect_set_client_cert(vpninfo, cert, NULL);
@@ -162,8 +165,8 @@ static GVariantDict *get_tokens(GHashTable *info)
 	openconnect_parse_url(vpninfo, host);
 
 	if(openconnect_obtain_cookie(vpninfo)) {
-		openconnect_vpninfo_free(vpninfo);
-		return NULL;
+		show_error(_("Connecting to VPN failed."), progress->str);
+		goto out;
 	}
 
 	tokens = g_variant_dict_new(NULL);
@@ -175,8 +178,9 @@ static GVariantDict *get_tokens(GHashTable *info)
 	g_variant_dict_insert(tokens, "OpenConnect.VPNHost", "s",
 			      openconnect_get_hostname(vpninfo));
 
+out:
 	openconnect_vpninfo_free(vpninfo);
-
+	g_string_free(progress, TRUE);
 	return tokens;
 }
 
