@@ -377,6 +377,7 @@ static GDBusProxy *manager_create(GDBusConnection *connection,
 
 out:
 	g_critical("Failed to connect to connman: %s", error->message);
+	show_error(_("Failed to connect to ConnMan."), error->message);
 	g_error_free(error);
 	return NULL;
 }
@@ -520,6 +521,8 @@ static void dbus_connected(GObject *source, GAsyncResult *res,
 	if(error) {
 		g_error("failed to connect to system dbus: %s",
 		        error->message);
+		show_error(_("Failed to connect to system DBus."),
+			   error->message);
 		g_error_free(error);
 		return;
 	}
