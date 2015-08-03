@@ -232,6 +232,7 @@ static GPtrArray *generate_entries(GVariant *args)
 	return array;
 }
 
+#ifdef USE_OPENCONNECT
 static GPtrArray *get_tokens(GPtrArray *tokens)
 {
 	GPtrArray *array;
@@ -281,7 +282,6 @@ static GPtrArray *get_tokens(GPtrArray *tokens)
 	return tokens;
 }
 
-#ifdef USE_OPENCONNECT
 static gboolean is_openconnect(GVariant *args)
 {
 	GVariantIter *iter;
