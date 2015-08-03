@@ -141,6 +141,7 @@ static void show_progress(void *data, int level, const char *fmt, ...)
 	va_end(argp);
 	printf("%s", msg);
 	g_string_append(progress, msg);
+	g_free(msg);
 }
 
 static GVariantDict *get_tokens(GHashTable *info)
