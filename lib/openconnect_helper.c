@@ -19,6 +19,7 @@
  */
 
 #include <glib.h>
+#include <glib/gi18n.h>
 #include <gio/gio.h>
 #include <openconnect.h>
 #include <stdarg.h>
@@ -80,10 +81,16 @@ static int ask_pass(void *data, struct oc_auth_form *form)
 			break;
 		}
 		case OC_FORM_OPT_TEXT:
-			token->label = opt->name;
+			if(!strcmp(opt->name, "username"))
+				token->label = _("Username");
+			else
+				token->label = opt->name;
 			break;
 		case OC_FORM_OPT_PASSWORD:
-			token->label = opt->name;
+			if(!strcmp(opt->name, "password"))
+				token->label = _("Password");
+			else
+				token->label = opt->name;
 			token->hidden = TRUE;
 			break;
 		case OC_FORM_OPT_TOKEN:
