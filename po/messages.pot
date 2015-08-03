@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-30 10:56+0300\n"
+"POT-Creation-Date: 2015-08-03 11:03+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,15 +17,15 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/agent.c:79
+#: src/agent.c:120
 msgid "Authentication required"
 msgstr ""
 
-#: src/agent.c:81 src/wireless.c:137
+#: src/agent.c:122 src/wireless.c:137
 msgid "_OK"
 msgstr ""
 
-#: src/agent.c:82 src/wireless.c:138
+#: src/agent.c:123 src/wireless.c:138
 msgid "_Cancel"
 msgstr ""
 
@@ -57,7 +57,7 @@ msgstr ""
 msgid "_Unknown"
 msgstr ""
 
-#: src/main.c:565 src/settings.c:519
+#: src/main.c:553 src/settings.c:537
 msgid "Network Settings"
 msgstr ""
 
@@ -97,11 +97,11 @@ msgstr ""
 msgid "Hidden unsecured network"
 msgstr ""
 
-#: src/service.c:468 src/settings.c:352
+#: src/service.c:468 src/settings.c:351
 msgid "Direct"
 msgstr ""
 
-#: src/service.c:470 src/settings.c:242 src/settings.c:245 src/settings.c:354
+#: src/service.c:470 src/settings.c:242 src/settings.c:245 src/settings.c:353
 msgid "Automatic"
 msgstr ""
 
@@ -121,7 +121,7 @@ msgstr ""
 msgid "Security"
 msgstr ""
 
-#: src/settings.c:149 src/settings.c:373
+#: src/settings.c:149 src/settings.c:372
 msgid "_Info"
 msgstr ""
 
@@ -129,7 +129,7 @@ msgstr ""
 msgid "Autoconnect"
 msgstr ""
 
-#: src/settings.c:155 src/settings.c:376
+#: src/settings.c:155 src/settings.c:375
 msgid "Name"
 msgstr ""
 
@@ -141,7 +141,7 @@ msgstr ""
 msgid "Interface"
 msgstr ""
 
-#: src/settings.c:162 src/settings.c:298 src/settings.c:322 src/settings.c:381
+#: src/settings.c:162 src/settings.c:297 src/settings.c:321 src/settings.c:381
 msgid "Nameservers"
 msgstr ""
 
@@ -158,7 +158,7 @@ msgid "Address"
 msgstr ""
 
 #: src/settings.c:190 src/settings.c:196 src/settings.c:254 src/settings.c:264
-#: src/settings_content.c:630
+#: src/settings_content.c:638
 msgid "Gateway"
 msgstr ""
 
@@ -174,84 +174,89 @@ msgstr ""
 msgid "IPv_6"
 msgstr ""
 
-#: src/settings.c:236 src/settings.c:349
+#: src/settings.c:236 src/settings.c:348
 msgid "Method"
 msgstr ""
 
-#: src/settings.c:247 src/settings.c:356
+#: src/settings.c:247 src/settings.c:355
 msgid "Manual"
 msgstr ""
 
-#: src/settings.c:256 src/settings.c:268 src/settings_content.c:628
+#: src/settings.c:256 src/settings.c:268 src/settings_content.c:636
 msgid "Netmask"
 msgstr ""
 
-#: src/settings.c:258 src/settings.c:272 src/settings_content.c:629
+#: src/settings.c:258 src/settings.c:272 src/settings_content.c:637
+#: src/settings_content.c:873
 msgid "Prefix length"
 msgstr ""
 
-#: src/settings.c:277
+#: src/settings.c:276
 msgid "Privacy"
 msgstr ""
 
-#: src/settings.c:282 src/technology.c:120
+#: src/settings.c:281 src/technology.c:120
 msgid "Disabled"
 msgstr ""
 
-#: src/settings.c:284
+#: src/settings.c:283
 msgid "Enabled"
 msgstr ""
 
-#: src/settings.c:286
+#: src/settings.c:285
 msgid "Prefered"
 msgstr ""
 
-#: src/settings.c:296
+#: src/settings.c:295
 msgid "_Servers"
 msgstr ""
 
-#: src/settings.c:299 src/settings.c:327
+#: src/settings.c:298 src/settings.c:326
 msgid "Timeservers"
 msgstr ""
 
-#: src/settings.c:300 src/settings.c:335
+#: src/settings.c:299 src/settings.c:334
 msgid "Domains"
 msgstr ""
 
-#: src/settings.c:301
+#: src/settings.c:300
 msgid "Proxy method"
 msgstr ""
 
-#: src/settings.c:305 src/settings.c:362
+#: src/settings.c:304 src/settings.c:361
 msgid "URL"
 msgstr ""
 
-#: src/settings.c:307 src/settings.c:365
+#: src/settings.c:306 src/settings.c:364
 msgid "Servers"
 msgstr ""
 
-#: src/settings.c:309 src/settings.c:367
+#: src/settings.c:308 src/settings.c:366
 msgid "Excludes"
 msgstr ""
 
-#: src/settings.c:321
+#: src/settings.c:320
 msgid "_Nameservers"
 msgstr ""
 
-#: src/settings.c:326
+#: src/settings.c:325
 msgid "_Timeservers"
 msgstr ""
 
-#: src/settings.c:330
+#: src/settings.c:329
 msgid "Custom Timeservers"
 msgstr ""
 
-#: src/settings.c:334
+#: src/settings.c:333
 msgid "_Domains"
 msgstr ""
 
-#: src/settings.c:347
+#: src/settings.c:346
 msgid "_Proxy"
+msgstr ""
+
+#: src/settings.c:376
+msgid "Type"
 msgstr ""
 
 #: src/settings.c:378
@@ -266,35 +271,51 @@ msgstr ""
 msgid "_User routes"
 msgstr ""
 
-#: src/settings.c:410
+#: src/settings.c:400
+msgid "Server fingerprint"
+msgstr ""
+
+#: src/settings.c:402
+msgid "Certificate Authority file"
+msgstr ""
+
+#: src/settings.c:404
+msgid "Client certificate file"
+msgstr ""
+
+#: src/settings.c:406
+msgid "VPN host"
+msgstr ""
+
+#: src/settings.c:425
 msgid "_Clear settings"
 msgstr ""
 
-#: src/settings.c:412
+#: src/settings.c:427
 msgid "_Reset"
 msgstr ""
 
-#: src/settings.c:413
+#: src/settings.c:428
 msgid "_Forget"
 msgstr ""
 
-#: src/settings.c:414
+#: src/settings.c:429
 msgid "Set all properties to defaults."
 msgstr ""
 
-#: src/settings.c:415
+#: src/settings.c:430
 msgid "Remove this service."
 msgstr ""
 
-#: src/settings.c:529
+#: src/settings.c:547
 msgid "_Apply"
 msgstr ""
 
-#: src/settings_content.c:624
+#: src/settings_content.c:632
 msgid "IP version"
 msgstr ""
 
-#: src/settings_content.c:627
+#: src/settings_content.c:635
 msgid "Network"
 msgstr ""
 
@@ -404,4 +425,12 @@ msgstr ""
 
 #: src/wireless.c:133
 msgid "Set Access Point SSID and passphrase"
+msgstr ""
+
+#: lib/openconnect_helper.c:85
+msgid "Username"
+msgstr ""
+
+#: lib/openconnect_helper.c:91
+msgid "Password"
 msgstr ""

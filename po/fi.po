@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-07-30 10:56+0300\n"
+"POT-Creation-Date: 2015-08-03 11:03+0300\n"
 "PO-Revision-Date: 2015-06-11 15:15+0300\n"
 "Last-Translator: Jaakko Hannikainen <jaakko.hannikainen@intel.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -18,15 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/agent.c:79
+#: src/agent.c:120
 msgid "Authentication required"
 msgstr "Tunnistautuminen vaadittu"
 
-#: src/agent.c:81 src/wireless.c:137
+#: src/agent.c:122 src/wireless.c:137
 msgid "_OK"
 msgstr "_OK"
 
-#: src/agent.c:82 src/wireless.c:138
+#: src/agent.c:123 src/wireless.c:138
 msgid "_Cancel"
 msgstr "_Peruuta"
 
@@ -58,7 +58,7 @@ msgstr "_VPN"
 msgid "_Unknown"
 msgstr "_Tuntematon"
 
-#: src/main.c:565 src/settings.c:519
+#: src/main.c:553 src/settings.c:537
 msgid "Network Settings"
 msgstr "Verkkoasetukset"
 
@@ -98,11 +98,11 @@ msgstr "Piilotettu WPS-suojattu verkko"
 msgid "Hidden unsecured network"
 msgstr "Piilotettu suojaamaton verkko"
 
-#: src/service.c:468 src/settings.c:352
+#: src/service.c:468 src/settings.c:351
 msgid "Direct"
 msgstr "Suora"
 
-#: src/service.c:470 src/settings.c:242 src/settings.c:245 src/settings.c:354
+#: src/service.c:470 src/settings.c:242 src/settings.c:245 src/settings.c:353
 msgid "Automatic"
 msgstr "Automaattinen"
 
@@ -122,7 +122,7 @@ msgstr "Pois p‰‰lt‰"
 msgid "Security"
 msgstr "Salaus"
 
-#: src/settings.c:149 src/settings.c:373
+#: src/settings.c:149 src/settings.c:372
 msgid "_Info"
 msgstr "_Tiedot"
 
@@ -130,7 +130,7 @@ msgstr "_Tiedot"
 msgid "Autoconnect"
 msgstr "Automaattiyhdistys"
 
-#: src/settings.c:155 src/settings.c:376
+#: src/settings.c:155 src/settings.c:375
 msgid "Name"
 msgstr "Nimi"
 
@@ -142,7 +142,7 @@ msgstr "Tila"
 msgid "Interface"
 msgstr "Liittym‰"
 
-#: src/settings.c:162 src/settings.c:298 src/settings.c:322 src/settings.c:381
+#: src/settings.c:162 src/settings.c:297 src/settings.c:321 src/settings.c:381
 msgid "Nameservers"
 msgstr "Nimipalvelimet"
 
@@ -159,7 +159,7 @@ msgid "Address"
 msgstr "Osoite"
 
 #: src/settings.c:190 src/settings.c:196 src/settings.c:254 src/settings.c:264
-#: src/settings_content.c:630
+#: src/settings_content.c:638
 msgid "Gateway"
 msgstr "Yhdysk‰yt‰v‰"
 
@@ -175,85 +175,90 @@ msgstr "IPv_4"
 msgid "IPv_6"
 msgstr "IPv_6"
 
-#: src/settings.c:236 src/settings.c:349
+#: src/settings.c:236 src/settings.c:348
 msgid "Method"
 msgstr "Menettelytapa"
 
-#: src/settings.c:247 src/settings.c:356
+#: src/settings.c:247 src/settings.c:355
 msgid "Manual"
 msgstr "Manuaalinen"
 
-#: src/settings.c:256 src/settings.c:268 src/settings_content.c:628
+#: src/settings.c:256 src/settings.c:268 src/settings_content.c:636
 msgid "Netmask"
 msgstr "Aliverkonpeite"
 
-#: src/settings.c:258 src/settings.c:272 src/settings_content.c:629
+#: src/settings.c:258 src/settings.c:272 src/settings_content.c:637
+#: src/settings_content.c:873
 msgid "Prefix length"
 msgstr "Etuliitteen pituus"
 
-#: src/settings.c:277
+#: src/settings.c:276
 msgid "Privacy"
 msgstr "Yksityisyys"
 
-#: src/settings.c:282 src/technology.c:120
+#: src/settings.c:281 src/technology.c:120
 msgid "Disabled"
 msgstr "Pois p‰‰lt‰"
 
-#: src/settings.c:284
+#: src/settings.c:283
 msgid "Enabled"
 msgstr "P‰‰ll‰"
 
-#: src/settings.c:286
+#: src/settings.c:285
 msgid "Prefered"
 msgstr "Ensisijainen"
 
-#: src/settings.c:296
+#: src/settings.c:295
 msgid "_Servers"
 msgstr "_Palvelimet"
 
-#: src/settings.c:299 src/settings.c:327
+#: src/settings.c:298 src/settings.c:326
 msgid "Timeservers"
 msgstr "Aikapalvelimet"
 
-#: src/settings.c:300 src/settings.c:335
+#: src/settings.c:299 src/settings.c:334
 msgid "Domains"
 msgstr "Verkko-osoitteet"
 
-#: src/settings.c:301
+#: src/settings.c:300
 msgid "Proxy method"
 msgstr "V‰lityspalvelimen menettelytapa"
 
-#: src/settings.c:305 src/settings.c:362
+#: src/settings.c:304 src/settings.c:361
 msgid "URL"
 msgstr "Verkko-osoite"
 
-#: src/settings.c:307 src/settings.c:365
+#: src/settings.c:306 src/settings.c:364
 msgid "Servers"
 msgstr "Palvelimet"
 
-#: src/settings.c:309 src/settings.c:367
+#: src/settings.c:308 src/settings.c:366
 msgid "Excludes"
 msgstr "Poissuljetut"
 
-#: src/settings.c:321
+#: src/settings.c:320
 msgid "_Nameservers"
 msgstr "_Nimipalvelimet"
 
-#: src/settings.c:326
+#: src/settings.c:325
 msgid "_Timeservers"
 msgstr "_Aikapalvelimet"
 
-#: src/settings.c:330
+#: src/settings.c:329
 msgid "Custom Timeservers"
 msgstr "Omat aikapalvelimet"
 
-#: src/settings.c:334
+#: src/settings.c:333
 msgid "_Domains"
 msgstr "V_erkko-osoitteet"
 
-#: src/settings.c:347
+#: src/settings.c:346
 msgid "_Proxy"
 msgstr "_V‰lityspalvelin"
+
+#: src/settings.c:376
+msgid "Type"
+msgstr "Tyyppi"
 
 #: src/settings.c:378
 msgid "Host"
@@ -267,35 +272,51 @@ msgstr "_Palvelimen reitit"
 msgid "_User routes"
 msgstr "_K‰ytt‰j‰n reitit"
 
-#: src/settings.c:410
+#: src/settings.c:400
+msgid "Server fingerprint"
+msgstr "Palvelimen sormenj‰lki"
+
+#: src/settings.c:402
+msgid "Certificate Authority file"
+msgstr "Varmentajavarmenne"
+
+#: src/settings.c:404
+msgid "Client certificate file"
+msgstr "K‰ytt‰j‰varmenne"
+
+#: src/settings.c:406
+msgid "VPN host"
+msgstr "VPN-palvelin"
+
+#: src/settings.c:425
 msgid "_Clear settings"
 msgstr "_Tyhjenn‰ asetukset"
 
-#: src/settings.c:412
+#: src/settings.c:427
 msgid "_Reset"
 msgstr "_Tyhjenn‰"
 
-#: src/settings.c:413
+#: src/settings.c:428
 msgid "_Forget"
 msgstr "_Unohda"
 
-#: src/settings.c:414
+#: src/settings.c:429
 msgid "Set all properties to defaults."
 msgstr "Tyhjenn‰ t‰m‰n palvelun asetukset."
 
-#: src/settings.c:415
+#: src/settings.c:430
 msgid "Remove this service."
 msgstr "Poista t‰m‰ palvelu."
 
-#: src/settings.c:529
+#: src/settings.c:547
 msgid "_Apply"
 msgstr "_Toteuta"
 
-#: src/settings_content.c:624
+#: src/settings_content.c:632
 msgid "IP version"
 msgstr "Protokollan versio"
 
-#: src/settings_content.c:627
+#: src/settings_content.c:635
 msgid "Network"
 msgstr "Verkko"
 
@@ -406,6 +427,14 @@ msgstr "_N‰yt‰ salasana"
 #: src/wireless.c:133
 msgid "Set Access Point SSID and passphrase"
 msgstr "Aseta yhteyspisteen nimi ja salalause"
+
+#: lib/openconnect_helper.c:85
+msgid "Username"
+msgstr "K‰ytt‰j‰nimi"
+
+#: lib/openconnect_helper.c:91
+msgid "Password"
+msgstr "Salasana"
 
 #~ msgid "IPv4"
 #~ msgstr "IPv4"
