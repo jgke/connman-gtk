@@ -51,4 +51,6 @@ void dual_hash_table_foreach(DualHashTable *table, DualHashTableIter cb,
                              gpointer user_data);
 GVariant *dual_hash_table_to_variant(DualHashTable *table);
 
+void show_error(const gchar *text, const gchar *message);
+
 #endif /* _CONNMAN_GTK_UTIL_H */
