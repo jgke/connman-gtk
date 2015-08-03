@@ -149,6 +149,7 @@ static GVariantDict *get_tokens(GHashTable *info)
 	GVariantDict *tokens = NULL;
 	gchar *host, *cert;
 	struct openconnect_info *vpninfo;
+	int status;
 
 	progress = g_string_new(NULL);
 	openconnect_init_ssl();
@@ -165,8 +166,11 @@ static GVariantDict *get_tokens(GHashTable *info)
 
 	openconnect_parse_url(vpninfo, host);
 
-	if(openconnect_obtain_cookie(vpninfo)) {
-		show_error(_("Connecting to VPN failed."), progress->str);
+	status = openconnect_obtain_cookie(vpninfo);
+	if(status) {
+		if(status != OC_FORM_RESULT_CANCELLED)
+			show_error(_("Connecting to VPN failed."),
+				   progress->str);
 		goto out;
 	}
 
