@@ -97,8 +97,19 @@ static gchar *get_token_entry_value(struct token_entry *entry)
 	return value;
 }
 
-static GVariantDict *ask_tokens_window(GPtrArray *entries)
+struct token_window_params {
+	GPtrArray *entries;
+	GCond *cond;
+	GMutex *mutex;
+	GVariantDict *tokens;
+	gboolean returned;
+};
+
+static gboolean ask_tokens_window_sync(void *data)
 {
+	struct token_window_params *params = data;
+	GPtrArray *entries = params->entries;
+
 	GtkDialog *dialog;
 	GtkWidget *grid, *window;
 	GVariantDict *dict = NULL;
@@ -142,7 +153,34 @@ static GVariantDict *ask_tokens_window(GPtrArray *entries)
 
 out:
 	gtk_widget_destroy(window);
-	return dict;
+	g_mutex_lock(params->mutex);
+	params->tokens = dict;
+	params->returned = TRUE;
+	g_cond_signal(params->cond);
+	g_mutex_unlock(params->mutex);
+	return FALSE;
+}
+
+static GVariantDict *ask_tokens_window_lock(GPtrArray *entries)
+{
+	struct token_window_params params = {};
+	GMutex mutex;
+	GCond cond;
+
+	params.entries = entries;
+	params.mutex = &mutex;
+	params.cond = &cond;
+	g_mutex_init(&mutex);
+	g_cond_init(&cond);
+	g_main_context_invoke(NULL, (GSourceFunc)ask_tokens_window_sync,
+			      &params);
+	g_mutex_lock(&mutex);
+	while(!params.returned)
+		g_cond_wait(&cond, &mutex);
+	g_mutex_unlock(&mutex);
+	g_mutex_clear(&mutex);
+	g_cond_clear(&cond);
+	return params.tokens;
 }
 
 static void add_field(GPtrArray *array, const char *label, gboolean secret)
@@ -224,7 +262,7 @@ static GPtrArray *get_tokens(GPtrArray *tokens)
 			g_ptr_array_add(array, entry);
 		}
 	}
-	dict = ask_tokens_window(array);
+	dict = ask_tokens_window_lock(array);
 	g_ptr_array_free(array, TRUE);
 	if(!dict)
 		return NULL;
@@ -267,9 +305,18 @@ static gboolean is_openconnect(GVariant *args)
 }
 #endif
 
-void request_input(struct agent *agent, GDBusMethodInvocation *invocation,
-		   GVariant *parameters)
+struct request_input_params {
+	struct agent *agent;
+	GDBusMethodInvocation *invocation;
+	GVariant *parameters;
+};
+
+gpointer request_input(gpointer data)
 {
+	struct request_input_params *params = data;
+	struct agent *agent = params->agent;
+	GDBusMethodInvocation *invocation = params->invocation;
+	GVariant *parameters = params->parameters;;
 	GVariantDict *dict;
 	GVariant *ret, *ret_v;
 	GPtrArray *entries = NULL;
@@ -277,13 +324,13 @@ void request_input(struct agent *agent, GDBusMethodInvocation *invocation,
 #ifdef USE_OPENCONNECT
 	if(!is_openconnect(parameters)) {
 		entries = generate_entries(parameters);
-		dict = ask_tokens_window(entries);
+		dict = ask_tokens_window_lock(entries);
 	}
 	else
 		dict = openconnect_handle(invocation, parameters, get_tokens);
 #else
 	entries = generate_entries(parameters);
-	dict = ask_tokens_window(entries);
+	dict = ask_tokens_window_lock(entries);
 #endif
 
 	if(!dict) {
@@ -301,10 +348,23 @@ void request_input(struct agent *agent, GDBusMethodInvocation *invocation,
 out:
 	if(entries)
 		g_ptr_array_free(entries, TRUE);
+	g_free(data);
+	return NULL;
 }
 
-void request_peer_authorization(struct agent *agent, GDBusMethodInvocation *invocation,
-                                GVariant *parameters)
+void request_input_async(struct agent *agent, GDBusMethodInvocation *invocation,
+			 GVariant *parameters)
+{
+	struct request_input_params *params = g_malloc(sizeof(*params));
+	params->agent = agent;
+	params->invocation = invocation;
+	params->parameters = parameters;
+	g_thread_new("request_input", (GThreadFunc)request_input, params);
+}
+
+void request_peer_authorization(struct agent *agent,
+				GDBusMethodInvocation *invocation,
+				GVariant *parameters)
 {
 	g_dbus_method_invocation_return_dbus_error(invocation,
 	                "net.connman.Agent.Error.Canceled",
@@ -330,7 +390,7 @@ void method_call(GDBusConnection *connection, const gchar *sender,
 	else if(!strcmp(method_name, "RequestBrowser"))
 		request_browser(user_data, invocation, parameters);
 	else if(!strcmp(method_name, "RequestInput"))
-		request_input(user_data, invocation, parameters);
+		request_input_async(user_data, invocation, parameters);
 	else if(!strcmp(method_name, "RequestPeerAuthorization"))
 		request_peer_authorization(user_data, invocation, parameters);
 	else
