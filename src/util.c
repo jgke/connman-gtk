@@ -327,7 +327,7 @@ static gboolean show_error_sync(gpointer data)
 	struct error_params *params = data;
 
 	const gchar *title;
-	int flags, height;
+	int flags, mwidth, width, mheight, height;
 	GtkWidget *window, *area, *grid, *text, *logl, *log, *box;
 
 	if(params->log)
@@ -354,7 +354,7 @@ static gboolean show_error_sync(gpointer data)
 					    GTK_SHADOW_IN);
 	gtk_widget_set_halign(text, GTK_ALIGN_START);
 	label_align_text(GTK_LABEL(logl), 0, 0);
-	label_align_text(GTK_LABEL(log), 0, 0);
+	label_align_text(GTK_LABEL(log), 0, 0.5);
 	style_add_margin(text, MARGIN_LARGE);
 	style_add_margin(logl, MARGIN_LARGE);
 	style_add_margin(box, MARGIN_LARGE);
@@ -370,9 +370,16 @@ static gboolean show_error_sync(gpointer data)
 	gtk_grid_attach(GTK_GRID(grid), box, 0, 2, 1, 1);
 	gtk_widget_show_all(grid);
 
-	gtk_widget_get_preferred_height(log, NULL, &height);
+	gtk_widget_get_preferred_width(log, &mwidth, &width);
+	if(mwidth > width)
+		width = mwidth;
+	gtk_widget_get_preferred_height(log, &mheight, &height);
+	if(mheight > height)
+		height = mheight;
 	if(height > 150)
 		height = 150;
+	gtk_scrolled_window_set_min_content_width(GTK_SCROLLED_WINDOW(box),
+						  width);
 	gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(box),
 						   height);
 
