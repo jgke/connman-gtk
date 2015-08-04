@@ -59,7 +59,32 @@ struct token_element *token_new_text(const gchar *name, const gchar *value)
 	return elem;
 }
 
-struct token_element *token_new_entry(const gchar *name, gboolean secret)
+static void check_entry(GtkWidget *entry, gpointer user_data)
+{
+	gboolean valid = TRUE;
+	gboolean (*check)(GtkWidget *entry);
+	GtkDialog *window;
+	GtkStyleContext *context;
+
+	check = g_object_get_data(G_OBJECT(entry), "check");
+	window = g_object_get_data(G_OBJECT(entry), "window");
+	context = gtk_widget_get_style_context(entry);
+	if(check)
+		valid = check(entry);
+
+	if(!valid) {
+		gtk_style_context_add_class(context, "error");
+		gtk_dialog_set_response_sensitive(window,
+						  GTK_RESPONSE_ACCEPT, FALSE);
+	} else {
+		gtk_style_context_remove_class(context, "error");
+		gtk_dialog_set_response_sensitive(window,
+						  GTK_RESPONSE_ACCEPT, TRUE);
+	}
+}
+struct token_element *token_new_entry_full(const gchar *name, gboolean secret,
+					   const gchar *value,
+					   gboolean (*check)(GtkWidget *entry))
 {
 	GtkWidget *content;
 	struct token_element *elem;
@@ -67,6 +92,7 @@ struct token_element *token_new_entry(const gchar *name, gboolean secret)
 	content = gtk_entry_new();
 	elem = create_new(TOKEN_ELEMENT_ENTRY, name, content);
 	gtk_entry_set_activates_default(GTK_ENTRY(content), TRUE);
+
 	if(secret && strcmp(name, "Name") && strcmp(name, "Identity") &&
 	   strcmp(name, "WPS") && strcmp(name, "Username") &&
 	   strcmp(name, "Host") && strcmp(name, "OpenConnect.CACert") &&
@@ -74,7 +100,18 @@ struct token_element *token_new_entry(const gchar *name, gboolean secret)
 	   strcmp(name, "OpenConnect.VPNHost"))
 		gtk_entry_set_visibility(GTK_ENTRY(content), FALSE);
 
+	if(value)
+		gtk_entry_set_text(GTK_ENTRY(content), value);
+
+	g_object_set_data(G_OBJECT(content), "check", check);
+	g_signal_connect(content, "changed", G_CALLBACK(check_entry), NULL);
+
 	return elem;
+}
+
+struct token_element *token_new_entry(const gchar *name, gboolean secret)
+{
+	return token_new_entry_full(name, secret, NULL, NULL);
 }
 
 struct token_element *token_new_list(const gchar *name, GPtrArray *options)
@@ -153,6 +190,9 @@ static gboolean ask_tokens_sync(gpointer data)
 		struct token_element *elem = g_ptr_array_index(elements, i);
 		gtk_grid_attach(GTK_GRID(grid), elem->label, 0, i, 1, 1);
 		gtk_grid_attach(GTK_GRID(grid), elem->content, 1, i, 1, 1);
+		g_object_set_data(G_OBJECT(elem->content), "window", window);
+		if(elem->type == TOKEN_ELEMENT_ENTRY)
+			check_entry(elem->content, NULL);
 	}
 
 	gtk_widget_show_all(grid);

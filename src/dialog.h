@@ -38,6 +38,9 @@ struct token_element {
 };
 
 struct token_element *token_new_text(const gchar *name, const gchar *content);
+struct token_element *token_new_entry_full(const gchar *name, gboolean secret,
+					   const gchar *value,
+					   gboolean (*check)(GtkWidget *entry));
 struct token_element *token_new_entry(const gchar *name, gboolean secret);
 struct token_element *token_new_list(const gchar *name, GPtrArray *options);
 struct token_element *token_new_checkbox(const gchar *name);
