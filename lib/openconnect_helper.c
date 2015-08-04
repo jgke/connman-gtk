@@ -147,14 +147,16 @@ static GVariantDict *get_tokens(GHashTable *info)
 	host = g_hash_table_lookup(info, "Host");
 
 	cert = g_hash_table_lookup(info, "OpenConnect.ClientCert");
-	openconnect_set_client_cert(vpninfo, cert, NULL);
+	if(cert) {
+		openconnect_set_client_cert(vpninfo, cert, NULL);
+
+		// XXX: connman doesn't support configuring this
+		openconnect_passphrase_from_fsid(vpninfo);
+	}
 
 	cert = g_hash_table_lookup(info, "OpenConnect.CACert");
 	if(cert)
 		openconnect_set_cafile(vpninfo, cert);
-
-	// XXX: connman doesn't support configuring this
-	openconnect_passphrase_from_fsid(vpninfo);
 
 	openconnect_parse_url(vpninfo, host);
 
