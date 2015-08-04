@@ -269,7 +269,6 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		settings_add_entry(sett, manual, write_if_selected, NULL, conf,
 		                   "Netmask", ipvs, validator);
 	} else {
-		settings_add_text(manual, _("Prefix length"), NULL, NULL);
 		settings_add_prefix_entry(sett, manual, write_if_selected);
 		ipv6_privacy = settings_add_combo_box(sett, dhcp,
 		                                      always_write,
