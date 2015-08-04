@@ -360,6 +360,7 @@ static void service_toggle_connection_cb(GObject *source, GAsyncResult *res,
 	const gchar *ia = "GDBus.Error:net.connman.Error.InvalidArguments";
 	const gchar *c = "GDBus.Error:net.connman.Error.Canceled";
 	const gchar *ip = "GDBus.Error:net.connman.Error.InProgress";
+	const gchar *oa = "GDBus.Error:net.connman.Error.OperationAborted";
 	GError *error = NULL;
 	GVariant *out;
 	out = g_dbus_proxy_call_finish((GDBusProxy *)user_data, res, &error);
@@ -370,7 +371,8 @@ static void service_toggle_connection_cb(GObject *source, GAsyncResult *res,
 		 */
 		if(strncmp(ia, error->message, strlen(ia)) &&
 		   strncmp(c, error->message, strlen(c)) &&
-		   strncmp(ip, error->message, strlen(ip))) {
+		   strncmp(ip, error->message, strlen(ip)) &&
+		   strncmp(oa, error->message, strlen(oa))) {
 			g_warning("failed to toggle connection state: %s",
 			          error->message);
 			show_error(_("Failed to toggle connection state."),
