@@ -70,36 +70,30 @@ void request_browser(struct agent *agent, GDBusMethodInvocation *invocation,
 static GPtrArray *generate_entries(GVariant *args)
 {
 	gchar *key;
-	GVariant *value;
-	GVariant *service, *parameters;
+	GVariant *value, *parameters;
 	GVariantIter *iter;
 	GPtrArray *array;
 
 	array = g_ptr_array_new_full(1, (GDestroyNotify)free_token_element);
-	service = g_variant_get_child_value(args, 0);
 	parameters = g_variant_get_child_value(args, 1);
 	iter = g_variant_iter_new(parameters);
 	while(g_variant_iter_loop(iter, "{sv}", &key, &value)) {
-		GVariantIter *propertyiter = g_variant_iter_new(value);
-		gchar *prop;
-		GVariant *val;
-		while(g_variant_iter_loop(propertyiter, "{sv}", &prop, &val)) {
-			if(!strcmp(prop, "Requirement")) {
-				const gchar *req = g_variant_get_string(val, NULL);
-				if(!strcmp(req, "mandatory")) {
-					struct token_element *elem;
+		GVariantDict *dict = g_variant_dict_new(value);
+		const gchar *req;
 
-					elem = token_new_entry(key, TRUE);
-					g_ptr_array_add(array, elem);
-				}
+		g_variant_dict_lookup(dict, "Requirement", "&s", &req);
 
-			}
+		if(!strcmp(req, "mandatory")) {
+			struct token_element *elem;
+
+			elem = token_new_entry(key, TRUE);
+			g_ptr_array_add(array, elem);
 		}
-		g_variant_iter_free(propertyiter);
+
+		g_variant_dict_unref(dict);
 	}
 	g_variant_iter_free(iter);
 	g_variant_unref(parameters);
-	g_variant_unref(service);
 
 	return array;
 }
