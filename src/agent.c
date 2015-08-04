@@ -72,28 +72,49 @@ static GPtrArray *generate_entries(GVariant *args)
 	gchar *key;
 	GVariant *value, *parameters;
 	GVariantIter *iter;
+	GVariantDict *argdict;
 	GPtrArray *array;
 
 	array = g_ptr_array_new_full(1, (GDestroyNotify)free_token_element);
 	parameters = g_variant_get_child_value(args, 1);
+	argdict = g_variant_dict_new(parameters);
 	iter = g_variant_iter_new(parameters);
 	while(g_variant_iter_loop(iter, "{sv}", &key, &value)) {
-		GVariantDict *dict = g_variant_dict_new(value);
-		const gchar *req;
+		struct token_element *elem;
+		const gchar *req, *previous, *pp = "PreviousPassphrase";
+		GVariantDict *prevdict, *dict;
+		GVariant *prevv;
 
+		dict = g_variant_dict_new(value);
 		g_variant_dict_lookup(dict, "Requirement", "&s", &req);
 
-		if(!strcmp(req, "mandatory")) {
-			struct token_element *elem;
-
-			elem = token_new_entry(key, TRUE);
-			g_ptr_array_add(array, elem);
+		if(strcmp(req, "mandatory")) {
+			g_variant_dict_unref(dict);
+			continue;
 		}
 
+		if(strcmp(key, "Passphrase") ||
+		   !g_variant_dict_contains(argdict, pp)) {
+			elem = token_new_entry(key, TRUE);
+
+			g_ptr_array_add(array, elem);
+			g_variant_dict_unref(dict);
+			continue;
+		}
+
+		prevv = g_variant_dict_lookup_value(argdict, pp, NULL);
+		prevdict = g_variant_dict_new(prevv);
+		g_variant_dict_lookup(prevdict, "Value", "&s", &previous);
+		elem = token_new_entry_full(key, TRUE, previous, NULL);
+		g_variant_dict_unref(prevdict);
+		g_variant_unref(prevv);
+
+		g_ptr_array_add(array, elem);
 		g_variant_dict_unref(dict);
 	}
 	g_variant_iter_free(iter);
 	g_variant_unref(parameters);
+	g_variant_dict_unref(argdict);
 
 	return array;
 }
