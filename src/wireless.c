@@ -23,6 +23,7 @@
 #include <gtk/gtk.h>
 #include <string.h>
 
+#include "dialog.h"
 #include "main.h"
 #include "style.h"
 #include "technology.h"
@@ -85,20 +86,20 @@ void service_wireless_free(struct service *tech)
 	g_free(tech->data);
 }
 
-static void check_passphrase(GtkWidget *entry, gpointer user_data)
+static gboolean check_ssid(GtkWidget *entry)
 {
 	const gchar *str = gtk_entry_get_text(GTK_ENTRY(entry));
-	GtkStyleContext *context = gtk_widget_get_style_context(entry);
+	int len = strlen(str);
 
-	if(strlen(str) < 8 || strlen(str) > 63) {
-		gtk_style_context_add_class(context, "error");
-		gtk_dialog_set_response_sensitive(user_data,
-						  GTK_RESPONSE_ACCEPT, FALSE);
-	} else {
-		gtk_style_context_remove_class(context, "error");
-		gtk_dialog_set_response_sensitive(user_data,
-						  GTK_RESPONSE_ACCEPT, TRUE);
-	}
+	return len >= 1 && len <= 32;
+}
+
+static gboolean check_pass(GtkWidget *entry)
+{
+	const gchar *str = gtk_entry_get_text(GTK_ENTRY(entry));
+	int len = strlen(str);
+
+	return len >= 8 && len <= 63;
 }
 
 static void toggle_entry_mode(GtkToggleButton *button, gpointer user_data)
@@ -117,28 +118,16 @@ static void toggle_entry_mode(GtkToggleButton *button, gpointer user_data)
 
 void technology_wireless_tether(struct technology *tech)
 {
-	const gchar *title;
-	const gchar *ssid, *pass;
+	const gchar *title, *ssid, *pass;
 	GVariant *old_ssid, *old_pass;
-	int flags, status;
-	GtkWidget *window, *area, *grid, *ssid_l, *ssid_e, *passphrase_l,
-		  *passphrase_e, *toggle;
+	struct token_element *ssid_e, *pass_e, *check;
+	GPtrArray *tokens;
+	gboolean success;
 
-	grid = gtk_grid_new();
-	ssid_l = gtk_label_new(_("SSID"));
-	ssid_e = gtk_entry_new();
-	passphrase_l = gtk_label_new(_("Passphrase"));
-	passphrase_e = gtk_entry_new();
-	toggle = gtk_check_button_new_with_mnemonic(_("_Show password"));
+	ssid = pass = NULL;
+	tokens = g_ptr_array_new_full(3, (GDestroyNotify)free_token_element);
+
 	title = _("Set Access Point SSID and passphrase");
-	flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
-	window = gtk_dialog_new_with_buttons(title, GTK_WINDOW(main_window),
-	                                     flags,
-	                                     _("_OK"), GTK_RESPONSE_ACCEPT,
-	                                     _("_Cancel"), GTK_RESPONSE_CANCEL,
-	                                     NULL);
-	gtk_dialog_set_default_response(GTK_DIALOG(window),
-					GTK_RESPONSE_ACCEPT);
 
 	old_ssid = g_hash_table_lookup(tech->settings->properties,
 				       "TetheringIdentifier");
@@ -146,59 +135,31 @@ void technology_wireless_tether(struct technology *tech)
 				       "TetheringPassphrase");
 
 	if(old_ssid)
-		gtk_entry_set_text(GTK_ENTRY(ssid_e),
-				   g_variant_get_string(old_ssid, NULL));
+		ssid = g_variant_get_string(old_ssid, NULL);
 	if(old_pass)
-		gtk_entry_set_text(GTK_ENTRY(passphrase_e),
-				   g_variant_get_string(old_pass, NULL));
+		pass = g_variant_get_string(old_pass, NULL);
 
-	gtk_entry_set_activates_default(GTK_ENTRY(ssid_e), TRUE);
-	gtk_entry_set_activates_default(GTK_ENTRY(passphrase_e), TRUE);
-	gtk_entry_set_visibility(GTK_ENTRY(passphrase_e), FALSE);
-	gtk_entry_set_input_purpose(GTK_ENTRY(passphrase_e),
-				    GTK_INPUT_PURPOSE_PASSWORD);
+	ssid_e = token_new_entry_full(_("SSID"), FALSE, ssid, check_ssid);
+	pass_e = token_new_entry_full(_("Passphrase"), TRUE, pass, check_pass);
+	check = token_new_checkbox(_("_Show passphrase"));
+	g_ptr_array_add(tokens, ssid_e);
+	g_ptr_array_add(tokens, pass_e);
+	g_ptr_array_add(tokens, check);
 
-	g_signal_connect(toggle, "toggled", G_CALLBACK(toggle_entry_mode),
-			 passphrase_e);
-	g_signal_connect(passphrase_e, "changed", G_CALLBACK(check_passphrase),
-			 window);
-	check_passphrase(passphrase_e, window);
+	g_signal_connect(check->content, "toggled",
+			 G_CALLBACK(toggle_entry_mode), pass_e->content);
 
-	gtk_widget_set_halign(ssid_l, GTK_ALIGN_END);
-	gtk_widget_set_halign(passphrase_l, GTK_ALIGN_END);
-	style_add_margin(ssid_l, MARGIN_LARGE);
-	style_add_margin(ssid_e, MARGIN_LARGE);
-	gtk_widget_set_margin_bottom(ssid_l, 0);
-	gtk_widget_set_margin_bottom(ssid_e, 0);
-	style_add_margin(passphrase_l, MARGIN_LARGE);
-	style_add_margin(passphrase_e, MARGIN_LARGE);
-	gtk_widget_set_margin_bottom(passphrase_e, 0);
-	style_add_margin(toggle, MARGIN_LARGE);
-	gtk_widget_set_margin_top(toggle, MARGIN_SMALL);
-
-	gtk_grid_attach(GTK_GRID(grid), ssid_l, 0, 0, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), ssid_e, 1, 0, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), passphrase_l, 0, 1, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), passphrase_e, 1, 1, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), toggle, 1, 2, 1, 1);
-	gtk_widget_show_all(grid);
-
-	area = gtk_dialog_get_content_area(GTK_DIALOG(window));
-	gtk_container_add(GTK_CONTAINER(area), grid);
-	status = gtk_dialog_run(GTK_DIALOG(window));
-
-	if(status != GTK_RESPONSE_ACCEPT)
+	success = dialog_ask_tokens(title, tokens);
+	if(!success)
 		goto out;
-	ssid = gtk_entry_get_text(GTK_ENTRY(ssid_e));
-	pass = gtk_entry_get_text(GTK_ENTRY(passphrase_e));
 	technology_set_property(tech, "TetheringIdentifier",
-	                        g_variant_new("s", ssid));
+	                        g_variant_new("s", ssid_e->value));
 	technology_set_property(tech, "TetheringPassphrase",
-	                        g_variant_new("s", pass));
+	                        g_variant_new("s", pass_e->value));
 	technology_set_property(tech, "Tethering",
 	                        g_variant_new("b", TRUE));
 out:
-	gtk_widget_destroy(window);
+	g_ptr_array_free(tokens, TRUE);
 }
 
 void service_wireless_init(struct service *serv, GDBusProxy *proxy,
