@@ -81,6 +81,11 @@ void technology_services_updated(struct technology *item);
 void technology_add_service(struct technology *item, struct service *serv);
 void technology_service_updated(struct technology *item, struct service *serv);
 void technology_remove_service(struct technology *item, const gchar *path);
+GVariant *technology_get_property(struct technology *item, const gchar *key);
+const gchar *technology_get_property_string(struct technology *item,
+				      const gchar *key);
+gboolean technology_get_property_bool(struct technology *item,
+				      const gchar *key);
 void technology_set_property(struct technology *item, const gchar *key,
                              GVariant *value);
 void technology_free(struct technology *item);
