@@ -399,7 +399,7 @@ void service_toggle_connection(struct service *serv)
 	g_free(state);
 
 	g_dbus_proxy_call(serv->proxy, function, NULL,
-	                  G_DBUS_CALL_FLAGS_NONE, -1, NULL,
+	                  G_DBUS_CALL_FLAGS_NONE, CONNECTION_TIMEOUT, NULL,
 	                  service_toggle_connection_cb, serv->proxy);
 }
 

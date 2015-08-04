@@ -30,6 +30,8 @@
 #include "settings.h"
 #include "util.h"
 
+#define CONNECTION_TIMEOUT (120 * 1000)
+
 struct service {
 	enum connection_type type;
 	struct technology *tech;
