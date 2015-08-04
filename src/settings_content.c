@@ -882,6 +882,7 @@ GtkWidget *settings_add_prefix_entry(struct settings *sett,
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry), value);
 
 	add_left_aligned(GTK_GRID(page->grid), label, entry, page->index++);
+	gtk_widget_set_halign(entry, GTK_ALIGN_END);
 	gtk_widget_show_all(page->grid);
 
 	hash_table_set_dual_key(sett->contents, "IPv6.Configuration",

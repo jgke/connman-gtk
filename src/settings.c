@@ -270,6 +270,8 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		                   "Netmask", ipvs, validator);
 	} else {
 		settings_add_prefix_entry(sett, manual, write_if_selected);
+		gtk_widget_set_halign(manual->item, GTK_ALIGN_START);
+
 		ipv6_privacy = settings_add_combo_box(sett, dhcp,
 		                                      always_write,
 		                                      _("Privacy"), conf,
