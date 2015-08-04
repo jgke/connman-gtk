@@ -27,7 +27,8 @@ enum token_element_type {
 	TOKEN_ELEMENT_INVALID,
 	TOKEN_ELEMENT_TEXT,
 	TOKEN_ELEMENT_ENTRY,
-	TOKEN_ELEMENT_LIST
+	TOKEN_ELEMENT_LIST,
+	TOKEN_ELEMENT_CHECKBOX
 };
 
 struct token_element {
@@ -39,6 +40,7 @@ struct token_element {
 struct token_element *token_new_text(const gchar *name, const gchar *content);
 struct token_element *token_new_entry(const gchar *name, gboolean secret);
 struct token_element *token_new_list(const gchar *name, GPtrArray *options);
+struct token_element *token_new_checkbox(const gchar *name);
 void free_token_element(struct token_element *elem);
 
 gboolean dialog_ask_tokens(const gchar *title, GPtrArray *elements);

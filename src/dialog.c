@@ -94,6 +94,17 @@ struct token_element *token_new_list(const gchar *name, GPtrArray *options)
 	return elem;
 }
 
+struct token_element *token_new_checkbox(const gchar *name)
+{
+	GtkWidget *content;
+	struct token_element *elem;
+
+	content = gtk_check_button_new();
+	elem = create_new(TOKEN_ELEMENT_CHECKBOX, name, content);
+
+	return elem;
+}
+
 gchar *get_element_value(struct token_element *elem)
 {
 	gchar *value = NULL;
@@ -105,12 +116,11 @@ gchar *get_element_value(struct token_element *elem)
 	} else if(elem->type == TOKEN_ELEMENT_LIST) {
 		GtkComboBoxText *box = GTK_COMBO_BOX_TEXT(elem->content);
 		value = gtk_combo_box_text_get_active_text(box);
-	}
+	} else if(elem->type == TOKEN_ELEMENT_CHECKBOX)
+		value = GINT_TO_POINTER(1);
 
 	return value;
-
 }
-
 
 struct token_window_params {
 	GPtrArray *elements;
@@ -196,6 +206,7 @@ gboolean dialog_ask_tokens(const gchar *title, GPtrArray *elements)
 void free_token_element(struct token_element *elem)
 {
 	g_free(elem->name);
-	g_free(elem->value);
+	if(elem->type != TOKEN_ELEMENT_CHECKBOX)
+		g_free(elem->value);
 	g_free(elem);
 }
