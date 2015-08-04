@@ -35,7 +35,12 @@ static struct token_element *create_new(enum token_element_type type,
 	elem->value = NULL;
 	elem->name = g_strdup(name);
 
-	elem->label = gtk_label_new(name);
+	if(strchr(name, '_')) {
+		elem->label = gtk_label_new_with_mnemonic(name);
+		gtk_label_set_mnemonic_widget(GTK_LABEL(elem->label), content);
+	}
+	else
+		elem->label = gtk_label_new(name);
 	elem->content = content;
 
 	style_add_margin(elem->label, MARGIN_LARGE);
