@@ -599,6 +599,10 @@ void technology_set_property(struct technology *tech, const gchar *key,
 	if(error) {
 		g_warning("failed to set technology property %s: %s",
 		          key, error->message);
+		if(!strcmp(key, "Tethering") &&
+		   tech->type == CONNECTION_TYPE_ETHERNET &&
+		   strstr(error->message, "NotSupported"))
+			show_error(_("Failed to enable ethernet tethering.\nEthernet tethering has to be manually allowed in /etc/connman/main.conf."), NULL);
 		g_error_free(error);
 		return;
 	}
