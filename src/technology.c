@@ -106,14 +106,7 @@ static void update_status(struct technology *tech)
 	powered = technology_get_property_bool(tech, "Powered");
 	tethering = technology_get_property_bool(tech, "Tethering");
 	name = technology_get_property_string(tech, "Name");
-	if(tethering) {
-		gchar *nname;
-
-		nname = g_strdup_printf("%s - %s", name, _("Tethering"));
-		gtk_label_set_text(GTK_LABEL(item->title), nname);
-		g_free(nname);
-	} else
-		gtk_label_set_text(GTK_LABEL(item->title), name);
+	gtk_label_set_text(GTK_LABEL(item->title), name);
 
 	if(connected) {
 		gtk_label_set_text(GTK_LABEL(item->status), _("Connected"));
@@ -129,8 +122,12 @@ static void update_status(struct technology *tech)
 					     "network-wired-disconnected",
 					     GTK_ICON_SIZE_DIALOG);
 	if(powered) {
-		gtk_label_set_text(GTK_LABEL(item->status),
-				   _("Not connected"));
+		if(tethering)
+			gtk_label_set_text(GTK_LABEL(item->status),
+					   _("Tethering"));
+		else
+			gtk_label_set_text(GTK_LABEL(item->status),
+					   _("Not connected"));
 		gtk_widget_show(item->buttons);
 		gtk_widget_show(item->contents);
 	} else {
@@ -415,12 +412,9 @@ void free_technology_settings(struct technology_settings *item)
 
 void technology_property_changed(struct technology *tech, const gchar *key)
 {
-	if(!strcmp(key, "Powered"))
-		update_power(tech);
-	else if(!strcmp(key, "Connected"))
-		update_status(tech);
-	else if(!strcmp(key, "Tethering"))
-		update_tethering(tech);
+	update_power(tech);
+	update_status(tech);
+	update_tethering(tech);
 }
 
 void technology_add_service(struct technology *tech, struct service *serv)
