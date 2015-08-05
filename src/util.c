@@ -360,7 +360,8 @@ static gboolean show_error_sync(gpointer data)
 	style_add_margin(box, MARGIN_LARGE);
 	gtk_widget_set_hexpand(log, TRUE);
 	gtk_widget_set_vexpand(log, TRUE);
-	gtk_widget_set_margin_bottom(text, 0);
+	if(params->log)
+		gtk_widget_set_margin_bottom(text, 0);
 	gtk_widget_set_margin_bottom(logl, 0);
 	gtk_widget_set_margin_top(box, 0);
 
