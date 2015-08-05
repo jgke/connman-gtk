@@ -32,8 +32,10 @@ AC_ARG_WITH([openconnect],
 AS_CASE(["$with_openconnect"],
         [yes], [PKG_CHECK_MODULES([openconnect], [openconnect], [HAVE_OPENCONNECT=1])],
         [no], [HAVE_OPENCONNECT=0],
+        [dynamic], [PKG_CHECK_MODULES([openconnect], [openconnect], [HAVE_OPENCONNECT=2])],
         [PKG_CHECK_MODULES([openconnect], [openconnect], [HAVE_OPENCONNECT=1], [HAVE_OPENCONNECT=0])])
-AM_CONDITIONAL([USE_OPENCONNECT], [test "$with_openconnect" != no -a "$HAVE_OPENCONNECT" -eq 1])
+AM_CONDITIONAL([USE_OPENCONNECT], [test "$with_openconnect" != no -a "$HAVE_OPENCONNECT" -ne 0])
+AM_CONDITIONAL([USE_OPENCONNECT_DYNAMIC], [test "$HAVE_OPENCONNECT" -eq 2])
 
 AC_CONFIG_FILES([
   Makefile

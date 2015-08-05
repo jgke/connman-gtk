@@ -21,6 +21,16 @@ Installation
 	make
 	make install
 
+configure options
+-----------------
+
+	--with-openconnect=[yes,no,check,dynamic]
+
+Enables use of [openconnect](http://infradead.org/openconnect/) for easier
+authentication for AnyConnect VPNs. Using 'dynamic' will load the library at
+runtime, if present. Default argument is 'check' which checks for the library
+at configure time.
+
 License
 -------
 

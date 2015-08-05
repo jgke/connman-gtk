@@ -29,10 +29,7 @@
 #include "interfaces.h"
 #include "main.h"
 #include "style.h"
-
-#ifdef USE_OPENCONNECT
 #include "openconnect_helper.h"
-#endif
 
 GDBusConnection *conn = NULL;
 
@@ -134,30 +131,6 @@ static GVariantDict *generate_dict(GPtrArray *elements)
 	return dict;
 }
 
-#ifdef USE_OPENCONNECT
-static gboolean is_openconnect(GVariant *args)
-{
-	GVariantIter *iter;
-	gchar *path;
-	GVariant *value, *service, *parameters;
-	gboolean openconnect = FALSE;
-
-	service = g_variant_get_child_value(args, 0);
-	parameters = g_variant_get_child_value(args, 1);
-
-	iter = g_variant_iter_new(parameters);
-
-	while(g_variant_iter_loop(iter, "{sv}", &path, &value))
-		openconnect = openconnect || strstr(path, "OpenConnect");
-	g_variant_iter_free(iter);
-
-	g_variant_unref(service);
-	g_variant_unref(parameters);
-
-	return openconnect;
-}
-#endif
-
 struct request_input_params {
 	struct agent *agent;
 	GDBusMethodInvocation *invocation;
@@ -175,7 +148,6 @@ gpointer request_input(gpointer data)
 	GPtrArray *entries = NULL;
 	int success = 0;
 
-#ifdef USE_OPENCONNECT
 	if(!is_openconnect(parameters)) {
 		entries = generate_entries(parameters);
 		success = dialog_ask_tokens(_("Authentication required"),
@@ -185,12 +157,6 @@ gpointer request_input(gpointer data)
 	}
 	else
 		dict = openconnect_handle(invocation, parameters);
-#else
-	entries = generate_entries(parameters);
-	success = dialog_ask_tokens(entries);
-	if(success)
-		dict = generate_dict(entries);
-#endif
 
 	if(!dict) {
 		g_dbus_method_invocation_return_dbus_error(invocation,

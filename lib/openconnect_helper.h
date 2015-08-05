@@ -26,5 +26,6 @@
 
 GVariantDict *openconnect_handle(GDBusMethodInvocation *invocation,
 				 GVariant *args);
+gboolean is_openconnect(GVariant *args);
 
 #endif /* _CONNMAN_GTK_OPENCONNECT_H */

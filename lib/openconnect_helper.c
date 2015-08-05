@@ -19,9 +19,12 @@
  */
 
 #include <glib.h>
-#include <glib/gi18n.h>
 #include <gio/gio.h>
+
+#ifdef USE_OPENCONNECT
+
 #include <openconnect.h>
+#include <glib/gi18n.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -29,6 +32,86 @@
 #include "openconnect_helper.h"
 #include "../src/util.h"
 #include "../src/dialog.h"
+
+#ifdef USE_OPENCONNECT_DYNAMIC
+#include <dlfcn.h>
+#endif /* USE_OPENCONNECT_DYNAMIC */
+
+typedef int (*init_ssl_fn)(void);
+typedef int (*validate_cert_fn) (void *privdata, const char *reason);
+typedef int (*write_config_fn) (void *privdata, const char *buf, int buflen);
+typedef int (*process_form_fn) (void *privdata, struct oc_auth_form *form);
+typedef void (*show_progress_fn) (void *privdata, int level,
+                                  const char *fmt, ...);
+typedef struct openconnect_info *(*vpninfo_new_fn)(const char *useragent,
+                                                   validate_cert_fn,
+                                                   write_config_fn,
+                                                   process_form_fn,
+                                                   show_progress_fn,
+                                                   void *privdata);
+typedef const char *(*get_cookie_fn)(struct openconnect_info *);
+typedef const char *(*get_hostname_fn)(struct openconnect_info *);
+typedef void (*vpninfo_free_fn)(struct openconnect_info *vpninfo);
+typedef int (*set_client_cert_fn)(struct openconnect_info *, const char *cert,
+                                  const char *sslkey);
+typedef int (*passphrase_from_fsid_fn)(struct openconnect_info *vpninfo);
+typedef int (*obtain_cookie_fn)(struct openconnect_info *vpninfo);
+typedef int (*set_cafile_fn)(struct openconnect_info *, const char *);
+typedef int (*parse_url_fn)(struct openconnect_info *vpninfo, const char *url);
+typedef int (*obtain_cookie_fn)(struct openconnect_info *vpninfo);
+typedef const char *(*get_peer_cert_hash_fn)(struct openconnect_info *vpninfo);
+
+static init_ssl_fn init_ssl;
+static vpninfo_new_fn vpninfo_new;
+static get_cookie_fn get_cookie;
+static get_hostname_fn get_hostname;
+static vpninfo_free_fn vpninfo_free;
+static set_client_cert_fn set_client_cert;
+static passphrase_from_fsid_fn passphrase_from_fsid;
+static set_cafile_fn set_cafile;
+static parse_url_fn parse_url;
+static obtain_cookie_fn obtain_cookie;
+static get_peer_cert_hash_fn get_peer_cert_hash;
+
+static gboolean init_lib(void) {
+	static gboolean initialized = FALSE;
+	static gboolean loaded = FALSE;
+	if(initialized)
+		return loaded;
+	initialized = TRUE;
+#ifndef USE_OPENCONNECT_DYNAMIC
+	init_ssl = openconnect_init_ssl;
+	vpninfo_new = openconnect_vpninfo_new;
+	get_cookie = openconnect_get_cookie;
+	get_hostname = openconnect_get_hostname;
+	vpninfo_free = openconnect_vpninfo_free;
+	set_client_cert = openconnect_set_client_cert;
+	passphrase_from_fsid = openconnect_passphrase_from_fsid;
+	set_cafile = openconnect_set_cafile;
+	parse_url = openconnect_parse_url;
+	obtain_cookie = openconnect_obtain_cookie;
+	get_peer_cert_hash = openconnect_get_peer_cert_hash;
+#else
+	void *lib = dlopen("libopenconnect.so", RTLD_NOW);
+	/* technically this shouldn't fail since getting here depends
+	 * on ConnMan having openconnect support */
+	if(!lib)
+		return FALSE;
+	init_ssl = dlsym(lib, "openconnect_init_ssl");
+	vpninfo_new = dlsym(lib, "openconnect_vpninfo_new");
+	get_cookie = dlsym(lib, "openconnect_get_cookie");
+	get_hostname = dlsym(lib, "openconnect_get_hostname");
+	vpninfo_free = dlsym(lib, "openconnect_vpninfo_free");
+	set_client_cert = dlsym(lib, "openconnect_set_client_cert");
+	passphrase_from_fsid = dlsym(lib, "openconnect_passphrase_from_fsid");
+	set_cafile = dlsym(lib, "openconnect_set_cafile");
+	parse_url = dlsym(lib, "openconnect_parse_url");
+	obtain_cookie = dlsym(lib, "openconnect_obtain_cookie");
+	get_peer_cert_hash = dlsym(lib, "openconnect_get_peer_cert_hash");
+#endif /* USE_OPENCONNECT_DYNAMIC */
+	loaded = TRUE;
+	return TRUE;
+};
 
 GString *progress;
 
@@ -140,27 +223,27 @@ static GVariantDict *get_tokens(GHashTable *info)
 	int status;
 
 	progress = g_string_new(NULL);
-	openconnect_init_ssl();
-	vpninfo = openconnect_vpninfo_new("linux-64", invalid_cert, new_config,
-					  ask_pass, show_progress, NULL);
+	init_ssl();
+	vpninfo = vpninfo_new("linux-64", invalid_cert, new_config,
+			      ask_pass, show_progress, NULL);
 
 	host = g_hash_table_lookup(info, "Host");
 
 	cert = g_hash_table_lookup(info, "OpenConnect.ClientCert");
 	if(cert) {
-		openconnect_set_client_cert(vpninfo, cert, NULL);
+		set_client_cert(vpninfo, cert, NULL);
 
 		// XXX: connman doesn't support configuring this
-		openconnect_passphrase_from_fsid(vpninfo);
+		passphrase_from_fsid(vpninfo);
 	}
 
 	cert = g_hash_table_lookup(info, "OpenConnect.CACert");
 	if(cert)
-		openconnect_set_cafile(vpninfo, cert);
+		set_cafile(vpninfo, cert);
 
-	openconnect_parse_url(vpninfo, host);
+	parse_url(vpninfo, host);
 
-	status = openconnect_obtain_cookie(vpninfo);
+	status = obtain_cookie(vpninfo);
 	if(status) {
 		if(status != OC_FORM_RESULT_CANCELLED)
 			show_error(_("Connecting to VPN failed."),
@@ -171,14 +254,14 @@ static GVariantDict *get_tokens(GHashTable *info)
 	tokens = g_variant_dict_new(NULL);
 
 	g_variant_dict_insert(tokens, "OpenConnect.ServerCert", "s",
-			      openconnect_get_peer_cert_hash(vpninfo));
+			      get_peer_cert_hash(vpninfo));
 	g_variant_dict_insert(tokens, "OpenConnect.Cookie", "s",
-			      openconnect_get_cookie(vpninfo));
+			      get_cookie(vpninfo));
 	g_variant_dict_insert(tokens, "OpenConnect.VPNHost", "s",
-			      openconnect_get_hostname(vpninfo));
+			      get_hostname(vpninfo));
 
 out:
-	openconnect_vpninfo_free(vpninfo);
+	vpninfo_free(vpninfo);
 	g_string_free(progress, TRUE);
 	return tokens;
 }
@@ -192,6 +275,9 @@ GVariantDict *openconnect_handle(GDBusMethodInvocation *invocation,
 	gchar *key;
 	GVariant *value;
 	GVariant *parameters;
+
+	if(!init_lib())
+		return NULL;
 
 	parameters = g_variant_get_child_value(args, 1);
 
@@ -228,3 +314,40 @@ GVariantDict *openconnect_handle(GDBusMethodInvocation *invocation,
 
 	return out;
 }
+
+gboolean is_openconnect(GVariant *args)
+{
+	GVariantIter *iter;
+	gchar *path;
+	GVariant *value, *service, *parameters;
+	gboolean openconnect = FALSE;
+
+	service = g_variant_get_child_value(args, 0);
+	parameters = g_variant_get_child_value(args, 1);
+
+	iter = g_variant_iter_new(parameters);
+
+	while(g_variant_iter_loop(iter, "{sv}", &path, &value))
+		openconnect = openconnect || strstr(path, "OpenConnect");
+	g_variant_iter_free(iter);
+
+	g_variant_unref(service);
+	g_variant_unref(parameters);
+
+	return openconnect && init_lib();
+}
+
+#else
+
+GVariantDict *openconnect_handle(GDBusMethodInvocation *invocation,
+				 GVariant *args)
+{
+	return NULL;
+}
+
+gboolean is_openconnect(GVariant *args)
+{
+	return FALSE;
+}
+
+#endif /* USE_OPENCONNECT */
