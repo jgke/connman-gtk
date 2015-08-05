@@ -24,6 +24,7 @@
 #include "interfaces.h"
 #include "main.h"
 #include "technology.h"
+#include "service.h"
 #include "vpn.h"
 
 static struct technology *tech;
@@ -153,6 +154,36 @@ struct technology *vpn_register(GDBusConnection *conn, GtkWidget *list,
 	g_signal_connect(proxy, "g-signal", G_CALLBACK(vpn_signal), NULL);
 	tech = create_vpn_technology();
 	return tech;
+}
+
+void vpn_update_status(struct technology *tech)
+{
+	GHashTableIter iter;
+	gpointer key, value;
+	struct technology_settings *item;
+	int status = 0;
+
+	item = tech->settings;
+	g_hash_table_iter_init(&iter, tech->services);
+	while(g_hash_table_iter_next(&iter, &key, &value)) {
+		gchar *state;
+
+		state = service_get_property_string_raw(value, "State", NULL);
+		if(status < 2 && !strcmp(state, "ready"))
+			status = 2;
+		else if(status < 1 && !strcmp(state, "configuration"))
+			status = 1;
+
+		g_free(state);
+	}
+
+	gtk_label_set_text(GTK_LABEL(item->title), _("VPN"));
+	if(status == 2)
+		gtk_label_set_text(GTK_LABEL(item->status), _("Connected"));
+	else if(status == 1)
+		gtk_label_set_text(GTK_LABEL(item->status), _("Connecting"));
+	else
+		gtk_label_set_text(GTK_LABEL(item->status), _("Not connected"));
 }
 
 void vpn_get_connections(GDBusProxy *manager_proxy)

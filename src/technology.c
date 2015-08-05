@@ -96,6 +96,11 @@ static void update_status(struct technology *tech)
 	gboolean connected, powered, tethering;
 	const gchar *name;
 
+	if(tech->type == CONNECTION_TYPE_VPN) {
+		vpn_update_status(tech);
+		return;
+	}
+
 	item = tech->settings;
 	connected = technology_get_property_bool(tech, "Connected");
 	powered = technology_get_property_bool(tech, "Powered");
@@ -112,14 +117,14 @@ static void update_status(struct technology *tech)
 
 	if(connected) {
 		gtk_label_set_text(GTK_LABEL(item->status), _("Connected"));
-		if(item->technology->type == CONNECTION_TYPE_ETHERNET)
+		if(tech->type == CONNECTION_TYPE_ETHERNET)
 			gtk_image_set_from_icon_name(GTK_IMAGE(item->icon),
 						     "network-wired",
 						     GTK_ICON_SIZE_DIALOG);
 		return;
 	}
 
-	if(item->technology->type == CONNECTION_TYPE_ETHERNET)
+	if(tech->type == CONNECTION_TYPE_ETHERNET)
 		gtk_image_set_from_icon_name(GTK_IMAGE(item->icon),
 					     "network-wired-disconnected",
 					     GTK_ICON_SIZE_DIALOG);
@@ -418,26 +423,35 @@ void technology_property_changed(struct technology *tech, const gchar *key)
 		update_tethering(tech);
 }
 
-void technology_add_service(struct technology *item, struct service *serv)
+void technology_add_service(struct technology *tech, struct service *serv)
 {
-	gtk_container_add(GTK_CONTAINER(item->settings->services), serv->item);
-	g_hash_table_insert(item->services, g_strdup(serv->path), serv);
+	gtk_container_add(GTK_CONTAINER(tech->settings->services), serv->item);
+	g_hash_table_insert(tech->services, g_strdup(serv->path), serv);
+
+	if(tech->type == CONNECTION_TYPE_VPN)
+		vpn_update_status(tech);
 }
 
-void technology_service_updated(struct technology *item, struct service *serv)
+void technology_service_updated(struct technology *tech, struct service *serv)
 {
-	if(item->settings->selected == serv)
-		update_connect_button(item);
+	if(tech->settings->selected == serv)
+		update_connect_button(tech);
+
+	if(tech->type == CONNECTION_TYPE_VPN)
+		vpn_update_status(tech);
 }
 
-void technology_remove_service(struct technology *item, const gchar *path)
+void technology_remove_service(struct technology *tech, const gchar *path)
 {
-	if(item->settings->selected == g_hash_table_lookup(item->services,
-	                path)) {
-		item->settings->selected = NULL;
-		update_connect_button(item);
+	if(tech->settings->selected == g_hash_table_lookup(tech->services,
+							   path)) {
+		tech->settings->selected = NULL;
+		update_connect_button(tech);
 	}
-	g_hash_table_remove(item->services, path);
+	g_hash_table_remove(tech->services, path);
+
+	if(tech->type == CONNECTION_TYPE_VPN)
+		vpn_update_status(tech);
 }
 
 void technology_free(struct technology *item)

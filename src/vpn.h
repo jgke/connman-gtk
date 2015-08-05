@@ -27,6 +27,7 @@
 
 struct technology *vpn_register(GDBusConnection *connection, GtkWidget *list,
                                 GtkWidget *notebook);
+void vpn_update_status(struct technology *tech);
 void vpn_get_connections(GDBusProxy *proxy);
 void vpn_clear_properties(struct service *serv);
 
