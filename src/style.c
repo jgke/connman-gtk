@@ -26,15 +26,26 @@ GtkCssProvider *css_provider;
 
 void style_init()
 {
+	static const char *stylesheet;
 	GError *error = NULL;
+
+	stylesheet = "" \
+		      ".cm-header-title {" \
+		      "  font-weight: bold;" \
+		      "}" \
+		      ".cm-wireless-hidden {" \
+		      "  font-style: italic;" \
+		      "}" \
+		      ".cm-log {" \
+		      "  background-color: white;" \
+		      "  padding: 5px;" \
+		      "}" \
+		      "";
+
 	css_provider = gtk_css_provider_new();
-	gtk_css_provider_load_from_path(css_provider,
-	                                CONNMAN_GTK_UIDIR "stylesheet.css",
-	                                &error);
+	gtk_css_provider_load_from_data(css_provider, stylesheet, -1, &error);
 	if(error != NULL) {
-		g_warning("couldn't load stylesheet %s: %s",
-		          CONNMAN_GTK_UIDIR "stylesheet.css",
-		          error->message);
+		g_warning("couldn't load stylesheet: %s", error->message);
 		g_error_free(error);
 	}
 }

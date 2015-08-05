@@ -3,8 +3,6 @@ ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 desktopdir = $(datadir)/applications
 desktop_DATA = connman-gtk.desktop
 
-uidir = $(datadir)/connman-gtk/
-ui_DATA = src/stylesheet.css
 bin_PROGRAMS = connman-gtk
 connman_gtk_SOURCES = src/main.c src/agent.c src/style.c src/technology.c \
 		      src/service.c src/util.c src/settings.c \
@@ -18,7 +16,7 @@ connman_gtk_CPPFLAGS = @GTK_CFLAGS@ @GLib_CFLAGS@ \
 EXTRA_DIST = src/agent.h src/interfaces.h src/main.h src/technology.h \
 	     src/style.h src/service.h src/util.h src/settings.h \
 	     src/settings_content.h src/connection.h src/vpn.h src/wireless.h \
-	     src/dialog.h src/stylesheet.css README.md
+	     src/dialog.h README.md
 
 if USE_OPENCONNECT
 connman_gtk_SOURCES += lib/openconnect_helper.c
