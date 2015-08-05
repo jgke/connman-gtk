@@ -392,6 +392,8 @@ void free_technology_settings(struct technology_settings *item)
 	g_object_unref(item->icon);
 	g_object_unref(item->title);
 	g_object_unref(item->status);
+	g_object_unref(item->filler);
+	g_object_unref(item->tethering);
 	g_object_unref(item->power_switch);
 	g_object_unref(item->contents);
 	g_object_unref(item->services);

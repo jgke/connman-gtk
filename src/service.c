@@ -349,6 +349,8 @@ void service_free(struct service *serv)
 	dual_hash_table_unref(serv->properties);
 	gtk_widget_destroy(serv->item);
 	g_object_unref(serv->item);
+	g_object_unref(serv->contents);
+	g_object_unref(serv->header);
 	if(serv->type == CONNECTION_TYPE_WIRELESS)
 		service_wireless_free(serv);
 	g_free(serv);
