@@ -83,11 +83,10 @@ static void free_list_item(struct technology_list_item *item)
 static gboolean toggle_power(GtkSwitch *widget, GParamSpec *pspec,
                              gpointer user_data)
 {
-	struct technology_settings *item = user_data;
+	struct technology *tech = user_data;
 	gboolean state = gtk_switch_get_active(widget);
 
-	technology_set_property(item->technology, "Powered",
-	                        g_variant_new("b", state));
+	technology_set_property(tech, "Powered", g_variant_new("b", state));
 	return TRUE;
 }
 
@@ -316,7 +315,7 @@ struct technology_settings *technology_create_settings(struct technology *tech,
 	g_object_ref(item->tethering);
 
 	item->powersig = g_signal_connect(item->power_switch, "notify::active",
-	                                  G_CALLBACK(toggle_power), item);
+	                                  G_CALLBACK(toggle_power), tech);
 	gtk_list_box_set_selection_mode(GTK_LIST_BOX(item->services),
 	                                GTK_SELECTION_SINGLE);
 	gtk_list_box_set_header_func(GTK_LIST_BOX(item->services),
