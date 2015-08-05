@@ -240,10 +240,16 @@ static void add_ipv_page(struct settings *sett, int ipv)
 
 	if(ipv == 4)
 		dhcp = add_page_to_combo_box(sett, box, "dhcp", _("Automatic"),
-		                             !strcmp("dhcp", cur));
+		                             !strcmp("dhcp", cur) ||
+					     !strcmp("fixed", cur));
 	else
 		dhcp = add_page_to_combo_box(sett, box, "auto", _("Automatic"),
-		                             !strcmp("auto", cur));
+		                             !strcmp("auto", cur) ||
+					     !strcmp("fixed", cur));
+
+	if(!strcmp(cur, "fixed"))
+		return;
+
 	manual = add_page_to_combo_box(sett, box, "manual", _("Manual"),
 	                               !strcmp("manual", cur));
 	g_free(cur);
