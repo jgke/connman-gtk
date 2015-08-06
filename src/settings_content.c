@@ -144,7 +144,7 @@ static struct settings_content *create_base_content(struct settings *sett,
 	return content;
 }
 
-static void add_left_aligned(GtkGrid *grid, GtkWidget *a, GtkWidget *b, int y)
+static void add_centered(GtkGrid *grid, GtkWidget *a, GtkWidget *b, int y)
 {
 	gtk_widget_set_margin_start(b, MARGIN_SMALL);
 	gtk_widget_set_margin_bottom(b, MARGIN_SMALL);
@@ -155,10 +155,12 @@ static void add_left_aligned(GtkGrid *grid, GtkWidget *a, GtkWidget *b, int y)
 		gtk_widget_set_margin_start(a, MARGIN_LARGE);
 		gtk_widget_set_margin_end(a, MARGIN_SMALL);
 		gtk_widget_set_margin_bottom(a, MARGIN_SMALL);
-		gtk_widget_set_halign(a, GTK_ALIGN_START);
-		gtk_widget_set_hexpand(a, TRUE);
+		gtk_widget_set_halign(a, GTK_ALIGN_END);
+		gtk_widget_set_hexpand(a, FALSE);
 		gtk_grid_attach(grid, a, 0, y, 1, 1);
 		gtk_grid_attach(grid, b, 1, y, 1, 1);
+		label_align_text(GTK_LABEL(a), 1, 0);
+		gtk_label_set_justify(GTK_LABEL(a), GTK_JUSTIFY_RIGHT);
 	} else {
 		gtk_widget_set_margin_start(b, MARGIN_LARGE);
 		gtk_grid_attach(grid, b, 0, y, 2, 1);
@@ -179,7 +181,9 @@ GtkWidget *settings_add_static_text(struct settings_page *page,
 	gtk_label_set_selectable(GTK_LABEL(value_w), TRUE);
 	label_align_text(GTK_LABEL(value_w), 0, 0);
 
-	add_left_aligned(GTK_GRID(page->grid), label_w, value_w, page->index++);
+	add_centered(GTK_GRID(page->grid), label_w, value_w, page->index++);
+	if(!text)
+		gtk_widget_set_halign(label_w, GTK_ALIGN_START);
 	gtk_widget_show_all(page->grid);
 
 	content->data = value_w;
@@ -205,9 +209,13 @@ GtkWidget *settings_add_text(struct settings_page *page, const gchar *label,
 	g_free(value);
 
 	gtk_label_set_selectable(GTK_LABEL(value_w), TRUE);
+	label_align_text(GTK_LABEL(label_w), 1, 0);
+	gtk_label_set_justify(GTK_LABEL(label_w), GTK_JUSTIFY_RIGHT);
 	label_align_text(GTK_LABEL(value_w), 0, 0);
 
-	add_left_aligned(GTK_GRID(page->grid), label_w, value_w, page->index++);
+	add_centered(GTK_GRID(page->grid), label_w, value_w, page->index++);
+	if(!key)
+		gtk_widget_set_halign(label_w, GTK_ALIGN_START);
 	gtk_widget_show_all(page->grid);
 
 	if(key) {
@@ -287,7 +295,7 @@ GtkWidget *settings_add_entry(struct settings *sett, struct settings_page *page,
 	else if(!strncmp(key, "IPv6", 4))
 		gtk_entry_set_width_chars(GTK_ENTRY(entry), 8*4 + 7);
 
-	add_left_aligned(GTK_GRID(page->grid), label_w, entry, page->index++);
+	add_centered(GTK_GRID(page->grid), label_w, entry, page->index++);
 	gtk_widget_show_all(page->grid);
 
 	hash_table_set_dual_key(sett->contents, key, subkey, content);
@@ -318,7 +326,7 @@ GtkWidget *settings_add_switch(struct settings *sett,
 
 	gtk_switch_set_active(GTK_SWITCH(toggle), value);
 
-	add_left_aligned(GTK_GRID(page->grid), label_w, toggle, page->index++);
+	add_centered(GTK_GRID(page->grid), label_w, toggle, page->index++);
 	gtk_widget_show_all(page->grid);
 
 	hash_table_set_dual_key(sett->contents, key, subkey, content);
@@ -370,7 +378,7 @@ GtkWidget *settings_add_combo_box(struct settings *sett,
 	g_signal_connect(box, "changed", G_CALLBACK(combo_box_changed),
 	                 notebook);
 
-	add_left_aligned(GTK_GRID(page->grid), label_w, box, page->index++);
+	add_centered(GTK_GRID(page->grid), label_w, box, page->index++);
 	gtk_widget_set_margin_bottom(label_w, MARGIN_LARGE);
 	gtk_widget_set_margin_bottom(box, MARGIN_LARGE);
 	gtk_grid_attach(GTK_GRID(page->grid), notebook, 0, page->index++, 2, 1);
@@ -881,7 +889,9 @@ GtkWidget *settings_add_prefix_entry(struct settings *sett,
 						 "IPv6", "PrefixLength");
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(entry), value);
 
-	add_left_aligned(GTK_GRID(page->grid), label, entry, page->index++);
+	add_centered(GTK_GRID(page->grid), label, entry, page->index++);
+	gtk_label_set_line_wrap(GTK_LABEL(label), FALSE);
+
 	gtk_widget_set_halign(entry, GTK_ALIGN_END);
 	gtk_widget_show_all(page->grid);
 
