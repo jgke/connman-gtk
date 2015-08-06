@@ -55,7 +55,6 @@ typedef void (*vpninfo_free_fn)(struct openconnect_info *vpninfo);
 typedef int (*set_client_cert_fn)(struct openconnect_info *, const char *cert,
                                   const char *sslkey);
 typedef int (*passphrase_from_fsid_fn)(struct openconnect_info *vpninfo);
-typedef int (*obtain_cookie_fn)(struct openconnect_info *vpninfo);
 typedef int (*set_cafile_fn)(struct openconnect_info *, const char *);
 typedef int (*parse_url_fn)(struct openconnect_info *vpninfo, const char *url);
 typedef int (*obtain_cookie_fn)(struct openconnect_info *vpninfo);
