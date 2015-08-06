@@ -414,6 +414,39 @@ static void add_immutable_openconnect_page(struct settings *sett)
 			  "OpenConnect.VPNHost", NULL);
 }
 
+static void add_immutable_openvpn_page(struct settings *sett)
+{
+	struct settings_page *page;
+
+	page = add_page_to_settings(sett, "OpenVPN", TRUE);
+	settings_add_text(page, _("Certificate Authority file"),
+			  "OpenVPN.CACert", NULL);
+	settings_add_text(page, _("Client certificate file"),
+			  "OpenVPN.Cert", NULL);
+	settings_add_text(page, _("Client private key file"),
+			  "OpenVPN.Key", NULL);
+	settings_add_text(page, _("Maximum transmission unit (MTU)"),
+			  "OpenVPN.MTU", NULL);
+	settings_add_text(page, _("Peer certificate type"),
+			  "OpenVPN.NSCertType", NULL);
+	settings_add_text(page, _("Protocol"), "OpenVPN.Proto", NULL);
+	settings_add_text(page, _("Port"), "OpenVPN.Port", NULL);
+	settings_add_text(page, _("Authenticate using username/password"),
+			  "OpenVPN.AuthUserPass", NULL);
+	settings_add_text(page, _("Private key password file"),
+			  "OpenVPN.AskPass", NULL);
+	settings_add_text(page, _("Do not cache password"),
+			  "OpenVPN.AuthNoCache", NULL);
+	settings_add_text(page, _("Cipher"), "OpenVPN.Cipher", NULL);
+	settings_add_text(page,
+			  _("Message digest algorithm for packet authentication"),
+			  "OpenVPN.Auth", NULL);
+	settings_add_text(page, _("Use fast LZO compression"),
+			  "OpenVPN.CompLZO", NULL);
+	settings_add_text(page, _("External configuration file"),
+			  "OpenVPN.ConfigFile", NULL);
+}
+
 static void clear_cb(GtkWidget *button, gpointer user_data)
 {
 	service_clear_properties(user_data);
@@ -476,6 +509,8 @@ static void add_pages(struct settings *sett)
 						       "Type", NULL);
 		if(!strcmp(type, "openconnect"))
 			add_immutable_openconnect_page(sett);
+		else if(!strcmp(type, "openvpn"))
+			add_immutable_openvpn_page(sett);
 		g_free(type);
 		return;
 	}
