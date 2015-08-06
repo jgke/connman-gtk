@@ -454,7 +454,7 @@ static gchar *wireless_name(struct service *serv)
 	       security_level == 1 ? _("Hidden WPS secured network") :
 	       _("Hidden unsecured network"));
 	g_strfreev(security);
-	return strdup(out);
+	return g_strdup(out);
 }
 
 gchar *service_get_property_string(struct service *serv, const char *key,
