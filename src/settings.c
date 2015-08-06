@@ -447,6 +447,30 @@ static void add_immutable_openvpn_page(struct settings *sett)
 			  "OpenVPN.ConfigFile", NULL);
 }
 
+static void add_immutable_vpnc_page(struct settings *sett)
+{
+	struct settings_page *page;
+
+	page = add_page_to_settings(sett, "VPNC", TRUE);
+	settings_add_text(page, _("Group username"), "VPNC.IPSec.ID", NULL);
+	settings_add_text(page, _("Username"), "VPNC.XAuth.ID", NULL);
+	settings_add_text(page, _("IKE Authentication mode"),
+			  "VPNC.IKE.Authmode", NULL);
+	settings_add_text(page, _("Diffie-Hellman group"), "VPNC.PFS", NULL);
+	settings_add_text(page, _("Domain"), "VPNC.Domain", NULL);
+	settings_add_text(page, _("Vendor"), "VPNC.Vendor", NULL);
+	settings_add_text(page, _("Local port"), "VPNC.LocalPort", NULL);
+	settings_add_text(page, _("Cisco port"), "VPNC.CiscoPort", NULL);
+	settings_add_text(page, _("Application version"), "VPNC.AppVersion",
+			  NULL);
+	settings_add_text(page, _("NAT traversal method"), "VPNC.NATTMode",
+			  NULL);
+	settings_add_text(page, _("DPD idle timeout"), "VPNC.DPDTimeout", NULL);
+	settings_add_text(page, _("Single DES encryption"), "VPNC.SingleDES",
+			  NULL);
+	settings_add_text(page, _("No encryption"), "VPNC.NoEncryption", NULL);
+}
+
 static void clear_cb(GtkWidget *button, gpointer user_data)
 {
 	service_clear_properties(user_data);
@@ -511,6 +535,8 @@ static void add_pages(struct settings *sett)
 			add_immutable_openconnect_page(sett);
 		else if(!strcmp(type, "openvpn"))
 			add_immutable_openvpn_page(sett);
+		else if(!strcmp(type, "vpnc"))
+			add_immutable_vpnc_page(sett);
 		g_free(type);
 		return;
 	}
