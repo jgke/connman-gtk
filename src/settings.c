@@ -399,6 +399,10 @@ static void add_route_pages(struct settings *sett)
 	settings_add_route_list(sett, page, "UserRoutes", FALSE, always_write);
 }
 
+/*
+ * TODO: Reorder text fields
+ * TODO: Show empty fields properly
+ */
 static void add_immutable_openconnect_page(struct settings *sett)
 {
 	struct settings_page *page;
@@ -471,6 +475,88 @@ static void add_immutable_vpnc_page(struct settings *sett)
 	settings_add_text(page, _("No encryption"), "VPNC.NoEncryption", NULL);
 }
 
+static void add_immutable_l2tp_page(struct settings *sett)
+{
+	struct settings_page *page;
+
+	page = add_page_to_settings(sett, "L2TP", TRUE);
+	settings_add_text(page, _("Username"), "L2TP.User", NULL);
+	settings_add_text(page, _("Maximum bandwidth (bps)"), "L2TP.BPS", NULL);
+	settings_add_text(page, _("Maximum transmit bandwidth (tx)"),
+			  "L2TP.TXBPS", NULL);
+	settings_add_text(page, _("Maximum receive bandwidth (rx)"),
+			  "L2TP.RXBPS", NULL);
+	settings_add_text(page, _("Use length bit"), "L2TP.LengthBit", NULL);
+	settings_add_text(page, _("Use challenge authentication"),
+			  "L2TP.Challenge", NULL);
+	settings_add_text(page, _("Default route"), "L2TP.DefaultRoute", NULL);
+	settings_add_text(page, _("Use seq numbers"), "L2TP.FlowBit", NULL);
+	settings_add_text(page, _("Window size"), "L2TP.TunnelRWS", NULL);
+	settings_add_text(page, _("Use only one control channel"),
+			  "L2TP.Exclusive", NULL);
+	settings_add_text(page, _("Redial if disconnected"),
+			  "L2TP.Redial", NULL);
+	settings_add_text(page, _("Redial timeout"),
+			  "L2TP.RedialTimeout", NULL);
+	settings_add_text(page, _("Maximum redial tries"),
+			  "L2TP.MaxRedials", NULL);
+	settings_add_text(page, _("Require PAP"), "L2TP.RequirePAP", NULL);
+	settings_add_text(page, _("Require CHAP"), "L2TP.RequireCHAP", NULL);
+	settings_add_text(page, _("Require authentication"),
+			  "L2TP.ReqAuth", NULL);
+	settings_add_text(page, _("Accept only these peers"),
+			  "L2TP.AccessControl", NULL);
+	settings_add_text(page, _("Authentication file location"),
+			  "L2TP.AuthFile", NULL);
+	settings_add_text(page, _("Listen address"), "L2TP.ListenAddr", NULL);
+	settings_add_text(page, _("Use IPSec SA"), "L2TP.IPsecSaref", NULL);
+	settings_add_text(page, _("UDP Port"), "L2TP.Port", NULL);
+}
+
+static void add_immutable_pptp_page(struct settings *sett)
+{
+	struct settings_page *page;
+
+	page = add_page_to_settings(sett, "PPTP", TRUE);
+	settings_add_text(page, _("Username"), "PPTP.User", NULL);
+}
+
+static void add_immutable_pppd_page(struct settings *sett)
+{
+	struct settings_page *page;
+
+	page = add_page_to_settings(sett, "PPPD", TRUE);
+	settings_add_text(page, _("Dead peer check count"),
+			  "PPPD.EchoFailure", NULL);
+	settings_add_text(page, _("Dead peer check interval"),
+			  "PPPD.EchoInterval", NULL);
+	settings_add_text(page, _("Debug level"), "PPPD.Debug", NULL);
+	settings_add_text(page, _("Refuse EAP authentication"),
+			  "PPPD.RefuseEAP", NULL);
+	settings_add_text(page, _("Refuse PAP authentication"),
+			  "PPPD.RefusePAP", NULL);
+	settings_add_text(page, _("Refuse CHAP authentication"),
+			  "PPPD.RefusePAP", NULL);
+	settings_add_text(page, _("Refuse MSCHAP authentication"),
+			  "PPPD.RefuseMSCHAP", NULL);
+	settings_add_text(page, _("Refuse MSCHAPv2 authentication"),
+			  "PPPD.RefuseMSCHAP2", NULL);
+	settings_add_text(page, _("Disable BSD compression"),
+			  "PPPD.NoBSDComp", NULL);
+	settings_add_text(page, _("Disable DEFLATE compression"),
+			  "PPPD.NoDeflate", NULL);
+	settings_add_text(page, _("Require the use of MPPE"),
+			  "PPPD.RequirMPPE", NULL);
+	settings_add_text(page, _("Require the use of MPPE 40 bit"),
+			  "PPPD.RequirMPPE40", NULL);
+	settings_add_text(page, _("Require the use of MPPE 128 bit"),
+			  "PPPD.RequirMPPE128", NULL);
+	settings_add_text(page, _("Allow MPPE to use stateful mode"),
+			  "PPPD.RequirMPPEStateful", NULL);
+	settings_add_text(page, _("No Van Jacobson compression"),
+			  "PPPD.NoVJ", NULL);
+}
+
 static void clear_cb(GtkWidget *button, gpointer user_data)
 {
 	service_clear_properties(user_data);
@@ -537,6 +623,13 @@ static void add_pages(struct settings *sett)
 			add_immutable_openvpn_page(sett);
 		else if(!strcmp(type, "vpnc"))
 			add_immutable_vpnc_page(sett);
+		else if(!strcmp(type, "l2tp") || !strcmp(type, "pptp")) {
+			if(!strcmp(type, "l2tp"))
+				add_immutable_l2tp_page(sett);
+			else
+				add_immutable_pptp_page(sett);
+			add_immutable_pppd_page(sett);
+		}
 		g_free(type);
 		return;
 	}
