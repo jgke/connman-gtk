@@ -388,17 +388,6 @@ static void add_vpn_info_page(struct settings *sett)
 	settings_add_text(page, _("Nameservers"), "Nameservers", NULL);
 }
 
-static void add_route_pages(struct settings *sett)
-{
-	struct settings_page *page;
-
-	page = add_page_to_settings(sett, _("_Server routes"), TRUE);
-	settings_add_route_list(sett, page, "ServerRoutes", TRUE, always_write);
-
-	page = add_page_to_settings(sett, _("_User routes"), TRUE);
-	settings_add_route_list(sett, page, "UserRoutes", FALSE, always_write);
-}
-
 /*
  * TODO: Reorder text fields
  * TODO: Show empty fields properly
@@ -604,12 +593,14 @@ static void add_pages(struct settings *sett)
 {
 	gboolean immutable = service_get_property_boolean(sett->serv,
 							  "Immutable", NULL);
-	if(immutable) {
+	if(immutable || sett->serv->type == CONNECTION_TYPE_VPN) {
 		gchar *type;
+
 		if(sett->serv->type != CONNECTION_TYPE_VPN)
 			add_info_page(sett);
 		else
 			add_vpn_info_page(sett);
+
 		add_immutable_ipv_page(sett);
 		add_immutable_server_page(sett);
 		if(sett->serv->type != CONNECTION_TYPE_VPN)
@@ -630,22 +621,17 @@ static void add_pages(struct settings *sett)
 				add_immutable_pptp_page(sett);
 			add_immutable_pppd_page(sett);
 		}
+
 		g_free(type);
+
 		return;
 	}
 
-	if(sett->serv->type != CONNECTION_TYPE_VPN) {
-		add_info_page(sett);
-		add_ipv_page(sett, 4);
-		add_ipv_page(sett, 6);
-		add_server_page(sett);
-		add_proxy_page(sett);
-	} else {
-		add_vpn_info_page(sett);
-		add_ipv_page(sett, 4);
-		add_ipv_page(sett, 6);
-		add_route_pages(sett);
-	}
+	add_info_page(sett);
+	add_ipv_page(sett, 4);
+	add_ipv_page(sett, 6);
+	add_server_page(sett);
+	add_proxy_page(sett);
 	add_clear_page(sett);
 }
 
