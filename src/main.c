@@ -318,9 +318,17 @@ static void add_all_technologies(GDBusConnection *connection,
 			GtkWidget *row = technologies[i]->list_item->item;
 			gtk_list_box_select_row(GTK_LIST_BOX(list),
 			                        GTK_LIST_BOX_ROW(row));
+
+			if(default_type != CONNECTION_TYPE_VPN)
+				default_page = NULL;
+
 			return;
 		}
 	}
+
+	if(default_type != CONNECTION_TYPE_VPN)
+		default_page = NULL;
+
 	for(i = CONNECTION_TYPE_ETHERNET; i < CONNECTION_TYPE_COUNT; i++) {
 		if(technologies[i]) {
 			GtkWidget *row = technologies[i]->list_item->item;
@@ -472,20 +480,28 @@ static void connman_disappeared(GDBusConnection *connection, const gchar *name,
 	agent_release();
 	g_object_unref(manager_proxy);
 	manager_proxy = NULL;
+	default_page = NULL;
 }
 
 static void connman_vpn_appeared(GDBusConnection *connection, const gchar *name,
 				 const gchar *name_owner, gpointer user_data)
 {
-	if(technologies[CONNECTION_TYPE_VPN])
+	enum connection_type type = CONNECTION_TYPE_VPN;
+	if(technologies[type])
 		return;
 	struct technology *vpn = vpn_register(connection, list, notebook);
-	technologies[CONNECTION_TYPE_VPN] = vpn;
+	technologies[type] = vpn;
 	gtk_container_add(GTK_CONTAINER(list), vpn->list_item->item);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook),
 	                         vpn->settings->grid, NULL);
 	vpn_manager_proxy = vpn_manager_register(connection);
 	register_vpn_agent(connection, vpn_manager_proxy);
+	if(default_page && !strcmp(default_page, "vpn")) {
+		GtkWidget *row = technologies[type]->list_item->item;
+		gtk_list_box_select_row(GTK_LIST_BOX(list),
+					GTK_LIST_BOX_ROW(row));
+		default_page = NULL;
+	}
 }
 
 static gboolean is_connection(gpointer key, gpointer value, gpointer user_data)
@@ -507,6 +523,8 @@ static void connman_vpn_disappeared(GDBusConnection *connection,
 	vpn_agent_release();
 	g_object_unref(vpn_manager_proxy);
 	vpn_manager_proxy = NULL;
+	if(default_page && !strcmp(default_page, "vpn"))
+		default_page = NULL;
 }
 
 static void dbus_connected(GObject *source, GAsyncResult *res,
