@@ -153,7 +153,7 @@ static void add_centered(GtkGrid *grid, GtkWidget *a, GtkWidget *b, int y)
 
 	if(a) {
 		gtk_widget_set_margin_start(a, MARGIN_LARGE);
-		gtk_widget_set_margin_end(a, MARGIN_SMALL);
+		gtk_widget_set_margin_end(a, MARGIN_LARGE);
 		gtk_widget_set_margin_bottom(a, MARGIN_SMALL);
 		gtk_widget_set_halign(a, GTK_ALIGN_END);
 		gtk_widget_set_hexpand(a, FALSE);
