@@ -245,6 +245,7 @@ static void add_ipv_page(struct settings *sett, int ipv)
 	else
 		dhcp = add_page_to_combo_box(sett, box, "auto", _("Automatic"),
 		                             !strcmp("auto", cur) ||
+		                             !strcmp("6to4", cur) ||
 					     !strcmp("fixed", cur));
 
 	if(!strcmp(cur, "fixed"))
