@@ -153,16 +153,10 @@ static int ask_pass(void *data, struct oc_auth_form *form)
 			break;
 		}
 		case OC_FORM_OPT_TEXT:
-			if(!strcmp(opt->name, "username"))
-				elem = token_new_entry(_("Username"), FALSE);
-			else
-				elem = token_new_entry(opt->name, FALSE);
+			elem = token_new_entry(opt->label, FALSE);
 			break;
 		case OC_FORM_OPT_PASSWORD:
-			if(!strcmp(opt->name, "password"))
-				elem = token_new_entry(_("Password"), TRUE);
-			else
-				elem = token_new_entry(opt->name, TRUE);
+			elem = token_new_entry(opt->label, TRUE);
 			break;
 		case OC_FORM_OPT_TOKEN:
 			break;
