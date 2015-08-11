@@ -37,12 +37,33 @@
 #include <dlfcn.h>
 #endif /* USE_OPENCONNECT_DYNAMIC */
 
-typedef int (*init_ssl_fn)(void);
-typedef int (*validate_cert_fn) (void *privdata, const char *reason);
-typedef int (*write_config_fn) (void *privdata, const char *buf, int buflen);
 typedef int (*process_form_fn) (void *privdata, struct oc_auth_form *form);
 typedef void (*show_progress_fn) (void *privdata, int level,
                                   const char *fmt, ...);
+
+typedef void (*vpninfo_free_fn)(struct openconnect_info *vpninfo);
+typedef int (*obtain_cookie_fn)(struct openconnect_info *vpninfo);
+
+#if OPENCONNECT_CHECK_VER(5, 0)
+typedef int (*validate_cert_fn) (void *privdata, const char *reason);
+typedef const char *(*get_peer_cert_hash_fn)(struct openconnect_info *vpninfo);
+#else /* !OPENCONNECT_CHECK_VER(5, 0) */
+typedef int (*validate_cert_fn) (void *privdata, OPENCONNECT_X509 *cert,
+				 const char *reason);
+typedef OPENCONNECT_X509 *(*get_peer_cert_fn)(struct openconnect_info *);
+typedef int (*get_cert_sha1_fn)(struct openconnect_info *vpninfo,
+				OPENCONNECT_X509 *cert, char *buf);
+#endif /* !OPENCONNECT_CHECK_VER(5, 0) */
+
+#if OPENCONNECT_CHECK_VER(4, 1)
+typedef int (*init_ssl_fn)(void);
+#else
+typedef void (*init_ssl_fn)(void);
+#endif
+
+#if OPENCONNECT_CHECK_VER(4, 0)
+typedef int (*write_config_fn) (void *privdata, const char *buf, int buflen);
+
 typedef struct openconnect_info *(*vpninfo_new_fn)(const char *useragent,
                                                    validate_cert_fn,
                                                    write_config_fn,
@@ -51,26 +72,54 @@ typedef struct openconnect_info *(*vpninfo_new_fn)(const char *useragent,
                                                    void *privdata);
 typedef const char *(*get_cookie_fn)(struct openconnect_info *);
 typedef const char *(*get_hostname_fn)(struct openconnect_info *);
-typedef void (*vpninfo_free_fn)(struct openconnect_info *vpninfo);
+
 typedef int (*set_client_cert_fn)(struct openconnect_info *, const char *cert,
                                   const char *sslkey);
 typedef int (*passphrase_from_fsid_fn)(struct openconnect_info *vpninfo);
 typedef int (*set_cafile_fn)(struct openconnect_info *, const char *);
 typedef int (*parse_url_fn)(struct openconnect_info *vpninfo, const char *url);
-typedef int (*obtain_cookie_fn)(struct openconnect_info *vpninfo);
-typedef const char *(*get_peer_cert_hash_fn)(struct openconnect_info *vpninfo);
+typedef int (*set_option_value_fn)(struct oc_form_opt *opt, const char *value);
+#else /* !OPENCONNECT_CHECK_VERSION(4, 0) */
+typedef int (*write_config_fn) (void *privdata, char *buf, int buflen);
+
+typedef struct openconnect_info *(*vpninfo_new_fn)(char *useragent,
+                                                   validate_cert_fn,
+                                                   write_config_fn,
+                                                   process_form_fn,
+                                                   show_progress_fn,
+                                                   void *privdata);
+typedef char *(*get_cookie_fn)(struct openconnect_info *);
+typedef char *(*get_hostname_fn)(struct openconnect_info *);
+
+typedef void (*set_client_cert_fn)(struct openconnect_info *, char *cert,
+                                  char *sslkey);
+typedef int (*passphrase_from_fsid_fn)(struct openconnect_info *vpninfo);
+typedef void (*set_cafile_fn)(struct openconnect_info *, char *);
+typedef int (*parse_url_fn)(struct openconnect_info *vpninfo, char *url);
+#endif /* !OPENCONNECT_CHECK_VERSION(4, 0) */
 
 static init_ssl_fn init_ssl;
-static vpninfo_new_fn vpninfo_new;
-static get_cookie_fn get_cookie;
-static get_hostname_fn get_hostname;
 static vpninfo_free_fn vpninfo_free;
-static set_client_cert_fn set_client_cert;
-static passphrase_from_fsid_fn passphrase_from_fsid;
-static set_cafile_fn set_cafile;
-static parse_url_fn parse_url;
 static obtain_cookie_fn obtain_cookie;
-static get_peer_cert_hash_fn get_peer_cert_hash;
+
+static vpninfo_new_fn _vpninfo_new;
+static get_cookie_fn _get_cookie;
+static get_hostname_fn _get_hostname;
+static set_client_cert_fn _set_client_cert;
+static passphrase_from_fsid_fn _passphrase_from_fsid;
+static set_cafile_fn _set_cafile;
+static parse_url_fn _parse_url;
+
+#if OPENCONNECT_CHECK_VER(5, 0)
+static get_peer_cert_hash_fn _get_peer_cert_hash;
+#else
+static get_peer_cert_fn _get_peer_cert;
+static get_cert_sha1_fn _get_cert_sha1;
+#endif
+
+#if OPENCONNECT_CHECK_VER(4, 0)
+static set_option_value_fn _set_option_value;
+#endif
 
 static gboolean init_lib(void) {
 	static gboolean initialized = FALSE;
@@ -80,16 +129,27 @@ static gboolean init_lib(void) {
 	initialized = TRUE;
 #ifndef USE_OPENCONNECT_DYNAMIC
 	init_ssl = openconnect_init_ssl;
-	vpninfo_new = openconnect_vpninfo_new;
-	get_cookie = openconnect_get_cookie;
-	get_hostname = openconnect_get_hostname;
 	vpninfo_free = openconnect_vpninfo_free;
-	set_client_cert = openconnect_set_client_cert;
-	passphrase_from_fsid = openconnect_passphrase_from_fsid;
-	set_cafile = openconnect_set_cafile;
-	parse_url = openconnect_parse_url;
 	obtain_cookie = openconnect_obtain_cookie;
-	get_peer_cert_hash = openconnect_get_peer_cert_hash;
+
+	_vpninfo_new = openconnect_vpninfo_new;
+	_get_cookie = openconnect_get_cookie;
+	_get_hostname = openconnect_get_hostname;
+	_set_client_cert = openconnect_set_client_cert;
+	_passphrase_from_fsid = openconnect_passphrase_from_fsid;
+	_set_cafile = openconnect_set_cafile;
+	_parse_url = openconnect_parse_url;
+#if OPENCONNECT_CHECK_VER(5, 0)
+	_get_peer_cert_hash = openconnect_get_peer_cert_hash;
+#else
+	_get_peer_cert = openconnect_get_peer_cert;
+	_get_cert_sha1 = openconnect_get_cert_sha1;
+#endif
+
+#if OPENCONNECT_CHECK_VER(4, 0)
+	_set_option_value = openconnect_set_option_value;
+#endif
+
 #else
 	void *lib = dlopen("libopenconnect.so", RTLD_NOW);
 	/* technically this shouldn't fail since getting here depends
@@ -97,23 +157,146 @@ static gboolean init_lib(void) {
 	if(!lib)
 		return FALSE;
 	init_ssl = dlsym(lib, "openconnect_init_ssl");
-	vpninfo_new = dlsym(lib, "openconnect_vpninfo_new");
-	get_cookie = dlsym(lib, "openconnect_get_cookie");
-	get_hostname = dlsym(lib, "openconnect_get_hostname");
 	vpninfo_free = dlsym(lib, "openconnect_vpninfo_free");
-	set_client_cert = dlsym(lib, "openconnect_set_client_cert");
-	passphrase_from_fsid = dlsym(lib, "openconnect_passphrase_from_fsid");
-	set_cafile = dlsym(lib, "openconnect_set_cafile");
-	parse_url = dlsym(lib, "openconnect_parse_url");
 	obtain_cookie = dlsym(lib, "openconnect_obtain_cookie");
-	get_peer_cert_hash = dlsym(lib, "openconnect_get_peer_cert_hash");
+
+	_vpninfo_new = dlsym(lib, "openconnect_vpninfo_new");
+	_get_cookie = dlsym(lib, "openconnect_get_cookie");
+	_get_hostname = dlsym(lib, "openconnect_get_hostname");
+	_set_client_cert = dlsym(lib, "openconnect_set_client_cert");
+	_passphrase_from_fsid = dlsym(lib, "openconnect_passphrase_from_fsid");
+	_set_cafile = dlsym(lib, "openconnect_set_cafile");
+	_parse_url = dlsym(lib, "openconnect_parse_url");
+#if OPENCONNECT_CHECK_VER(5, 0)
+	_get_peer_cert_hash = dlsym(lib, "openconnect_get_peer_cert_hash");
+#else
+	_get_peer_cert = dlsym(lib, "openconnect_get_peer_cert");
+	_get_cert_sha1 = dlsym(lib, "openconnect_get_cert_sha1");
+#endif
+
+#if OPENCONNECT_CHECK_VER(4, 0)
+	_set_option_value = dlsym(lib, "openconnect_set_option_value");
+#endif
+
 #endif /* USE_OPENCONNECT_DYNAMIC */
 	loaded = TRUE;
 	return TRUE;
 };
 
+#if OPENCONNECT_CHECK_VER(4, 0)
+struct openconnect_info *vpninfo_new(const char *useragent,
+				     validate_cert_fn validate,
+				     write_config_fn new_config,
+				     process_form_fn process_form,
+				     show_progress_fn show_progress,
+				     void *privdata)
+{
+	return _vpninfo_new(useragent, validate, new_config,
+			    process_form, show_progress, privdata);
+}
+
+void set_client_cert(struct openconnect_info *info, const char *key,
+		     const char *sslkey)
+{
+	_set_client_cert(info, key, sslkey);
+}
+
+void set_cafile(struct openconnect_info *info, const char *file)
+{
+	_set_cafile(info, file);
+}
+
+void parse_url(struct openconnect_info *info, const char *url)
+{
+	_parse_url(info, url);
+}
+
+static char *get_cookie(struct openconnect_info *info)
+{
+	return g_strdup(_get_cookie(info));
+}
+
+static char *get_hostname(struct openconnect_info *info)
+{
+	return g_strdup(_get_hostname(info));
+}
+
+static char *get_peer_cert_hash(struct openconnect_info *info)
+{
+	return g_strdup(_get_peer_cert_hash(info));
+}
+
+static void set_option_value(struct oc_form_opt *opt, char *value)
+{
+	_set_option_value(opt, value);
+	g_free(value);
+}
+
+#else
+
+struct openconnect_info *vpninfo_new(const char *useragent,
+				     validate_cert_fn validate,
+				     write_config_fn new_config,
+				     process_form_fn process_form,
+				     show_progress_fn show_progress,
+				     void *privdata)
+{
+	return _vpninfo_new(g_strdup(useragent), validate, new_config,
+			    process_form, show_progress, privdata);
+}
+
+void set_client_cert(struct openconnect_info *info, const char *key,
+		     const char *sslkey)
+{
+	_set_client_cert(info, g_strdup(key), g_strdup(sslkey));
+}
+
+void set_cafile(struct openconnect_info *info, const char *file)
+{
+	_set_cafile(info, g_strdup(file));
+}
+
+void parse_url(struct openconnect_info *info, const char *url)
+{
+	_parse_url(info, g_strdup(url));
+}
+
+static char *get_cookie(struct openconnect_info *info)
+{
+	return _get_cookie(info);
+}
+
+static char *get_hostname(struct openconnect_info *info)
+{
+	return _get_hostname(info);
+}
+
+static char *get_peer_cert_hash(struct openconnect_info *info)
+{
+	char buf[41] = {0, };
+	char *out;
+	OPENCONNECT_X509 *cert = _get_peer_cert(info);
+
+	if(!cert)
+		return g_strdup("");
+
+	_get_cert_sha1(info, cert, buf);
+	out = g_strdup(buf);
+	/* openconnect's documentation states that cert should be now freed
+	 * with X509_free... */
+	return out;
+}
+
+static void set_option_value(struct oc_form_opt *opt, char *value)
+{
+	opt->value = value;
+}
+
+#endif
+
 GString *progress;
 
+#if OPENCONNECT_CHECK_VER(4, 0)
 static int invalid_cert(void *data, const char *reason)
 {
 	printf("%s\n", reason);
@@ -124,6 +307,18 @@ static int new_config(void *data, const char *buf, int buflen)
 {
 	return 0;
 }
+#else /* !OPENCONNECT_CHECK_VER(4, 0) */
+static int new_config(void *data, char *buf, int buflen)
+{
+	return 0;
+}
+
+static int invalid_cert(void *data, OPENCONNECT_X509 *cert, const char *reason)
+{
+	printf("%s\n", reason);
+	return 0;
+}
+#endif /* !OPENCONNECT_CHECK_VER(4, 0) */
 
 static int ask_pass(void *data, struct oc_auth_form *form)
 {
@@ -182,7 +377,7 @@ static int ask_pass(void *data, struct oc_auth_form *form)
 		case OC_FORM_OPT_TEXT:
 		case OC_FORM_OPT_PASSWORD:
 			elem = tokens->pdata[i++];
-			opt->_value = elem->value;
+			set_option_value(opt, elem->value);
 			elem->value = NULL;
 			break;
 		case OC_FORM_OPT_TOKEN:
@@ -212,11 +407,12 @@ static GVariantDict *get_tokens(GHashTable *info)
 {
 	GVariantDict *tokens = NULL;
 	gchar *host, *cert;
+	gchar *hash, *cookie, *hostname;
 	struct openconnect_info *vpninfo;
 	int status;
 
-	progress = g_string_new(NULL);
 	init_ssl();
+	progress = g_string_new(NULL);
 	vpninfo = vpninfo_new("linux-64", invalid_cert, new_config,
 			      ask_pass, show_progress, NULL);
 
@@ -242,13 +438,15 @@ static GVariantDict *get_tokens(GHashTable *info)
 
 	tokens = g_variant_dict_new(NULL);
 
-	g_variant_dict_insert(tokens, "OpenConnect.ServerCert", "s",
-			      get_peer_cert_hash(vpninfo));
-	g_variant_dict_insert(tokens, "OpenConnect.Cookie", "s",
-			      get_cookie(vpninfo));
-	g_variant_dict_insert(tokens, "OpenConnect.VPNHost", "s",
-			      get_hostname(vpninfo));
-
+	hash = get_peer_cert_hash(vpninfo);
+	cookie = get_cookie(vpninfo);
+	hostname = get_hostname(vpninfo);
+	g_variant_dict_insert(tokens, "OpenConnect.ServerCert", "s", hash);
+	g_variant_dict_insert(tokens, "OpenConnect.Cookie", "s", cookie);
+	g_variant_dict_insert(tokens, "OpenConnect.VPNHost", "s", hostname);
+	g_free(hash);
+	g_free(cookie);
+	g_free(hostname);
 out:
 	vpninfo_free(vpninfo);
 	g_string_free(progress, TRUE);
