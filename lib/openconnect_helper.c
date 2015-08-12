@@ -211,16 +211,6 @@ void parse_url(struct openconnect_info *info, const char *url)
 	_parse_url(info, url);
 }
 
-static char *get_cookie(struct openconnect_info *info)
-{
-	return g_strdup(_get_cookie(info));
-}
-
-static char *get_hostname(struct openconnect_info *info)
-{
-	return g_strdup(_get_hostname(info));
-}
-
 static char *get_peer_cert_hash(struct openconnect_info *info)
 {
 	return g_strdup(_get_peer_cert_hash(info));
@@ -261,16 +251,6 @@ void parse_url(struct openconnect_info *info, const char *url)
 	_parse_url(info, g_strdup(url));
 }
 
-static char *get_cookie(struct openconnect_info *info)
-{
-	return _get_cookie(info);
-}
-
-static char *get_hostname(struct openconnect_info *info)
-{
-	return _get_hostname(info);
-}
-
 static char *get_peer_cert_hash(struct openconnect_info *info)
 {
 	char buf[41] = {0, };
@@ -293,6 +273,16 @@ static void set_option_value(struct oc_form_opt *opt, char *value)
 }
 
 #endif
+
+static const char *get_cookie(struct openconnect_info *info)
+{
+	return _get_cookie(info);
+}
+
+static const char *get_hostname(struct openconnect_info *info)
+{
+	return _get_hostname(info);
+}
 
 GString *progress;
 
@@ -406,8 +396,8 @@ static void show_progress(void *data, int level, const char *fmt, ...)
 static GVariantDict *get_tokens(GHashTable *info)
 {
 	GVariantDict *tokens = NULL;
-	gchar *host, *cert;
-	gchar *hash, *cookie, *hostname;
+	gchar *host, *cert, *hash;
+	const gchar *cookie, *hostname;
 	struct openconnect_info *vpninfo;
 	int status;
 
@@ -445,8 +435,6 @@ static GVariantDict *get_tokens(GHashTable *info)
 	g_variant_dict_insert(tokens, "OpenConnect.Cookie", "s", cookie);
 	g_variant_dict_insert(tokens, "OpenConnect.VPNHost", "s", hostname);
 	g_free(hash);
-	g_free(cookie);
-	g_free(hostname);
 out:
 	vpninfo_free(vpninfo);
 	g_string_free(progress, TRUE);
