@@ -286,11 +286,29 @@ static const char *get_hostname(struct openconnect_info *info)
 
 GString *progress;
 
+static int check_cert(const char *reason)
+{
+	GPtrArray *tokens;
+	gboolean status;
+	const gchar *message;
+
+	tokens = g_ptr_array_new_full(0, (GDestroyNotify)free_token_element);
+
+	message = _("Certificate from VPN server failed verification. Reason:");
+	g_ptr_array_add(tokens, token_new_text(message, NULL));
+	g_ptr_array_add(tokens, token_new_text(reason, NULL));
+	message = _("Continue connecting?");
+	g_ptr_array_add(tokens, token_new_text(message, NULL));
+	status = dialog_ask_tokens(_("Certificate failure"), tokens);
+	g_ptr_array_free(tokens, TRUE);
+	return !status;
+}
+
 #if OPENCONNECT_CHECK_VER(4, 0)
 static int invalid_cert(void *data, const char *reason)
 {
 	printf("%s\n", reason);
-	return 0;
+	return check_cert(reason);
 }
 
 static int new_config(void *data, const char *buf, int buflen)
@@ -306,7 +324,7 @@ static int new_config(void *data, char *buf, int buflen)
 static int invalid_cert(void *data, OPENCONNECT_X509 *cert, const char *reason)
 {
 	printf("%s\n", reason);
-	return 0;
+	return check_cert(reason);
 }
 #endif /* !OPENCONNECT_CHECK_VER(4, 0) */
 
