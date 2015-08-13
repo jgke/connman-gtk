@@ -118,11 +118,6 @@ static struct technology *create_vpn_technology(void)
 	return tech;
 }
 
-void vpn_clear_properties(struct service *serv)
-{
-
-}
-
 struct technology *vpn_register(GDBusConnection *conn, GtkWidget *list,
                                 GtkWidget *notebook)
 {

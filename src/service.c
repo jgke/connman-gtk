@@ -596,10 +596,8 @@ void service_clear_properties(struct service *serv)
 {
 	GVariantBuilder *b;
 
-	if(serv->type == CONNECTION_TYPE_VPN) {
-		vpn_clear_properties(serv);
+	if(serv->type == CONNECTION_TYPE_VPN)
 		return;
-	}
 
 	b = g_variant_builder_new(G_VARIANT_TYPE("a{sv}"));
 	g_variant_builder_add(b, "{sv}", "Method",
