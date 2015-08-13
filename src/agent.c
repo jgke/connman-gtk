@@ -66,6 +66,7 @@ static void request_browser(struct agent *agent,
 	                "User canceled browser");
 }
 
+/* Generate dialog entries from Agent.RequestInput's parameters */
 static GPtrArray *generate_entries(GVariant *args)
 {
 	gchar *key;
@@ -88,6 +89,7 @@ static GPtrArray *generate_entries(GVariant *args)
 		g_variant_dict_lookup(dict, "Requirement", "&s", &req);
 
 		if(strcmp(req, "mandatory")) {
+			// TODO: parse non-mandatory fields
 			g_variant_dict_unref(dict);
 			continue;
 		}
@@ -118,6 +120,7 @@ static GPtrArray *generate_entries(GVariant *args)
 	return array;
 }
 
+/* Convert array of entries to a dict */
 static GVariantDict *generate_dict(GPtrArray *elements)
 {
 	GVariantDict *dict;
