@@ -97,7 +97,7 @@ void service_update_property(struct service *serv, const gchar *key,
 	set_label(serv, serv->mac, "Ethernet", "Address");
 }
 
-void show_field(GtkWidget *entry)
+static void show_field(GtkWidget *entry)
 {
 	GtkWidget *label = g_object_get_data(G_OBJECT(entry), "label");
 	if(!label)
@@ -107,7 +107,7 @@ void show_field(GtkWidget *entry)
 	gtk_widget_show(label);
 }
 
-void hide_field(GtkWidget *entry)
+static void hide_field(GtkWidget *entry)
 {
 	GtkWidget *label = g_object_get_data(G_OBJECT(entry), "label");
 	if(!label)
@@ -117,7 +117,7 @@ void hide_field(GtkWidget *entry)
 	gtk_widget_hide(label);
 }
 
-void update_fields(struct service *serv)
+static void update_fields(struct service *serv)
 {
 	gchar *state = service_get_property_string_raw(serv, "State", NULL);
 	if(!strcmp(state, "idle") || !strcmp(state, "failure") ||
@@ -157,7 +157,6 @@ void service_update(struct service *serv, GVariant *properties)
 		return;
 	}
 
-	// TODO: horribly inefficient
 	service_wireless_update(serv);
 	gchar *name;
 	GtkStyleContext *context;
