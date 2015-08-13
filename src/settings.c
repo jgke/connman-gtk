@@ -726,6 +726,9 @@ static void init_settings(struct settings *sett)
 
 	gtk_widget_show_all(sett->window);
 
+	if(sett->serv->type == CONNECTION_TYPE_VPN)
+		gtk_widget_hide(sett->apply);
+
 	add_pages(sett);
 }
 
