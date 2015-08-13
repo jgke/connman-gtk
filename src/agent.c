@@ -38,26 +38,28 @@ struct agent {
 	const gchar *cancel;
 } *normal_agent, *vpn_agent;
 
-void release(struct agent *agent, GDBusMethodInvocation *invocation)
+static void release(struct agent *agent, GDBusMethodInvocation *invocation)
 {
 	g_dbus_method_invocation_return_value(invocation, NULL);
 }
 
-void report_error(struct agent *agent, GDBusMethodInvocation *invocation,
-		  GVariant *parameters)
+static void report_error(struct agent *agent, GDBusMethodInvocation *invocation,
+			 GVariant *parameters)
 {
 	g_dbus_method_invocation_return_dbus_error(invocation,
 	                "net.connman.Agent.Error.Retry", "");
 }
 
-void report_peer_error(struct agent *agent, GDBusMethodInvocation *invocation,
-		       GVariant *parameters)
+static void report_peer_error(struct agent *agent,
+			      GDBusMethodInvocation *invocation,
+			      GVariant *parameters)
 {
 	g_dbus_method_invocation_return_value(invocation, NULL);
 }
 
-void request_browser(struct agent *agent, GDBusMethodInvocation *invocation,
-		     GVariant *parameters)
+static void request_browser(struct agent *agent,
+			    GDBusMethodInvocation *invocation,
+			    GVariant *parameters)
 {
 	g_dbus_method_invocation_return_dbus_error(invocation,
 	                "net.connman.Agent.Error.Canceled",
@@ -137,7 +139,7 @@ struct request_input_params {
 	GVariant *parameters;
 };
 
-gpointer request_input(gpointer data)
+static gpointer request_input(gpointer data)
 {
 	struct request_input_params *params = data;
 	struct agent *agent = params->agent;
@@ -177,8 +179,9 @@ out:
 	return NULL;
 }
 
-void request_input_async(struct agent *agent, GDBusMethodInvocation *invocation,
-			 GVariant *parameters)
+static void request_input_async(struct agent *agent,
+				GDBusMethodInvocation *invocation,
+				GVariant *parameters)
 {
 	struct request_input_params *params = g_malloc(sizeof(*params));
 	params->agent = agent;
@@ -187,24 +190,24 @@ void request_input_async(struct agent *agent, GDBusMethodInvocation *invocation,
 	g_thread_new("request_input", (GThreadFunc)request_input, params);
 }
 
-void request_peer_authorization(struct agent *agent,
-				GDBusMethodInvocation *invocation,
-				GVariant *parameters)
+static void request_peer_authorization(struct agent *agent,
+				       GDBusMethodInvocation *invocation,
+				       GVariant *parameters)
 {
 	g_dbus_method_invocation_return_dbus_error(invocation,
 	                "net.connman.Agent.Error.Canceled",
 	                "User canceled password dialog");
 }
 
-void cancel(GDBusMethodInvocation *invocation)
+static void cancel(GDBusMethodInvocation *invocation)
 {
 	g_dbus_method_invocation_return_value(invocation, NULL);
 }
 
-void method_call(GDBusConnection *connection, const gchar *sender,
-                 const gchar *object_path, const gchar *interface_name,
-                 const gchar *method_name, GVariant *parameters,
-                 GDBusMethodInvocation *invocation, gpointer user_data)
+static void method_call(GDBusConnection *connection, const gchar *sender,
+			const gchar *object_path, const gchar *interface_name,
+			const gchar *method_name, GVariant *parameters,
+			GDBusMethodInvocation *invocation, gpointer user_data)
 {
 	if(!strcmp(method_name, "Release"))
 		release(user_data, invocation);
