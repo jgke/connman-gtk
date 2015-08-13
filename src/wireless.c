@@ -55,7 +55,7 @@ static gboolean scan_cb(gpointer user_data)
 	GHashTable *properties = tech->settings->properties;
 	if(!variant_to_bool(g_hash_table_lookup(properties, "Powered")))
 		return TRUE;
-	if(!variant_to_bool(g_hash_table_lookup(properties, "Tethering")))
+	if(variant_to_bool(g_hash_table_lookup(properties, "Tethering")))
 		return TRUE;
 
 	g_dbus_proxy_call(tech->settings->proxy, "Scan", NULL,
