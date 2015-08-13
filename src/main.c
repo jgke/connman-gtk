@@ -82,7 +82,7 @@ static void create_content(void)
 	gtk_container_add(GTK_CONTAINER(main_window), grid);
 }
 
-static void tech_item_mnemonic(GtkWidget *widget, gboolean arg1,
+static void tech_item_mnemonic_callback(GtkWidget *widget, gboolean arg1,
 			       gpointer user_data)
 {
 	list_item_selected(NULL, GTK_LIST_BOX_ROW(widget), user_data);
@@ -127,7 +127,7 @@ static void add_technology(GDBusConnection *connection, GVariant *technology)
 
 	item = technology_create(proxy, object_path, properties);
 	g_signal_connect(item->list_item->item, "mnemonic-activate",
-			 G_CALLBACK(tech_item_mnemonic), notebook);
+			 G_CALLBACK(tech_item_mnemonic_callback), notebook);
 
 	g_hash_table_insert(technology_types, g_strdup(object_path),
 	                    &item->type);
@@ -309,26 +309,31 @@ static void add_all_technologies(GDBusConnection *connection,
 		add_technology(connection, child);
 		g_variant_unref(child);
 	}
+
 	if(default_page)
 		default_type = connection_type_from_string(default_page);
-	for(i = CONNECTION_TYPE_ETHERNET; i < CONNECTION_TYPE_COUNT; i++) {
-		if(default_type && technologies[i]) {
+	/* If the default page is "vpn", we have to ignore it because VPN
+	 * connections may not have been added yet */
+	if(default_type && default_type != CONNECTION_TYPE_VPN) {
+		for(i = CONNECTION_TYPE_ETHERNET;
+					i < CONNECTION_TYPE_COUNT; i++) {
+			GtkWidget *row;
+
+			if(!technologies[i])
+				continue;
 			if(default_type != technologies[i]->type)
 				continue;
-			GtkWidget *row = technologies[i]->list_item->item;
+
+			row = technologies[i]->list_item->item;
 			gtk_list_box_select_row(GTK_LIST_BOX(list),
-			                        GTK_LIST_BOX_ROW(row));
+						GTK_LIST_BOX_ROW(row));
 
-			if(default_type != CONNECTION_TYPE_VPN)
-				default_page = NULL;
-
+			default_page = NULL;
 			return;
 		}
 	}
 
-	if(default_type != CONNECTION_TYPE_VPN)
-		default_page = NULL;
-
+	/* Default page wasn't set or wasn't found, select any possible page */
 	for(i = CONNECTION_TYPE_ETHERNET; i < CONNECTION_TYPE_COUNT; i++) {
 		if(technologies[i]) {
 			GtkWidget *row = technologies[i]->list_item->item;
