@@ -26,8 +26,9 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
-#include "main.h"
 #include "connection.h"
+#include "dialog.h"
+#include "main.h"
 #include "style.h"
 #include "technology.h"
 #include "vpn.h"

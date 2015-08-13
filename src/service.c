@@ -24,6 +24,7 @@
 #include <glib.h>
 #include <glib/gi18n.h>
 
+#include "dialog.h"
 #include "style.h"
 #include "service.h"
 #include "settings.h"

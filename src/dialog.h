@@ -22,6 +22,7 @@
 #define _CONNMAN_GTK_DIALOG_H
 
 #include <glib.h>
+#include <gtk/gtk.h>
 
 enum token_element_type {
 	TOKEN_ELEMENT_INVALID,
@@ -47,5 +48,7 @@ struct token_element *token_new_checkbox(const gchar *name);
 void free_token_element(struct token_element *elem);
 
 gboolean dialog_ask_tokens(const gchar *title, GPtrArray *elements);
+
+void show_error(const gchar *text, const gchar *message);
 
 #endif /* _CONNMAN_GTK_DIALOG_H */

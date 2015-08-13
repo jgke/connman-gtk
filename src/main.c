@@ -27,10 +27,10 @@
 
 #include "agent.h"
 #include "connection.h"
+#include "dialog.h"
 #include "technology.h"
 #include "interfaces.h"
 #include "style.h"
-#include "util.h"
 #include "vpn.h"
 
 GtkWidget *list, *notebook, *main_window;
