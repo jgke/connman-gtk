@@ -483,7 +483,8 @@ static void connman_disappeared(GDBusConnection *connection, const gchar *name,
 	}
 
 	agent_release();
-	g_object_unref(manager_proxy);
+	if(manager_proxy)
+		g_object_unref(manager_proxy);
 	manager_proxy = NULL;
 	default_page = NULL;
 }
@@ -526,7 +527,8 @@ static void connman_vpn_disappeared(GDBusConnection *connection,
 
 	technologies[type] = NULL;
 	vpn_agent_release();
-	g_object_unref(vpn_manager_proxy);
+	if(vpn_manager_proxy)
+		g_object_unref(vpn_manager_proxy);
 	vpn_manager_proxy = NULL;
 	if(default_page && !strcmp(default_page, "vpn"))
 		default_page = NULL;
