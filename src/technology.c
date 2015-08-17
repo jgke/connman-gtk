@@ -81,13 +81,19 @@ static void free_list_item(struct technology_list_item *item)
 	g_free(item);
 }
 
+static gpointer toggle_power_sync(gpointer data)
+{
+	struct technology *tech = data;
+	GtkWidget *pw = tech->settings->power_switch;
+	gboolean state = gtk_switch_get_active(GTK_SWITCH(pw));
+	technology_set_property(tech, "Powered", g_variant_new("b", state));
+	return NULL;
+}
+
 static gboolean toggle_power(GtkSwitch *widget, GParamSpec *pspec,
                              gpointer user_data)
 {
-	struct technology *tech = user_data;
-	gboolean state = gtk_switch_get_active(widget);
-
-	technology_set_property(tech, "Powered", g_variant_new("b", state));
+	g_thread_new("toggle_power", toggle_power_sync, user_data);
 	return TRUE;
 }
 
