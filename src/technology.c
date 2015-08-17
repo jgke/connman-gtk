@@ -332,6 +332,9 @@ struct technology_settings *technology_create_settings(struct technology *tech,
 	g_signal_connect(item->tethering, "clicked",
 	                 G_CALLBACK(tether_button_cb), tech);
 
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
+				       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+
 	gtk_widget_set_margin_start(item->grid, MARGIN_LARGE);
 	gtk_widget_set_margin_end(item->grid, MARGIN_LARGE);
 	gtk_widget_set_margin_start(item->title, MARGIN_MEDIUM);
