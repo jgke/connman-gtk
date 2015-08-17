@@ -43,7 +43,11 @@ static void update_name(struct service *serv)
 		const gchar *failure;
 		error = service_get_property_string(serv, "Error", NULL);
 		failure = failure_localized(error);
-		title = g_strdup_printf("%s - %s: %s", name, state, failure);
+		if(strlen(failure))
+			title = g_strdup_printf("%s - %s: %s", name,
+						state, failure);
+		else
+			title = g_strdup_printf("%s - %s", name, state);
 		g_free(error);
 	}
 	else if(type == CONNECTION_TYPE_WIRELESS && !strcmp(state_r, "idle"))
