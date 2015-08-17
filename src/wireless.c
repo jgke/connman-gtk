@@ -32,6 +32,7 @@
 struct wireless_service {
 	struct service *parent;
 
+	GtkWidget *favourite;
 	GtkWidget *security;
 	GtkWidget *signal;
 };
@@ -169,21 +170,28 @@ void service_wireless_init(struct service *serv, GDBusProxy *proxy,
 
 	serv->data = item;
 	item->parent = serv;
+	item->favourite = gtk_image_new_from_icon_name("object-select-symbolic",
+						       GTK_ICON_SIZE_MENU);
 	item->security = gtk_image_new_from_icon_name("", GTK_ICON_SIZE_MENU);
 	item->signal = gtk_image_new_from_icon_name("", GTK_ICON_SIZE_MENU);
 
+	style_add_margin(item->favourite, MARGIN_SMALL);
 	style_add_margin(item->security, MARGIN_SMALL);
 	style_add_margin(item->signal, MARGIN_SMALL);
 
+	gtk_widget_set_halign(item->favourite, GTK_ALIGN_END);
 	gtk_widget_set_halign(item->signal, GTK_ALIGN_END);
 	gtk_widget_set_halign(item->security, GTK_ALIGN_END);
+	gtk_widget_set_valign(item->favourite, GTK_ALIGN_CENTER);
 	gtk_widget_set_valign(item->signal, GTK_ALIGN_CENTER);
 	gtk_widget_set_valign(item->security, GTK_ALIGN_CENTER);
 
 	gtk_grid_insert_column(GTK_GRID(serv->header), 1);
 	gtk_grid_insert_column(GTK_GRID(serv->header), 1);
-	gtk_grid_attach(GTK_GRID(serv->header), item->security, 1, 0, 1, 1);
-	gtk_grid_attach(GTK_GRID(serv->header), item->signal, 2, 0, 1, 1);
+	gtk_grid_insert_column(GTK_GRID(serv->header), 1);
+	gtk_grid_attach(GTK_GRID(serv->header), item->favourite, 1, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(serv->header), item->security, 2, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(serv->header), item->signal, 3, 0, 1, 1);
 
 	gtk_widget_show_all(serv->header);
 	gtk_widget_hide(serv->contents);
@@ -222,10 +230,15 @@ void service_wireless_update(struct service *serv)
 		             NULL);
 		gtk_image_set_from_icon_name(GTK_IMAGE(item->security),
 		                             icon_name, GTK_ICON_SIZE_MENU);
-		if(!security)
+		if(!security) {
 			gtk_widget_hide(item->security);
-		else
+			gtk_widget_set_margin_end(item->favourite,
+						  3*MARGIN_SMALL + 16);
+		} else {
 			gtk_widget_show(item->security);
+			gtk_widget_set_margin_end(item->favourite,
+						  MARGIN_SMALL);
+		}
 		g_variant_unref(variant);
 	} else
 		gtk_widget_hide(item->security);
@@ -234,4 +247,9 @@ void service_wireless_update(struct service *serv)
 	gtk_image_set_from_icon_name(GTK_IMAGE(item->signal),
 	                             SIGNAL_TO_ICON("wireless", strength),
 	                             GTK_ICON_SIZE_MENU);
+
+	if(service_get_property_boolean(serv, "Favorite", NULL))
+		gtk_widget_show(item->favourite);
+	else
+		gtk_widget_hide(item->favourite);
 }
