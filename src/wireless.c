@@ -175,6 +175,7 @@ void service_wireless_init(struct service *serv, GDBusProxy *proxy,
 	item->security = gtk_image_new_from_icon_name("", GTK_ICON_SIZE_MENU);
 	item->signal = gtk_image_new_from_icon_name("", GTK_ICON_SIZE_MENU);
 
+	style_add_context(serv->title);
 	style_add_margin(item->favourite, MARGIN_SMALL);
 	style_add_margin(item->security, MARGIN_SMALL);
 	style_add_margin(item->signal, MARGIN_SMALL);
@@ -202,6 +203,9 @@ void service_wireless_init(struct service *serv, GDBusProxy *proxy,
 void service_wireless_update(struct service *serv)
 {
 	struct wireless_service *item = serv->data;
+	gchar *name;
+	GtkStyleContext *context;
+	int width;
 
 	GVariant *variant;
 	int strength;
@@ -252,4 +256,24 @@ void service_wireless_update(struct service *serv)
 		gtk_widget_show(item->favourite);
 	else
 		gtk_widget_hide(item->favourite);
+
+	context = gtk_widget_get_style_context(serv->title);
+	name = service_get_property_string_raw(serv, "Name", NULL);
+	if(strlen(name)) {
+		gtk_widget_set_margin_end(item->signal, MARGIN_SMALL);
+		gtk_style_context_remove_class(context, "cm-wireless-hidden");
+		gtk_widget_show(serv->settings_button);
+		g_free(name);
+		return;
+	}
+
+	gtk_widget_show(serv->settings_button);
+	gtk_widget_get_preferred_width(serv->settings_button, &width, NULL);
+	gtk_widget_hide(serv->settings_button);
+
+	gtk_style_context_add_class(context, "cm-wireless-hidden");
+	gtk_widget_set_margin_end(item->signal, MARGIN_SMALL + width);
+	gtk_widget_hide(serv->settings_button);
+
+	g_free(name);
 }

@@ -159,22 +159,6 @@ void service_update(struct service *serv, GVariant *properties)
 	}
 
 	service_wireless_update(serv);
-	gchar *name;
-	GtkStyleContext *context;
-
-	name = service_get_property_string_raw(serv, "Name", NULL);
-	if(strlen(name)) {
-		g_free(name);
-		return;
-	}
-
-	style_add_context(serv->title);
-	context = gtk_widget_get_style_context(serv->title);
-	gtk_style_context_add_class(context, "cm-wireless-hidden");
-	gtk_widget_hide(serv->settings_button);
-
-	g_free(name);
-
 }
 
 static void service_proxy_signal(GDBusProxy *proxy, gchar *sender,
