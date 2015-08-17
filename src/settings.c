@@ -576,6 +576,8 @@ static void add_clear_page(struct settings *sett)
 	gtk_widget_set_halign(remove_l, GTK_ALIGN_START);
 	style_add_margin(clear, MARGIN_LARGE);
 	style_add_margin(remove, MARGIN_LARGE);
+	gtk_widget_set_margin_top(clear, 0);
+	gtk_widget_set_margin_bottom(clear, 0);
 
 	gtk_grid_attach(GTK_GRID(page->grid), clear, 0, 0, 1, 1);
 	gtk_grid_attach(GTK_GRID(page->grid), clear_l, 1, 0, 1, 1);
@@ -587,6 +589,8 @@ static void add_clear_page(struct settings *sett)
 	if(sett->serv->type == CONNECTION_TYPE_ETHERNET) {
 		gtk_widget_hide(remove);
 		gtk_widget_hide(remove_l);
+		gtk_widget_set_margin_top(remove, 0);
+		gtk_widget_set_margin_bottom(remove, 0);
 	}
 }
 
