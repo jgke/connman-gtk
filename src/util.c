@@ -150,7 +150,7 @@ const gchar *failure_localized(const gchar *state)
 	else if(!strcmp(state, "invalid-key"))
 		return _("Invalid key");
 	else
-		return "";
+		return state;
 }
 
 gboolean valid_ipv4(const gchar *address)
