@@ -351,18 +351,21 @@ static void service_toggle_connection_cb(GObject *source, GAsyncResult *res,
 	const gchar *c = "GDBus.Error:net.connman.Error.Canceled";
 	const gchar *ip = "GDBus.Error:net.connman.Error.InProgress";
 	const gchar *oa = "GDBus.Error:net.connman.Error.OperationAborted";
+	const gchar *f = "GDBus.Error:net.connman.Error.Failed";
 	GError *error = NULL;
 	GVariant *out;
 	out = g_dbus_proxy_call_finish((GDBusProxy *)user_data, res, &error);
 	if(error) {
 		/*
 		 * InvalidArguments is thrown when user cancels the dialog,
-		 * so ignore it
+		 * so ignore it, Failed is returned in 1.29 and older when
+		 * cancelling connects to hidden wireless networks
 		 */
 		if(strncmp(ia, error->message, strlen(ia)) &&
 		   strncmp(c, error->message, strlen(c)) &&
 		   strncmp(ip, error->message, strlen(ip)) &&
-		   strncmp(oa, error->message, strlen(oa))) {
+		   strncmp(oa, error->message, strlen(oa)) &&
+		   strncmp(f, error->message, strlen(f))) {
 			g_warning("failed to toggle connection state: %s",
 			          error->message);
 			show_error(_("Failed to toggle connection state."),
