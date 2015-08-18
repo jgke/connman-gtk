@@ -344,9 +344,31 @@ void service_free(struct service *serv)
 	g_free(serv);
 }
 
+static gboolean strv_contains(const gchar *const *strv, const gchar *str) {
+	const gchar *const *iter = strv;
+	while(*iter && strcmp(*iter, str))
+		iter++;
+	return *iter != NULL;
+}
+
+static void show_wireless_error(struct service *serv, const gchar *message)
+{
+	const gchar *e;
+	gchar **security;
+
+	e = _("IEEE8021x secured services have to be manually configured.");
+	security = service_get_property_strv(serv, "Security", NULL);
+
+	if(strv_contains((const gchar **)security, "ieee8021x"))
+		show_error(_("Failed to toggle connection state."), e);
+
+	g_strfreev(security);
+}
+
 static void service_toggle_connection_cb(GObject *source, GAsyncResult *res,
                 gpointer user_data)
 {
+	struct service *serv;
 	const gchar *ia = "GDBus.Error:net.connman.Error.InvalidArguments";
 	const gchar *c = "GDBus.Error:net.connman.Error.Canceled";
 	const gchar *ip = "GDBus.Error:net.connman.Error.InProgress";
@@ -354,23 +376,28 @@ static void service_toggle_connection_cb(GObject *source, GAsyncResult *res,
 	const gchar *f = "GDBus.Error:net.connman.Error.Failed";
 	GError *error = NULL;
 	GVariant *out;
-	out = g_dbus_proxy_call_finish((GDBusProxy *)user_data, res, &error);
+
+	serv = user_data;
+	out = g_dbus_proxy_call_finish(serv->proxy, res, &error);
 	if(error) {
 		/*
 		 * InvalidArguments is thrown when user cancels the dialog,
 		 * so ignore it, Failed is returned in 1.29 and older when
 		 * cancelling connects to hidden wireless networks
 		 */
+		g_warning("failed to toggle connection state: %s",
+			  error->message);
 		if(strncmp(ia, error->message, strlen(ia)) &&
 		   strncmp(c, error->message, strlen(c)) &&
 		   strncmp(ip, error->message, strlen(ip)) &&
 		   strncmp(oa, error->message, strlen(oa)) &&
-		   strncmp(f, error->message, strlen(f))) {
-			g_warning("failed to toggle connection state: %s",
-			          error->message);
+		   strncmp(f, error->message, strlen(f)))
 			show_error(_("Failed to toggle connection state."),
 				   error->message);
-		}
+		else if(serv->type == CONNECTION_TYPE_WIRELESS &&
+				!strncmp(ia, error->message, strlen(ia)))
+			show_wireless_error(serv, error->message);
+
 		g_error_free(error);
 		return;
 	}
@@ -393,7 +420,7 @@ void service_toggle_connection(struct service *serv)
 
 	g_dbus_proxy_call(serv->proxy, function, NULL,
 	                  G_DBUS_CALL_FLAGS_NONE, CONNECTION_TIMEOUT, NULL,
-	                  service_toggle_connection_cb, serv->proxy);
+	                  service_toggle_connection_cb, serv);
 }
 
 GVariant *service_get_property(struct service *serv, const char *key,
