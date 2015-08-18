@@ -265,20 +265,18 @@ static gboolean show_error_sync(gpointer data)
 {
 	struct error_params *params = data;
 
+	static const int max_log_length = 100;
+
 	const gchar *title;
-	int flags, mwidth, width, mheight, height;
-	GtkWidget *window, *area, *grid, *text, *logl, *log, *box;
+	int flags;
+	GtkWidget *window, *area, *grid, *text, *log, *box = NULL;
+
+	grid = gtk_grid_new();
 
 	if(params->log)
 		g_strstrip(params->log);
 
-	grid = gtk_grid_new();
 	text = gtk_label_new(params->text);
-	logl = gtk_label_new(_("Details:"));
-	log = gtk_label_new(params->log);
-	box = gtk_scrolled_window_new(NULL, NULL);
-	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(box),
-				       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
 	title = _("Operation failed");
 	flags = GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL;
 	window = gtk_dialog_new_with_buttons(title, GTK_WINDOW(main_window),
@@ -286,50 +284,68 @@ static gboolean show_error_sync(gpointer data)
 	                                     _("_OK"), GTK_RESPONSE_NONE, NULL);
 	gtk_dialog_set_default_response(GTK_DIALOG(window), GTK_RESPONSE_NONE);
 
-	style_add_context(log);
-	gtk_style_context_add_class(gtk_widget_get_style_context(log),
-				    "cm-log");
-	gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(box),
-					    GTK_SHADOW_IN);
 	gtk_widget_set_halign(text, GTK_ALIGN_START);
-	label_align_text(GTK_LABEL(logl), 0, 0);
-	label_align_text(GTK_LABEL(log), 0, 0.5);
 	style_add_margin(text, MARGIN_LARGE);
-	style_add_margin(logl, MARGIN_LARGE);
-	style_add_margin(box, MARGIN_LARGE);
-	gtk_widget_set_hexpand(log, TRUE);
-	gtk_widget_set_vexpand(log, TRUE);
-	if(params->log)
-		gtk_widget_set_margin_bottom(text, 0);
-	gtk_widget_set_margin_bottom(logl, 0);
-	gtk_widget_set_margin_top(box, 0);
-
-	gtk_container_add(GTK_CONTAINER(box), log);
 	gtk_grid_attach(GTK_GRID(grid), text, 0, 0, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), logl, 0, 1, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), box, 0, 2, 1, 1);
-	gtk_widget_show_all(grid);
 
-	gtk_widget_get_preferred_width(log, &mwidth, &width);
-	if(mwidth > width)
-		width = mwidth;
-	gtk_widget_get_preferred_height(log, &mheight, &height);
-	if(mheight > height)
-		height = mheight;
-	if(height > 150)
-		height = 150;
-	gtk_scrolled_window_set_min_content_width(GTK_SCROLLED_WINDOW(box),
-						  width);
-	gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(box),
-						   height);
+	if(params->log) {
+		gtk_widget_set_margin_bottom(text, 0);
 
-	if(!params->log) {
-		gtk_widget_hide(box);
-		gtk_widget_hide(logl);
+		log = gtk_label_new(params->log);
+		style_add_margin(log, MARGIN_LARGE);
+		gtk_widget_set_hexpand(log, TRUE);
+		gtk_widget_set_vexpand(log, TRUE);
+
+		if(strlen(params->log) >= max_log_length) {
+			label_align_text(GTK_LABEL(log), 0, 0.5);
+			GtkStyleContext *context;
+			GtkScrolledWindow *scroll;
+
+			box = gtk_scrolled_window_new(NULL, NULL);
+			scroll = GTK_SCROLLED_WINDOW(box);
+			gtk_scrolled_window_set_policy(scroll,
+						       GTK_POLICY_NEVER,
+						       GTK_POLICY_AUTOMATIC);
+			style_add_margin(log, 0);
+			style_add_margin(box, MARGIN_LARGE);
+			gtk_widget_set_margin_top(box, 0);
+			style_add_context(log);
+			context = gtk_widget_get_style_context(log);
+			gtk_style_context_add_class(context, "cm-log");
+			gtk_scrolled_window_set_shadow_type(scroll,
+							    GTK_SHADOW_IN);
+
+			gtk_container_add(GTK_CONTAINER(box), log);
+			gtk_grid_attach(GTK_GRID(grid), box, 0, 1, 1, 1);
+		} else
+			gtk_grid_attach(GTK_GRID(grid), log, 0, 1, 1, 1);
 	}
+	else
+		log = NULL;
+
+	gtk_widget_show_all(grid);
 
 	area = gtk_dialog_get_content_area(GTK_DIALOG(window));
 	gtk_container_add(GTK_CONTAINER(area), grid);
+
+	if(box) {
+		int mwidth, width, mheight, height;
+		const int max_height = 300;
+		GtkScrolledWindow *scroll;
+
+		scroll = GTK_SCROLLED_WINDOW(box);
+		gtk_widget_get_preferred_width(log, &mwidth, &width);
+		if(mwidth > width)
+			width = mwidth;
+		gtk_widget_get_preferred_height(log, &mheight, &height);
+		if(mheight > height)
+			height = mheight;
+		if(height > max_height)
+			height = max_height;
+		gtk_scrolled_window_set_min_content_width(scroll, width);
+		gtk_scrolled_window_set_min_content_height(scroll, height);
+	}
+
 	gtk_dialog_run(GTK_DIALOG(window));
 
 	gtk_widget_destroy(window);

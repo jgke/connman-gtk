@@ -612,7 +612,8 @@ void technology_set_property(struct technology *tech, const gchar *key,
 		if(!strcmp(key, "Tethering") &&
 		   tech->type == CONNECTION_TYPE_ETHERNET &&
 		   strstr(error->message, "NotSupported"))
-			show_error(_("Failed to enable ethernet tethering.\nEthernet tethering has to be manually allowed in /etc/connman/main.conf."), NULL);
+			show_error(_("Failed to enable ethernet tethering."),
+				   _("Ethernet tethering has to be manually allowed in /etc/connman/main.conf."));
 		g_error_free(error);
 		return;
 	}
