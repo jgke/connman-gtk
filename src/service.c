@@ -165,6 +165,46 @@ void service_update(struct service *serv, GVariant *properties)
 	service_wireless_update(serv);
 }
 
+static void ensure_field(GVariantDict *dict, const gchar *field,
+			 GVariant *value)
+{
+	if(g_variant_dict_contains(dict, field))
+		return;
+	g_variant_dict_insert_value(dict, field, value);
+}
+
+static GVariant *add_missing_fields(const gchar *name, GVariant *value)
+{
+	GVariantDict *dict;
+
+	if(strcmp(name, "Ethernet") && strncmp(name, "IPv", 3) &&
+			strncmp(name, "Proxy", 5))
+		return value;
+
+	dict = g_variant_dict_new(value);
+	if(!strcmp(name, "Ethernet")) {
+		ensure_field(dict, "Method", g_variant_new("s", "auto"));
+		ensure_field(dict, "Interface", g_variant_new("s", ""));
+		ensure_field(dict, "Address", g_variant_new("s", ""));
+		ensure_field(dict, "MTU", g_variant_new("q", 1500));
+	} else if(!strcmp(name, "IPv4")) {
+		ensure_field(dict, "Method", g_variant_new("s", "off"));
+		ensure_field(dict, "Address", g_variant_new("s", ""));
+		ensure_field(dict, "Netmask", g_variant_new("s", ""));
+		ensure_field(dict, "Gateway", g_variant_new("s", ""));
+	} else if(!strcmp(name, "IPv6")) {
+		ensure_field(dict, "Method", g_variant_new("s", "off"));
+		ensure_field(dict, "Address", g_variant_new("s", ""));
+		ensure_field(dict, "PrefixLength", g_variant_new("s", ""));
+		ensure_field(dict, "Gateway", g_variant_new("s", ""));
+	}
+
+	g_variant_unref(value);
+	value = g_variant_dict_end(dict);
+	g_variant_dict_unref(dict);
+	return value;
+}
+
 static void service_proxy_signal(GDBusProxy *proxy, gchar *sender,
                                  gchar *signal, GVariant *parameters,
                                  gpointer user_data)
@@ -179,6 +219,7 @@ static void service_proxy_signal(GDBusProxy *proxy, gchar *sender,
 
 		name = g_variant_get_string(name_v, NULL);
 		value = g_variant_get_child_value(value_v, 0);
+		value = add_missing_fields(name, value);
 
 		service_update_property(serv, name, value);
 		g_variant_unref(value);
