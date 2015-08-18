@@ -280,7 +280,7 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		gtk_widget_set_halign(manual->item, GTK_ALIGN_START);
 
 		ipv6_privacy = settings_add_combo_box(sett, dhcp,
-		                                      always_write,
+		                                      write_if_selected,
 		                                      _("Privacy"), conf,
 		                                      "Privacy", ipvs);
 
