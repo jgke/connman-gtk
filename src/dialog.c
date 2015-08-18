@@ -43,8 +43,8 @@ static struct token_element *create_new(enum token_element_type type,
 		elem->label = gtk_label_new(name);
 	elem->content = content;
 
-	style_add_margin(elem->label, MARGIN_LARGE);
-	style_add_margin(elem->content, MARGIN_LARGE);
+	style_set_margin(elem->label, MARGIN_LARGE);
+	style_set_margin(elem->content, MARGIN_LARGE);
 	gtk_widget_set_margin_top(elem->label, MARGIN_MEDIUM);
 	gtk_widget_set_margin_bottom(elem->label, MARGIN_MEDIUM);
 	gtk_widget_set_margin_top(elem->content, MARGIN_MEDIUM);
@@ -285,14 +285,14 @@ static gboolean show_error_sync(gpointer data)
 	gtk_dialog_set_default_response(GTK_DIALOG(window), GTK_RESPONSE_NONE);
 
 	gtk_widget_set_halign(text, GTK_ALIGN_START);
-	style_add_margin(text, MARGIN_LARGE);
+	style_set_margin(text, MARGIN_LARGE);
 	gtk_grid_attach(GTK_GRID(grid), text, 0, 0, 1, 1);
 
 	if(params->log) {
 		gtk_widget_set_margin_bottom(text, 0);
 
 		log = gtk_label_new(params->log);
-		style_add_margin(log, MARGIN_LARGE);
+		style_set_margin(log, MARGIN_LARGE);
 		gtk_widget_set_hexpand(log, TRUE);
 		gtk_widget_set_vexpand(log, TRUE);
 
@@ -306,8 +306,8 @@ static gboolean show_error_sync(gpointer data)
 			gtk_scrolled_window_set_policy(scroll,
 						       GTK_POLICY_NEVER,
 						       GTK_POLICY_AUTOMATIC);
-			style_add_margin(log, 0);
-			style_add_margin(box, MARGIN_LARGE);
+			style_set_margin(log, 0);
+			style_set_margin(box, MARGIN_LARGE);
 			gtk_widget_set_margin_top(box, 0);
 			style_add_context(log);
 			context = gtk_widget_get_style_context(log);

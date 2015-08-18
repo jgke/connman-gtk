@@ -58,7 +58,7 @@ struct technology_list_item *technology_create_item(struct technology *tech)
 	g_object_set_data(G_OBJECT(item->item), "technology-type",
 	                  &tech->type);
 
-	style_add_margin(grid, MARGIN_SMALL);
+	style_set_margin(grid, MARGIN_SMALL);
 	gtk_widget_set_margin_start(item->label, MARGIN_SMALL);
 
 	gtk_container_add(GTK_CONTAINER(grid), item->icon);

@@ -81,7 +81,7 @@ static struct settings_page *add_page_to_settings(struct settings *sett,
 			 sett->notebook);
 	g_object_set_data(G_OBJECT(item), "content", page->item);
 
-	style_add_margin(label, MARGIN_SMALL);
+	style_set_margin(label, MARGIN_SMALL);
 	gtk_widget_set_margin_start(label, MARGIN_LARGE);
 	gtk_widget_set_margin_end(label, MARGIN_LARGE);
 
@@ -574,8 +574,8 @@ static void add_clear_page(struct settings *sett)
 
 	gtk_widget_set_halign(clear_l, GTK_ALIGN_START);
 	gtk_widget_set_halign(remove_l, GTK_ALIGN_START);
-	style_add_margin(clear, MARGIN_LARGE);
-	style_add_margin(remove, MARGIN_LARGE);
+	style_set_margin(clear, MARGIN_LARGE);
+	style_set_margin(remove, MARGIN_LARGE);
 	gtk_widget_set_margin_top(clear, 0);
 	gtk_widget_set_margin_bottom(clear, 0);
 
@@ -710,7 +710,7 @@ static void init_settings(struct settings *sett)
 	g_signal_connect(sett->apply, "clicked",
 	                 G_CALLBACK(apply_cb), sett);
 
-	style_add_margin(GTK_WIDGET(grid), MARGIN_LARGE);
+	style_set_margin(GTK_WIDGET(grid), MARGIN_LARGE);
 	gtk_widget_set_margin_top(sett->apply, MARGIN_LARGE);
 
 	gtk_widget_set_size_request(sett->list, SETTINGS_LIST_WIDTH, -1);

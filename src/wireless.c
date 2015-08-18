@@ -176,9 +176,9 @@ void service_wireless_init(struct service *serv, GDBusProxy *proxy,
 	item->signal = gtk_image_new_from_icon_name("", GTK_ICON_SIZE_MENU);
 
 	style_add_context(serv->title);
-	style_add_margin(item->favourite, MARGIN_SMALL);
-	style_add_margin(item->security, MARGIN_SMALL);
-	style_add_margin(item->signal, MARGIN_SMALL);
+	style_set_margin(item->favourite, MARGIN_SMALL);
+	style_set_margin(item->security, MARGIN_SMALL);
+	style_set_margin(item->signal, MARGIN_SMALL);
 
 	gtk_widget_set_halign(item->favourite, GTK_ALIGN_END);
 	gtk_widget_set_halign(item->signal, GTK_ALIGN_END);

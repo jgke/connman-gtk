@@ -76,7 +76,7 @@ void style_add_context(GtkWidget *widget)
 				       GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 }
 
-void style_add_margin(GtkWidget *widget, gint margin)
+void style_set_margin(GtkWidget *widget, gint margin)
 {
 	gtk_widget_set_margin_start(widget, margin);
 	gtk_widget_set_margin_end(widget, margin);
