@@ -344,7 +344,8 @@ static gboolean show_error_sync(gpointer data)
 			height = max_height;
 		gtk_scrolled_window_set_min_content_width(scroll, width);
 		gtk_scrolled_window_set_min_content_height(scroll, height);
-	}
+	} else
+		gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
 
 	gtk_dialog_run(GTK_DIALOG(window));
 
