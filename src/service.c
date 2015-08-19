@@ -254,7 +254,7 @@ static GtkWidget *add_label(GtkWidget *grid, gint y, const gchar *text)
 
 	style_set_margin(label, MARGIN_SMALL);
 	g_object_set_data(G_OBJECT(value), "label", label);
-	gtk_widget_set_margin_start(label, MARGIN_LARGE);
+	style_set_margin_start(label, MARGIN_LARGE);
 	gtk_style_context_add_class(gtk_widget_get_style_context(label),
 	                            "dim-label");
 	gtk_label_set_selectable(GTK_LABEL(value), TRUE);
@@ -303,8 +303,8 @@ void service_init(struct service *serv, GDBusProxy *proxy, const gchar *path,
 
 	style_set_margin(serv->item, MARGIN_SMALL);
 	style_set_margin(serv->title, MARGIN_SMALL);
-	gtk_widget_set_margin_start(serv->title, MARGIN_LARGE);
-	gtk_widget_set_margin_start(serv->contents, MARGIN_LARGE);
+	style_set_margin_start(serv->title, MARGIN_LARGE);
+	style_set_margin_start(serv->contents, MARGIN_LARGE);
 	gtk_widget_set_margin_top(serv->contents, 0);
 	gtk_widget_set_margin_bottom(serv->contents, 0);
 

@@ -54,7 +54,7 @@ static struct settings_page *create_page(GtkWidget *notebook, gboolean scrolled)
 
 	g_signal_connect(page->item, "destroy",
 	                 G_CALLBACK(free_page), page);
-	gtk_widget_set_margin_start(page->item, MARGIN_LARGE);
+	style_set_margin_start(page->item, MARGIN_LARGE);
 	gtk_widget_show_all(page->item);
 	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), page->item, NULL);
 	return page;
@@ -82,8 +82,8 @@ static struct settings_page *add_page_to_settings(struct settings *sett,
 	g_object_set_data(G_OBJECT(item), "content", page->item);
 
 	style_set_margin(label, MARGIN_SMALL);
-	gtk_widget_set_margin_start(label, MARGIN_LARGE);
-	gtk_widget_set_margin_end(label, MARGIN_LARGE);
+	style_set_margin_start(label, MARGIN_LARGE);
+	style_set_margin_end(label, MARGIN_LARGE);
 
 	gtk_widget_set_halign(label, GTK_ALIGN_START);
 

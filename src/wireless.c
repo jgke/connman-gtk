@@ -236,11 +236,11 @@ void service_wireless_update(struct service *serv)
 		                             icon_name, GTK_ICON_SIZE_MENU);
 		if(!security) {
 			gtk_widget_hide(item->security);
-			gtk_widget_set_margin_end(item->favourite,
+			style_set_margin_end(item->favourite,
 						  3*MARGIN_SMALL + 16);
 		} else {
 			gtk_widget_show(item->security);
-			gtk_widget_set_margin_end(item->favourite,
+			style_set_margin_end(item->favourite,
 						  MARGIN_SMALL);
 		}
 		g_variant_unref(variant);
@@ -260,7 +260,7 @@ void service_wireless_update(struct service *serv)
 	context = gtk_widget_get_style_context(serv->title);
 	name = service_get_property_string_raw(serv, "Name", NULL);
 	if(strlen(name)) {
-		gtk_widget_set_margin_end(item->signal, MARGIN_SMALL);
+		style_set_margin_end(item->signal, MARGIN_SMALL);
 		gtk_style_context_remove_class(context, "cm-wireless-hidden");
 		gtk_widget_show(serv->settings_button);
 		g_free(name);
@@ -272,7 +272,7 @@ void service_wireless_update(struct service *serv)
 	gtk_widget_hide(serv->settings_button);
 
 	gtk_style_context_add_class(context, "cm-wireless-hidden");
-	gtk_widget_set_margin_end(item->signal, MARGIN_SMALL + width);
+	style_set_margin_end(item->signal, MARGIN_SMALL + width);
 	gtk_widget_hide(serv->settings_button);
 
 	g_free(name);

@@ -41,5 +41,7 @@ void style_init();
 void label_align_text(GtkLabel *label, gfloat xalign, gfloat yalign);
 void style_add_context(GtkWidget *widget);
 void style_set_margin(GtkWidget *widget, gint margin);
+void style_set_margin_start(GtkWidget *widget, gint margin);
+void style_set_margin_end(GtkWidget *widget, gint margin);
 
 #endif /* _CONNMAN_GTK_STYLE_H */

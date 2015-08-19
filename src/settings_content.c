@@ -146,14 +146,14 @@ static struct settings_content *create_base_content(struct settings *sett,
 
 static void add_centered(GtkGrid *grid, GtkWidget *a, GtkWidget *b, int y)
 {
-	gtk_widget_set_margin_start(b, MARGIN_SMALL);
+	style_set_margin_start(b, MARGIN_SMALL);
 	gtk_widget_set_margin_bottom(b, MARGIN_SMALL);
 	gtk_widget_set_halign(b, GTK_ALIGN_START);
 	gtk_widget_set_hexpand(b, TRUE);
 
 	if(a) {
-		gtk_widget_set_margin_start(a, MARGIN_LARGE);
-		gtk_widget_set_margin_end(a, MARGIN_LARGE);
+		style_set_margin_start(a, MARGIN_LARGE);
+		style_set_margin_end(a, MARGIN_LARGE);
 		gtk_widget_set_margin_bottom(a, MARGIN_SMALL);
 		gtk_widget_set_halign(a, GTK_ALIGN_END);
 		gtk_widget_set_hexpand(a, FALSE);
@@ -162,7 +162,7 @@ static void add_centered(GtkGrid *grid, GtkWidget *a, GtkWidget *b, int y)
 		label_align_text(GTK_LABEL(a), 1, 0);
 		gtk_label_set_justify(GTK_LABEL(a), GTK_JUSTIFY_RIGHT);
 	} else {
-		gtk_widget_set_margin_start(b, MARGIN_LARGE);
+		style_set_margin_start(b, MARGIN_LARGE);
 		gtk_grid_attach(grid, b, 0, y, 2, 1);
 	}
 }
@@ -526,7 +526,7 @@ GtkWidget *settings_add_entry_list(struct settings *sett,
 	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
 	gtk_toolbar_set_icon_size(GTK_TOOLBAR(toolbar), GTK_ICON_SIZE_MENU);
 
-	gtk_widget_set_margin_start(grid, MARGIN_LARGE);
+	style_set_margin_start(grid, MARGIN_LARGE);
 	gtk_widget_set_margin_bottom(label_w, MARGIN_MEDIUM);
 	gtk_widget_set_hexpand(toolbar, TRUE);
 	gtk_widget_set_halign(label_w, GTK_ALIGN_START);
@@ -817,7 +817,7 @@ GtkWidget *settings_add_route_list(struct settings *sett,
 	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
 	gtk_toolbar_set_icon_size(GTK_TOOLBAR(toolbar), GTK_ICON_SIZE_MENU);
 
-	gtk_widget_set_margin_start(grid, MARGIN_LARGE);
+	style_set_margin_start(grid, MARGIN_LARGE);
 	gtk_widget_set_hexpand(toolbar, TRUE);
 	gtk_widget_set_halign(button, GTK_ALIGN_END);
 	gtk_list_box_set_selection_mode(GTK_LIST_BOX(box), GTK_SELECTION_NONE);

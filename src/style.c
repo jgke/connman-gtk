@@ -78,8 +78,32 @@ void style_add_context(GtkWidget *widget)
 
 void style_set_margin(GtkWidget *widget, gint margin)
 {
-	gtk_widget_set_margin_start(widget, margin);
-	gtk_widget_set_margin_end(widget, margin);
+	style_set_margin_start(widget, margin);
+	style_set_margin_end(widget, margin);
 	gtk_widget_set_margin_top(widget, margin);
 	gtk_widget_set_margin_bottom(widget, margin);
+}
+
+void style_set_margin_start(GtkWidget *widget, gint margin)
+{
+#if (GTK_MAJOR_VERSION > 3) || (GTK_MINOR_VERSION >= 12)
+	gtk_widget_set_margin_start(widget, margin);
+#else
+	if(gtk_widget_get_direction(widget) == GTK_TEXT_DIR_RTL)
+		gtk_widget_set_margin_right(widget, margin);
+	else
+		gtk_widget_set_margin_left(widget, margin);
+#endif
+}
+
+void style_set_margin_end(GtkWidget *widget, gint margin)
+{
+#if (GTK_MAJOR_VERSION > 3) || (GTK_MINOR_VERSION >= 12)
+	gtk_widget_set_margin_end(widget, margin);
+#else
+	if(gtk_widget_get_direction(widget) == GTK_TEXT_DIR_RTL)
+		gtk_widget_set_margin_left(widget, margin);
+	else
+		gtk_widget_set_margin_right(widget, margin);
+#endif
 }
