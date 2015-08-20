@@ -64,7 +64,7 @@ void label_align_text(GtkLabel *label, gfloat xalign, gfloat yalign)
 	if(xalign < 0)
 		gtk_misc_get_alignment(GTK_MISC(label), &xalign, NULL);
 	if(yalign < 0)
-		gtk_misc_get_alignment(GTK_MISC(label), &yalign, NULL);
+		gtk_misc_get_alignment(GTK_MISC(label), NULL, &yalign);
 	gtk_misc_set_alignment(GTK_MISC(label), xalign, yalign);
 #endif
 }
