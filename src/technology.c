@@ -517,7 +517,7 @@ static void set_icons(struct technology *tech)
 			settings_icon = "bluetooth-symbolic";
 			break;
 		case CONNECTION_TYPE_CELLULAR:
-			list_icon = "emblem-system-symbolic";
+			list_icon = "network-cellular-connected-symbolic";
 			settings_icon = "network-cellular-connected";
 			break;
 		case CONNECTION_TYPE_P2P:
