@@ -393,6 +393,9 @@ struct technology_settings *technology_create_settings(struct technology *tech,
 
 	gtk_widget_show_all(item->grid);
 
+	if(tech->type == CONNECTION_TYPE_P2P)
+		gtk_widget_hide(item->tethering);
+
 	return item;
 }
 
