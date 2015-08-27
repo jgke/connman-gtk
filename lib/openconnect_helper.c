@@ -30,6 +30,7 @@
 #include <string.h>
 
 #include "openconnect_helper.h"
+#include "../src/main.h"
 #include "../src/util.h"
 #include "../src/dialog.h"
 
@@ -43,6 +44,7 @@ typedef void (*show_progress_fn) (void *privdata, int level,
 
 typedef void (*vpninfo_free_fn)(struct openconnect_info *vpninfo);
 typedef int (*obtain_cookie_fn)(struct openconnect_info *vpninfo);
+typedef int (*passphrase_from_fsid_fn)(struct openconnect_info *vpninfo);
 
 #if OPENCONNECT_CHECK_VER(5, 0)
 typedef int (*validate_cert_fn) (void *privdata, const char *reason);
@@ -75,7 +77,6 @@ typedef const char *(*get_hostname_fn)(struct openconnect_info *);
 
 typedef int (*set_client_cert_fn)(struct openconnect_info *, const char *cert,
                                   const char *sslkey);
-typedef int (*passphrase_from_fsid_fn)(struct openconnect_info *vpninfo);
 typedef int (*set_cafile_fn)(struct openconnect_info *, const char *);
 typedef int (*parse_url_fn)(struct openconnect_info *vpninfo, const char *url);
 typedef int (*set_option_value_fn)(struct oc_form_opt *opt, const char *value);
@@ -93,7 +94,6 @@ typedef char *(*get_hostname_fn)(struct openconnect_info *);
 
 typedef void (*set_client_cert_fn)(struct openconnect_info *, char *cert,
                                   char *sslkey);
-typedef int (*passphrase_from_fsid_fn)(struct openconnect_info *vpninfo);
 typedef void (*set_cafile_fn)(struct openconnect_info *, char *);
 typedef int (*parse_url_fn)(struct openconnect_info *vpninfo, char *url);
 #endif /* !OPENCONNECT_CHECK_VERSION(4, 0) */
@@ -101,12 +101,12 @@ typedef int (*parse_url_fn)(struct openconnect_info *vpninfo, char *url);
 static init_ssl_fn init_ssl;
 static vpninfo_free_fn vpninfo_free;
 static obtain_cookie_fn obtain_cookie;
+static passphrase_from_fsid_fn passphrase_from_fsid;
 
 static vpninfo_new_fn _vpninfo_new;
 static get_cookie_fn _get_cookie;
 static get_hostname_fn _get_hostname;
 static set_client_cert_fn _set_client_cert;
-static passphrase_from_fsid_fn _passphrase_from_fsid;
 static set_cafile_fn _set_cafile;
 static parse_url_fn _parse_url;
 
@@ -136,7 +136,7 @@ static gboolean init_lib(void) {
 	_get_cookie = openconnect_get_cookie;
 	_get_hostname = openconnect_get_hostname;
 	_set_client_cert = openconnect_set_client_cert;
-	_passphrase_from_fsid = openconnect_passphrase_from_fsid;
+	passphrase_from_fsid = openconnect_passphrase_from_fsid;
 	_set_cafile = openconnect_set_cafile;
 	_parse_url = openconnect_parse_url;
 #if OPENCONNECT_CHECK_VER(5, 0)
@@ -164,7 +164,7 @@ static gboolean init_lib(void) {
 	_get_cookie = dlsym(lib, "openconnect_get_cookie");
 	_get_hostname = dlsym(lib, "openconnect_get_hostname");
 	_set_client_cert = dlsym(lib, "openconnect_set_client_cert");
-	_passphrase_from_fsid = dlsym(lib, "openconnect_passphrase_from_fsid");
+	passphrase_from_fsid = dlsym(lib, "openconnect_passphrase_from_fsid");
 	_set_cafile = dlsym(lib, "openconnect_set_cafile");
 	_parse_url = dlsym(lib, "openconnect_parse_url");
 #if OPENCONNECT_CHECK_VER(5, 0)
@@ -433,6 +433,9 @@ static GVariantDict *get_tokens(GHashTable *info)
 	cert = g_hash_table_lookup(info, "OpenConnect.CACert");
 	if(cert)
 		set_cafile(vpninfo, cert);
+
+	if(use_fsid)
+		passphrase_from_fsid(vpninfo);
 
 	parse_url(vpninfo, host);
 

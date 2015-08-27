@@ -38,7 +38,9 @@ GHashTable *technology_types, *services;
 GDBusProxy *manager_proxy, *vpn_manager_proxy;
 struct technology *technologies[CONNECTION_TYPE_COUNT];
 gboolean shutting_down = FALSE;
+
 const gchar *default_page;
+gboolean use_fsid;
 
 /* sort smallest enum value first */
 gint technology_list_sort_cb(GtkListBoxRow *row1, GtkListBoxRow *row2,
@@ -590,6 +592,8 @@ static void activate(GtkApplication *app, gpointer user_data)
 static const GOptionEntry options[] = {
 	{ "page", 0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_STRING, &default_page,
 		NULL, NULL },
+	{ "use-fsid", 0, 0, G_OPTION_ARG_NONE, &use_fsid,
+		"Use FSID with openconnect", NULL },
 	{ NULL }
 };
 
