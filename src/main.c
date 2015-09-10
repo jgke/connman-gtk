@@ -30,6 +30,7 @@
 #include "dialog.h"
 #include "technology.h"
 #include "interfaces.h"
+#include "status.h"
 #include "style.h"
 #include "vpn.h"
 
@@ -587,6 +588,12 @@ static void startup(GtkApplication *app, gpointer user_data)
 	create_content();
 
 	gtk_widget_show_all(main_window);
+
+#ifdef USE_STATUS_ICON
+	g_signal_connect(main_window, "delete-event",
+	                 G_CALLBACK(gtk_widget_hide_on_delete), main_window);
+	status_init(app);
+#endif
 }
 
 static void activate(GtkApplication *app, gpointer user_data)

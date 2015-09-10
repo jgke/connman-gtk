@@ -5,7 +5,7 @@ desktop_DATA = connman-gtk.desktop
 
 bin_PROGRAMS = connman-gtk
 connman_gtk_SOURCES = src/main.c src/agent.c src/style.c src/technology.c \
-		      src/service.c src/util.c src/settings.c \
+		      src/service.c src/util.c src/settings.c src/status.c \
 		      src/settings_content.c src/connection.c src/vpn.c \
 		      src/wireless.c src/dialog.c lib/openconnect_helper.c
 connman_gtk_LDADD = @GTK_LIBS@ @GLib_LIBS@
@@ -14,7 +14,7 @@ connman_gtk_CPPFLAGS = @GTK_CFLAGS@ @GLib_CFLAGS@ \
 		       -DCONNMAN_GTK_UIDIR=\""$(uidir)"\" -I$(builddir)/lib
 
 EXTRA_DIST = src/agent.h src/interfaces.h src/main.h src/technology.h \
-	     src/style.h src/service.h src/util.h src/settings.h \
+	     src/style.h src/service.h src/util.h src/settings.h src/status.h \
 	     src/settings_content.h src/connection.h src/vpn.h src/wireless.h \
 	     src/dialog.h lib/openconnect_helper.h README.md
 
@@ -25,6 +25,10 @@ if USE_OPENCONNECT_DYNAMIC
 connman_gtk_LDADD += -ldl
 connman_gtk_CPPFLAGS += -DUSE_OPENCONNECT_DYNAMIC=1
 endif
+endif
+
+if USE_STATUS_ICON
+connman_gtk_CPPFLAGS += -DUSE_STATUS_ICON=1
 endif
 
 SUBDIRS = po

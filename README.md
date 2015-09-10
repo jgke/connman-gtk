@@ -24,6 +24,11 @@ Installation
 configure options
 -----------------
 
+	--enable-status-icon=[yes,no]
+	--disable-status-icon
+
+Enable or disable the status icon.
+
 	--with-openconnect=[yes,no,check,dynamic]
 
 Enables use of [openconnect](http://infradead.org/openconnect/) for easier

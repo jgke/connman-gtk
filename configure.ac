@@ -24,11 +24,16 @@ AX_CFLAGS_WARN_ALL
 PKG_PROG_PKG_CONFIG([0.22])
 PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.10], [], [AC_MSG_ERROR(gtk+ >= 3.10 is required)])
 PKG_CHECK_MODULES([GLib], [glib-2.0 >= 2.0], [], [AC_MSG_ERROR(glib >= 2.0 is required)])
+
 AC_ARG_WITH([openconnect],
             [AS_HELP_STRING([--with-openconnect],
                             [support easier authentication to AnyConnect VPNs @<:@default=check@:>@])],
             [],
             [with_openconnect=check])
+AC_ARG_ENABLE([status-icon],
+              [AS_HELP_STRING([--disable-status-icon],
+                              [Disable the status icon @<:@default=false@:>@])])
+
 AS_CASE(["$with_openconnect"],
         [yes], [PKG_CHECK_MODULES([openconnect], [openconnect >= 5.99], [HAVE_OPENCONNECT=1])],
         [no], [HAVE_OPENCONNECT=0],
@@ -36,6 +41,11 @@ AS_CASE(["$with_openconnect"],
         [PKG_CHECK_MODULES([openconnect], [openconnect >= 5.99], [HAVE_OPENCONNECT=1], [HAVE_OPENCONNECT=0])])
 AM_CONDITIONAL([USE_OPENCONNECT], [test "$with_openconnect" != no -a "$HAVE_OPENCONNECT" -ne 0])
 AM_CONDITIONAL([USE_OPENCONNECT_DYNAMIC], [test "$HAVE_OPENCONNECT" -eq 2])
+
+AS_IF([test "x$enable_status_icon" != "xno"],
+        [STATUS_ICON=1],
+        [STATUS_ICON=0])
+AM_CONDITIONAL([USE_STATUS_ICON], [test "$STATUS_ICON" -eq 1])
 
 AC_CONFIG_FILES([
   Makefile
