@@ -573,13 +573,13 @@ static gboolean delete_event(GtkApplication *app, GdkEvent *event,
 	return FALSE;
 }
 
-static void activate(GtkApplication *app, gpointer user_data)
+static void startup(GtkApplication *app, gpointer user_data)
 {
 	g_bus_get(G_BUS_TYPE_SYSTEM, NULL, dbus_connected, NULL);
 
 	main_window = gtk_application_window_new(app);
-	g_signal_connect(main_window, "delete-event", G_CALLBACK(delete_event),
-	                 NULL);
+	g_signal_connect(app, "window-removed",
+	                 G_CALLBACK(delete_event), NULL);
 	gtk_window_set_title(GTK_WINDOW(main_window), _("Network Settings"));
 	gtk_window_set_default_size(GTK_WINDOW(main_window), DEFAULT_WIDTH,
 	                            DEFAULT_HEIGHT);
@@ -587,6 +587,11 @@ static void activate(GtkApplication *app, gpointer user_data)
 	create_content();
 
 	gtk_widget_show_all(main_window);
+}
+
+static void activate(GtkApplication *app, gpointer user_data)
+{
+	gtk_widget_show(main_window);
 }
 
 static const GOptionEntry options[] = {
@@ -616,6 +621,7 @@ int main(int argc, char *argv[])
 
 	app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
 	g_application_add_main_option_entries(G_APPLICATION(app), options);
+	g_signal_connect(app, "startup", G_CALLBACK(startup), NULL);
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
 	status = g_application_run(G_APPLICATION(app), argc, argv);
 	g_object_unref(app);
