@@ -42,3 +42,6 @@ DISTCLEANFILES = intltool-extract \
 		 intltool-merge \
 		 intltool-update \
 		 po/.intltool-merge-cache
+
+gsettings_SCHEMAS = net.connman.gtk.gschema.xml
+@GSETTINGS_RULES@

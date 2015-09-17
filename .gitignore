@@ -30,4 +30,5 @@ connman-gtk.desktop
 *.o
 *~
 *.orig
+net.connman.gtk.gschema.valid
 connman-gtk

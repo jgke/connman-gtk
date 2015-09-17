@@ -25,6 +25,8 @@ PKG_PROG_PKG_CONFIG([0.22])
 PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.10], [], [AC_MSG_ERROR(gtk+ >= 3.10 is required)])
 PKG_CHECK_MODULES([GLib], [glib-2.0 >= 2.0], [], [AC_MSG_ERROR(glib >= 2.0 is required)])
 
+GLIB_GSETTINGS
+
 AC_ARG_WITH([openconnect],
             [AS_HELP_STRING([--with-openconnect],
                             [support easier authentication to AnyConnect VPNs @<:@default=check@:>@])],

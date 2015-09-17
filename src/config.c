@@ -28,12 +28,19 @@
 
 gboolean status_icon_enabled;
 GHashTable *openconnect_fsid_table;
+GSettings *settings;
 
 void config_load(GtkApplication *app)
 {
-	status_icon_enabled = TRUE;
+	settings = g_settings_new("net.connman.gtk");
+	GVariant *value;
+
 	openconnect_fsid_table = g_hash_table_new_full(g_str_hash, g_str_equal,
 						       g_free, NULL);
+
+	value = g_settings_get_value(settings, "status-icon-enabled");
+	status_icon_enabled = g_variant_get_boolean(value);
+	g_variant_unref(value);
 }
 
 void config_window_open(GtkApplication *app)

@@ -1,0 +1,7 @@
+<schemalist>
+	<schema path="/net/connman/gtk/" id="net.connman.gtk">
+		<key name="status-icon-enabled" type="b">
+			<default>true</default>
+		</key>
+	</schema>
+</schemalist>
