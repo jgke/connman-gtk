@@ -27,6 +27,9 @@
 // Enable the status icon, or, minimize to tray on close
 extern gboolean status_icon_enabled;
 
+// Use fsid with openconnect by default
+extern gboolean openconnect_use_fsid_by_default;
+
 // Service name in this hashset -> enable fsid
 extern GHashTable *openconnect_fsid_table;
 

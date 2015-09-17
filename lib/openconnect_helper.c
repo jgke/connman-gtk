@@ -30,6 +30,7 @@
 #include <string.h>
 
 #include "openconnect_helper.h"
+#include "../src/config.h"
 #include "../src/main.h"
 #include "../src/util.h"
 #include "../src/dialog.h"
@@ -434,7 +435,7 @@ static GVariantDict *get_tokens(GHashTable *info)
 	if(cert)
 		set_cafile(vpninfo, cert);
 
-	if(use_fsid)
+	if(use_fsid || openconnect_use_fsid_by_default)
 		passphrase_from_fsid(vpninfo);
 
 	parse_url(vpninfo, host);

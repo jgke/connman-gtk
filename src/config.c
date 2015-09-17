@@ -27,6 +27,7 @@
 #include "config.h"
 
 gboolean status_icon_enabled;
+gboolean openconnect_use_fsid_by_default;
 GHashTable *openconnect_fsid_table;
 GSettings *settings;
 
@@ -40,6 +41,10 @@ void config_load(GtkApplication *app)
 
 	value = g_settings_get_value(settings, "status-icon-enabled");
 	status_icon_enabled = g_variant_get_boolean(value);
+	g_variant_unref(value);
+
+	value = g_settings_get_value(settings, "openconnect-use-fsid-by-default");
+	openconnect_use_fsid_by_default = g_variant_get_boolean(value);
 	g_variant_unref(value);
 }
 
