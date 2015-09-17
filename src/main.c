@@ -27,6 +27,7 @@
 
 #include "agent.h"
 #include "connection.h"
+#include "config.h"
 #include "dialog.h"
 #include "technology.h"
 #include "interfaces.h"
@@ -578,6 +579,8 @@ static void startup(GtkApplication *app, gpointer user_data)
 {
 	g_bus_get(G_BUS_TYPE_SYSTEM, NULL, dbus_connected, NULL);
 
+	config_load(app);
+
 	main_window = gtk_application_window_new(app);
 	g_signal_connect(app, "window-removed",
 	                 G_CALLBACK(delete_event), NULL);
@@ -590,9 +593,12 @@ static void startup(GtkApplication *app, gpointer user_data)
 	gtk_widget_show_all(main_window);
 
 #ifdef USE_STATUS_ICON
-	g_signal_connect(main_window, "delete-event",
-	                 G_CALLBACK(gtk_widget_hide_on_delete), main_window);
-	status_init(app);
+	if(status_icon_enabled) {
+		g_signal_connect(main_window, "delete-event",
+				 G_CALLBACK(gtk_widget_hide_on_delete),
+				 main_window);
+		status_init(app);
+	}
 #endif
 }
 
