@@ -158,8 +158,10 @@ gchar *get_element_value(struct token_element *elem)
 	} else if(elem->type == TOKEN_ELEMENT_LIST) {
 		GtkComboBoxText *box = GTK_COMBO_BOX_TEXT(elem->content);
 		value = gtk_combo_box_text_get_active_text(box);
-	} else if(elem->type == TOKEN_ELEMENT_CHECKBOX)
-		value = GINT_TO_POINTER(1);
+	} else if(elem->type == TOKEN_ELEMENT_CHECKBOX) {
+		GtkToggleButton *button = GTK_TOGGLE_BUTTON(elem->content);
+		value = GINT_TO_POINTER(gtk_toggle_button_get_active(button));
+	}
 
 	return value;
 }
