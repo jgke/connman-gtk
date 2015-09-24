@@ -142,7 +142,7 @@ void technology_wireless_tether(struct technology *tech)
 
 	ssid_e = token_new_entry_full(_("SSID"), FALSE, ssid, check_ssid);
 	pass_e = token_new_entry_full(_("Passphrase"), TRUE, pass, check_pass);
-	check = token_new_checkbox(_("_Show passphrase"));
+	check = token_new_checkbox(_("_Show passphrase"), FALSE);
 	g_ptr_array_add(tokens, ssid_e);
 	g_ptr_array_add(tokens, pass_e);
 	g_ptr_array_add(tokens, check);

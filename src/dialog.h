@@ -44,7 +44,7 @@ struct token_element *token_new_entry_full(const gchar *name, gboolean secret,
 					   gboolean (*check)(GtkWidget *entry));
 struct token_element *token_new_entry(const gchar *name, gboolean secret);
 struct token_element *token_new_list(const gchar *name, GPtrArray *options);
-struct token_element *token_new_checkbox(const gchar *name);
+struct token_element *token_new_checkbox(const gchar *name, gboolean state);
 void free_token_element(struct token_element *elem);
 
 gboolean dialog_ask_tokens(const gchar *title, GPtrArray *elements);

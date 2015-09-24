@@ -136,13 +136,14 @@ struct token_element *token_new_list(const gchar *name, GPtrArray *options)
 	return elem;
 }
 
-struct token_element *token_new_checkbox(const gchar *name)
+struct token_element *token_new_checkbox(const gchar *name, gboolean state)
 {
 	GtkWidget *content;
 	struct token_element *elem;
 
 	content = gtk_check_button_new();
 	elem = create_new(TOKEN_ELEMENT_CHECKBOX, name, content);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(content), state);
 
 	return elem;
 }
