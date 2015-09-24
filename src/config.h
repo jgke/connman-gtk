@@ -24,6 +24,10 @@
 
 #include <gtk/gtk.h>
 
+#if defined(USE_OPENCONNECT) || defined(USE_STATUS_ICON)
+#define HAVE_CONFIG_SETTINGS 1
+#endif
+
 // Enable the status icon, or, minimize to tray on close
 extern gboolean status_icon_enabled;
 

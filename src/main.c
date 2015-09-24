@@ -57,7 +57,7 @@ gint technology_list_sort_cb(GtkListBoxRow *row1, GtkListBoxRow *row2,
 
 static void create_content(void)
 {
-	GtkWidget *frame, *grid;
+	GtkWidget *frame, *grid, *settings;
 
 	grid = gtk_grid_new();
 	style_set_margin(grid, MARGIN_LARGE);
@@ -77,13 +77,25 @@ static void create_content(void)
 
 	gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), FALSE);
 	gtk_notebook_set_show_border(GTK_NOTEBOOK(notebook), FALSE);
+	gtk_widget_set_vexpand(frame, TRUE);
 	gtk_widget_set_hexpand(notebook, TRUE);
 	gtk_widget_set_vexpand(notebook, TRUE);
 
 	gtk_container_add(GTK_CONTAINER(frame), list);
 	gtk_grid_attach(GTK_GRID(grid), frame, 0, 0, 1, 1);
-	gtk_grid_attach(GTK_GRID(grid), notebook, 1, 0, 1, 1);
+	gtk_grid_attach(GTK_GRID(grid), notebook, 1, 0, 1, 2);
 	gtk_container_add(GTK_CONTAINER(main_window), grid);
+
+#ifdef HAVE_CONFIG_SETTINGS
+	settings = gtk_button_new_with_mnemonic(_("_Settings"));
+	g_signal_connect(settings, "clicked", G_CALLBACK(config_window_open),
+	                 NULL);
+	style_set_margin(settings, MARGIN_MEDIUM);
+	gtk_widget_set_margin_bottom(settings, 0);
+	gtk_widget_set_vexpand(settings, FALSE);
+	gtk_widget_set_valign(settings, GTK_ALIGN_END);
+	gtk_grid_attach(GTK_GRID(grid), settings, 0, 1, 1, 1);
+#endif
 }
 
 static void tech_item_mnemonic_callback(GtkWidget *widget, gboolean arg1,

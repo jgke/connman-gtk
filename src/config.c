@@ -22,9 +22,11 @@
 #define _CONNMAN_GTK_CONFIG_H
 
 #include <glib.h>
+#include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
 #include "config.h"
+#include "dialog.h"
 
 gboolean status_icon_enabled;
 gboolean openconnect_use_fsid_by_default;
@@ -34,23 +36,58 @@ GSettings *settings;
 void config_load(GtkApplication *app)
 {
 	settings = g_settings_new("net.connman.gtk");
-	GVariant *value;
-
+	g_settings_delay(settings);
 	openconnect_fsid_table = g_hash_table_new_full(g_str_hash, g_str_equal,
 						       g_free, NULL);
 
-	value = g_settings_get_value(settings, "status-icon-enabled");
-	status_icon_enabled = g_variant_get_boolean(value);
-	g_variant_unref(value);
+	status_icon_enabled = g_settings_get_boolean(settings,
+						     "status-icon-enabled");
 
-	value = g_settings_get_value(settings, "openconnect-use-fsid-by-default");
-	openconnect_use_fsid_by_default = g_variant_get_boolean(value);
-	g_variant_unref(value);
+	openconnect_use_fsid_by_default = g_settings_get_boolean(settings,
+					     "openconnect-use-fsid-by-default");
 }
 
-void config_window_open(GtkApplication *app)
+void config_window_open(gpointer *ignored, gpointer user_data)
 {
+	GPtrArray *entries;
+	struct token_element *element;
+	int index = 0;
 
+	entries = g_ptr_array_new_full(1, (GDestroyNotify)free_token_element);
+#ifdef USE_OPENCONNECT
+	g_ptr_array_add(entries,
+			token_new_checkbox(_("Use fsid with openconnect"),
+					   openconnect_use_fsid_by_default));
+#endif
+#ifdef USE_STATUS_ICON
+	g_ptr_array_add(entries,
+			token_new_checkbox(_("Use status icon"),
+					   status_icon_enabled));
+#endif
+
+	if(!dialog_ask_tokens(_("Settings"), entries)) {
+		g_ptr_array_free(entries, TRUE);
+		return;
+	}
+
+#ifdef USE_OPENCONNECT
+	element = entries->pdata[index];
+	openconnect_use_fsid_by_default = !!element->value;
+	index++;
+	g_settings_set_boolean(settings, "openconnect-use-fsid-by-default",
+			       openconnect_use_fsid_by_default);
+#endif
+#ifdef USE_STATUS_ICON
+	element = entries->pdata[index];
+	status_icon_enabled = !!element->value;
+	index++;
+	g_settings_set_boolean(settings, "status-icon-enabled",
+			       status_icon_enabled);
+#endif
+
+	g_ptr_array_free(entries, TRUE);
+
+	g_settings_apply(settings);
 }
 
 #endif /* _CONNMAN_GTK_CONFIG_H */
