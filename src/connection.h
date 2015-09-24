@@ -34,6 +34,7 @@ enum connection_type {
 
 enum connection_type connection_type_from_string(const gchar *str);
 enum connection_type connection_type_from_properties(GVariant *properties);
+const gchar *translated_tech_name(enum connection_type type);
 const gchar *mnemonic_tech_name(enum connection_type type);
 
 #endif /* _CONNMAN_GTK_CONNECTION_H */

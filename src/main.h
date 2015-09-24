@@ -31,5 +31,7 @@ void remove_service(const gchar *path);
 extern gboolean shutting_down;
 extern GtkWidget *main_window;
 extern gboolean use_fsid;
+extern struct technology *technologies[];
+
 
 #endif /* _CONNMAN_GTK_MAIN_H */

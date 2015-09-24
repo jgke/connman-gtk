@@ -61,6 +61,29 @@ enum connection_type connection_type_from_properties(GVariant *properties)
 	return type;
 }
 
+const gchar *translated_tech_name(enum connection_type type)
+{
+	switch(type) {
+	case CONNECTION_TYPE_ETHERNET:
+		return _("Wired");
+	case CONNECTION_TYPE_WIRELESS:
+		return _("Wireless");
+	case CONNECTION_TYPE_BLUETOOTH:
+		return _("Bluetooth");
+	case CONNECTION_TYPE_CELLULAR:
+		return _("Cellular");
+	case CONNECTION_TYPE_P2P:
+		return _("P2P");
+	case CONNECTION_TYPE_VPN:
+		return _("VPN");
+	case CONNECTION_TYPE_UNKNOWN:
+		return _("Unknown");
+	case CONNECTION_TYPE_COUNT:
+		return "";
+	}
+	return "";
+}
+
 const gchar *mnemonic_tech_name(enum connection_type type)
 {
 	switch(type) {

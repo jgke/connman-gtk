@@ -21,8 +21,10 @@
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 
+#include "connection.h"
 #include "main.h"
 #include "status.h"
+#include "technology.h"
 
 #ifdef USE_STATUS_ICON
 static void status_activate(gpointer *ignored, gpointer user_data)
@@ -40,6 +42,8 @@ static void status_menu(GtkStatusIcon *icon, guint button, guint activate_time,
 {
 	GtkMenu *menu;
 	GtkWidget *open, *exit;
+	int index;
+
 	menu = GTK_MENU(gtk_menu_new());
 
 	open = gtk_menu_item_new_with_label(_("Open app"));
@@ -48,6 +52,40 @@ static void status_menu(GtkStatusIcon *icon, guint button, guint activate_time,
 			 user_data);
 	g_signal_connect(exit, "activate", G_CALLBACK(status_exit), user_data);
 	gtk_container_add(GTK_CONTAINER(menu), open);
+	gtk_container_add(GTK_CONTAINER(menu), gtk_separator_menu_item_new());
+
+	for(index = CONNECTION_TYPE_ETHERNET; index < CONNECTION_TYPE_COUNT; index++) {
+		const gchar *label;
+		struct technology *tech;
+		GHashTableIter iter;
+		gpointer key, value;
+		GtkMenuItem *item;
+		GtkMenu *submenu;
+
+		tech = technologies[index];
+		if(!tech)
+			continue;
+		if(!technology_get_property_bool(tech, "Powered"))
+			continue;
+		submenu = GTK_MENU(gtk_menu_new());
+		label = translated_tech_name(tech->type);
+		item = GTK_MENU_ITEM(gtk_menu_item_new_with_label(label));
+
+		g_hash_table_iter_init(&iter, tech->services);
+		while(g_hash_table_iter_next(&iter, &key, &value)) {
+			const gchar *name;
+
+			name = service_get_property_string(value, "Name", NULL);
+			gtk_container_add(GTK_CONTAINER(submenu),
+					  gtk_menu_item_new_with_label(name));
+		}
+
+		gtk_menu_item_set_submenu(item, GTK_WIDGET(submenu));
+		gtk_container_add(GTK_CONTAINER(menu), GTK_WIDGET(item));
+	}
+
+
+	gtk_container_add(GTK_CONTAINER(menu), gtk_separator_menu_item_new());
 	gtk_container_add(GTK_CONTAINER(menu), exit);
 	gtk_widget_show_all(GTK_WIDGET(menu));
 	gtk_menu_popup(menu, NULL, NULL, NULL, NULL, button, activate_time);
