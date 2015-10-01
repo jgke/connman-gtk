@@ -168,8 +168,10 @@ void service_update(struct service *serv, GVariant *properties)
 static void ensure_field(GVariantDict *dict, const gchar *field,
 			 GVariant *value)
 {
-	if(g_variant_dict_contains(dict, field))
+	if(g_variant_dict_contains(dict, field)) {
+		g_variant_unref(value);
 		return;
+	}
 	g_variant_dict_insert_value(dict, field, value);
 }
 
