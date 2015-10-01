@@ -37,6 +37,11 @@ static void status_exit(gpointer *ignored, gpointer user_data)
 	g_signal_emit_by_name(main_window, "destroy");
 }
 
+static void status_toggle_connection(gpointer *ignored, gpointer user_data)
+{
+	service_toggle_connection(user_data);
+}
+
 static void status_menu(GtkStatusIcon *icon, guint button, guint activate_time,
                         gpointer user_data)
 {
@@ -58,7 +63,7 @@ static void status_menu(GtkStatusIcon *icon, guint button, guint activate_time,
 		const gchar *label;
 		struct technology *tech;
 		GHashTableIter iter;
-		gpointer key, value;
+		gpointer key, service;
 		GtkMenuItem *item;
 		GtkMenu *submenu;
 
@@ -72,12 +77,24 @@ static void status_menu(GtkStatusIcon *icon, guint button, guint activate_time,
 		item = GTK_MENU_ITEM(gtk_menu_item_new_with_label(label));
 
 		g_hash_table_iter_init(&iter, tech->services);
-		while(g_hash_table_iter_next(&iter, &key, &value)) {
-			const gchar *name;
+		while(g_hash_table_iter_next(&iter, &key, &service)) {
+			gchar *name, *state, *label;
+			GtkWidget *item;
 
-			name = service_get_property_string(value, "Name", NULL);
-			gtk_container_add(GTK_CONTAINER(submenu),
-					  gtk_menu_item_new_with_label(name));
+			name = service_get_property_string(service, "Name",
+							   NULL);
+			state = service_get_property_string(service, "State",
+							    NULL);
+			/* Todo: is autoupdate needed here? */
+			label = g_strdup_printf("%s - %s", name, state);
+			item = gtk_menu_item_new_with_label(label);
+			g_signal_connect(item, "activate",
+					 G_CALLBACK(status_toggle_connection),
+					 service);
+			gtk_container_add(GTK_CONTAINER(submenu), item);
+			g_free(name);
+			g_free(state);
+			g_free(label);
 		}
 
 		gtk_menu_item_set_submenu(item, GTK_WIDGET(submenu));
