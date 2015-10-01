@@ -42,6 +42,35 @@ static void status_toggle_connection(gpointer *ignored, gpointer user_data)
 	service_toggle_connection(user_data);
 }
 
+static GtkWidget *create_service_item(struct service *serv)
+{
+	gchar *name, *state, *state_r, *label;
+	GtkWidget *item, *child;
+
+	name = service_get_property_string(serv, "Name", NULL);
+	state = service_get_property_string(serv, "State", NULL);
+	state_r = service_get_property_string_raw(serv, "State", NULL);
+
+	/* Todo: is autoupdate needed here? */
+	if(strcmp(state_r, "idle"))
+		label = g_markup_printf_escaped("<b>%s - %s</b>", name, state);
+	else
+		label = g_markup_printf_escaped("%s - %s", name, state);
+
+	item = gtk_menu_item_new_with_label(NULL);
+	child = gtk_bin_get_child(GTK_BIN(item));
+	gtk_label_set_markup(GTK_LABEL(child), label);
+	g_signal_connect(item, "activate", G_CALLBACK(status_toggle_connection),
+			 serv);
+
+	g_free(name);
+	g_free(state);
+	g_free(state_r);
+	g_free(label);
+
+	return item;
+}
+
 static void status_menu(GtkStatusIcon *icon, guint button, guint activate_time,
                         gpointer user_data)
 {
@@ -78,29 +107,13 @@ static void status_menu(GtkStatusIcon *icon, guint button, guint activate_time,
 
 		g_hash_table_iter_init(&iter, tech->services);
 		while(g_hash_table_iter_next(&iter, &key, &service)) {
-			gchar *name, *state, *label;
-			GtkWidget *item;
-
-			name = service_get_property_string(service, "Name",
-							   NULL);
-			state = service_get_property_string(service, "State",
-							    NULL);
-			/* Todo: is autoupdate needed here? */
-			label = g_strdup_printf("%s - %s", name, state);
-			item = gtk_menu_item_new_with_label(label);
-			g_signal_connect(item, "activate",
-					 G_CALLBACK(status_toggle_connection),
-					 service);
+			GtkWidget *item = create_service_item(service);
 			gtk_container_add(GTK_CONTAINER(submenu), item);
-			g_free(name);
-			g_free(state);
-			g_free(label);
 		}
 
 		gtk_menu_item_set_submenu(item, GTK_WIDGET(submenu));
 		gtk_container_add(GTK_CONTAINER(menu), GTK_WIDGET(item));
 	}
-
 
 	gtk_container_add(GTK_CONTAINER(menu), gtk_separator_menu_item_new());
 	gtk_container_add(GTK_CONTAINER(menu), exit);
