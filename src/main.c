@@ -90,8 +90,7 @@ static void create_content(void)
 	settings = gtk_button_new_with_mnemonic(_("_Settings"));
 	g_signal_connect(settings, "clicked", G_CALLBACK(config_window_open),
 	                 NULL);
-	style_set_margin(settings, MARGIN_MEDIUM);
-	gtk_widget_set_margin_bottom(settings, 0);
+	gtk_widget_set_margin_top(settings, MARGIN_SMALL);
 	gtk_widget_set_vexpand(settings, FALSE);
 	gtk_widget_set_valign(settings, GTK_ALIGN_END);
 	gtk_grid_attach(GTK_GRID(grid), settings, 0, 1, 1, 1);
