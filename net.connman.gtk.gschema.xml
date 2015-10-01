@@ -1,7 +1,7 @@
 <schemalist>
 	<schema path="/net/connman/gtk/" id="net.connman.gtk">
 		<key name="status-icon-enabled" type="b">
-			<default>true</default>
+			<default>false</default>
 		</key>
 		<key name="openconnect-use-fsid-by-default" type="b">
 			<default>false</default>
