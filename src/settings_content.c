@@ -41,6 +41,9 @@ gboolean always_write(struct settings_content *content)
 gboolean write_if_selected(struct settings_content *content)
 {
 	GtkWidget *parent = gtk_widget_get_parent(content->data);
+	parent = gtk_widget_get_parent(parent);
+	if(!strcmp(content->key, "Proxy.Configuration"))
+		parent = gtk_widget_get_parent(parent);
 	return  !!g_object_get_data(G_OBJECT(parent), "selected");
 }
 
@@ -81,6 +84,28 @@ static GVariant *content_value_list(struct settings_content *content)
 	return var;
 }
 
+static int remove_empty_strings(const gchar **strv, int i)
+{
+	int index = 0;
+	int removed = 0;
+	const gchar **iter = strv;
+
+	if(!i)
+		return 0;
+
+	while (i--) {
+		if (**iter)
+			strv[index++] = *iter;
+		else
+			removed++;
+		iter++;
+	}
+
+	strv[index] = NULL;
+
+	return removed;
+}
+
 static GVariant *content_value_entry_list(struct settings_content *content)
 {
 	GtkWidget *list = content->data;
@@ -94,6 +119,11 @@ static GVariant *content_value_entry_list(struct settings_content *content)
 		g_ptr_array_insert(array, -1, (gchar *)text);
 	}
 	g_list_free(children);
+	array->len -= remove_empty_strings((const char **)array->pdata, array->len);
+	if(array->len == 0 || !array->pdata[0]) {
+		g_ptr_array_free(array, TRUE);
+		return g_variant_new_strv(NULL, 0);
+	}
 	GVariant *var = g_variant_new_strv((const gchar * const *)array->pdata,
 	                                   array->len);
 	g_ptr_array_free(array, TRUE);
