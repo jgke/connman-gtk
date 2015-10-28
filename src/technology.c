@@ -29,6 +29,7 @@
 #include "connection.h"
 #include "dialog.h"
 #include "main.h"
+#include "status.h"
 #include "style.h"
 #include "technology.h"
 #include "vpn.h"

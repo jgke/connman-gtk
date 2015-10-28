@@ -24,9 +24,12 @@
 #include "connection.h"
 #include "main.h"
 #include "status.h"
+#include "service.h"
 #include "technology.h"
 
 #ifdef USE_STATUS_ICON
+GtkStatusIcon *icon;
+
 static void status_activate(gpointer *ignored, gpointer user_data)
 {
 	g_signal_emit_by_name(user_data, "activate");
@@ -121,16 +124,74 @@ static void status_menu(GtkStatusIcon *icon, guint button, guint activate_time,
 	gtk_menu_popup(menu, NULL, NULL, NULL, NULL, button, activate_time);
 }
 
+void status_update(void) {
+	int best_status = 0;
+	int index;
+
+	for(index = CONNECTION_TYPE_ETHERNET; index < CONNECTION_TYPE_COUNT; index++) {
+		struct technology *tech;
+		GHashTableIter iter;
+		gpointer key, service;
+
+		tech = technologies[index];
+		if(!tech)
+			continue;
+
+		g_hash_table_iter_init(&iter, tech->services);
+		while(g_hash_table_iter_next(&iter, &key, &service)) {
+			gchar *state;
+			state = service_get_property_string_raw(service, "State",
+			                                        NULL);
+			switch(best_status) {
+				case 0:
+					if(!strcmp(state, "association"))
+						best_status = 1;
+				case 1:
+					if(!strcmp(state, "configuration"))
+						best_status = 2;
+				case 2:
+					if(!strcmp(state, "ready"))
+						best_status = 3;
+				case 3:
+					if(!strcmp(state, "online"))
+						best_status = 4;
+			}
+
+			g_free(state);
+
+			if(best_status == 4)
+				break;
+		}
+	}
+
+	switch(best_status) {
+		case 0:
+			gtk_status_icon_set_from_icon_name(icon, "network-offline");
+			break;
+		case 1:
+		case 2:
+			gtk_status_icon_set_from_icon_name(icon, "preferences-system-network");
+			break;
+		case 3:
+		case 4:
+			gtk_status_icon_set_from_icon_name(icon, "network-transmit-receive");
+			break;
+	}
+}
+
 void status_init(GtkApplication *app)
 {
-	GtkStatusIcon *icon;
-
 	icon = gtk_status_icon_new_from_icon_name("preferences-system-network");
 	g_signal_connect(icon, "activate", G_CALLBACK(status_activate), app);
 	g_signal_connect(icon, "popup-menu", G_CALLBACK(status_menu), app);
+
+	status_update();
 }
 #else
 void status_init(GtkApplication *app)
+{
+}
+void status_update(void)
 {
 }
 #endif /* USE_STATUS_ICON */

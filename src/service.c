@@ -25,6 +25,7 @@
 #include <glib/gi18n.h>
 
 #include "dialog.h"
+#include "status.h"
 #include "style.h"
 #include "service.h"
 #include "settings.h"
@@ -229,6 +230,9 @@ static void service_proxy_signal(GDBusProxy *proxy, gchar *sender,
 		g_variant_unref(value_v);
 
 		technology_service_updated(serv->tech, serv);
+
+		if(!strcmp(name, "State"))
+			status_update();
 	}
 }
 

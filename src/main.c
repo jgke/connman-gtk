@@ -316,6 +316,8 @@ static void manager_signal(GDBusProxy *proxy, gchar *sender, gchar *signal,
 	} else if(!strcmp(signal, "ServicesChanged")) {
 		services_changed(connection, parameters);
 	}
+
+	status_update();
 }
 
 static void add_all_technologies(GDBusConnection *connection,
@@ -480,6 +482,8 @@ static void connman_appeared(GDBusConnection *connection, const gchar *name,
 {
 	manager_proxy = manager_register(connection);
 	register_agent(connection, manager_proxy);
+
+	status_update();
 }
 
 static gboolean is_service(gpointer key, gpointer value, gpointer user_data)

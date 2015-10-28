@@ -23,6 +23,7 @@
 
 #include <gtk/gtk.h>
 
+void status_update(void);
 void status_init(GtkApplication *app);
 
 #endif /* _CONNMAN_GTK_STATUS_H */
