@@ -3,6 +3,9 @@
 		<key name="status-icon-enabled" type="b">
 			<default>false</default>
 		</key>
+		<key name="launch-to-tray" type="b">
+			<default>false</default>
+		</key>
 		<key name="openconnect-use-fsid-by-default" type="b">
 			<default>false</default>
 		</key>

@@ -31,6 +31,9 @@
 // Enable the status icon, or, minimize to tray on close
 extern gboolean status_icon_enabled;
 
+// Launch to tray
+extern gboolean launch_to_tray_by_default;
+
 // Use fsid with openconnect by default
 extern gboolean openconnect_use_fsid_by_default;
 

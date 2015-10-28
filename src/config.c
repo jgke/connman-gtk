@@ -29,6 +29,7 @@
 #include "dialog.h"
 
 gboolean status_icon_enabled;
+gboolean launch_to_tray_by_default;
 gboolean openconnect_use_fsid_by_default;
 GHashTable *openconnect_fsid_table;
 GSettings *settings;
@@ -42,6 +43,9 @@ void config_load(GtkApplication *app)
 
 	status_icon_enabled = g_settings_get_boolean(settings,
 						     "status-icon-enabled");
+
+	launch_to_tray_by_default = g_settings_get_boolean(settings,
+							   "launch-to-tray");
 
 	openconnect_use_fsid_by_default = g_settings_get_boolean(settings,
 					     "openconnect-use-fsid-by-default");
@@ -63,6 +67,9 @@ void config_window_open(gpointer *ignored, gpointer user_data)
 	g_ptr_array_add(entries,
 			token_new_checkbox(_("Use status icon"),
 					   status_icon_enabled));
+	g_ptr_array_add(entries,
+			token_new_checkbox(_("Launch to tray by default"),
+					   launch_to_tray_by_default));
 #endif
 
 	if(!dialog_ask_tokens(_("Settings"), entries)) {
@@ -83,6 +90,12 @@ void config_window_open(gpointer *ignored, gpointer user_data)
 	index++;
 	g_settings_set_boolean(settings, "status-icon-enabled",
 			       status_icon_enabled);
+
+	element = entries->pdata[index];
+	launch_to_tray_by_default = !!element->value;
+	index++;
+	g_settings_set_boolean(settings, "launch-to-tray",
+			       launch_to_tray_by_default);
 #endif
 
 	g_ptr_array_free(entries, TRUE);

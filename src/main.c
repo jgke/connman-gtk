@@ -42,6 +42,11 @@ struct technology *technologies[CONNECTION_TYPE_COUNT];
 gboolean shutting_down = FALSE;
 
 const gchar *default_page;
+
+#ifdef USE_STATUS_ICON
+gboolean launch_to_tray;
+#endif
+
 gboolean use_fsid;
 
 /* sort smallest enum value first */
@@ -591,6 +596,9 @@ static void startup(GtkApplication *app, gpointer user_data)
 	g_bus_get(G_BUS_TYPE_SYSTEM, NULL, dbus_connected, NULL);
 
 	config_load(app);
+#ifdef USE_STATUS_ICON
+	launch_to_tray = launch_to_tray || launch_to_tray_by_default;
+#endif
 
 	main_window = gtk_application_window_new(app);
 	g_signal_connect(app, "window-removed",
@@ -602,6 +610,8 @@ static void startup(GtkApplication *app, gpointer user_data)
 	create_content();
 
 	gtk_widget_show_all(main_window);
+	if(launch_to_tray)
+		gtk_widget_hide(main_window);
 
 #ifdef USE_STATUS_ICON
 	if(status_icon_enabled) {
@@ -615,12 +625,18 @@ static void startup(GtkApplication *app, gpointer user_data)
 
 static void activate(GtkApplication *app, gpointer user_data)
 {
-	gtk_widget_show(main_window);
+	if(!launch_to_tray)
+		gtk_widget_show(main_window);
+	launch_to_tray = FALSE;
 }
 
 static const GOptionEntry options[] = {
 	{ "page", 0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_STRING, &default_page,
 		NULL, NULL },
+#ifdef USE_STATUS_ICON
+	{ "tray", 0, 0, G_OPTION_ARG_NONE, &launch_to_tray,
+		"Launch connman-gtk straight to tray", NULL },
+#endif
 	{ "use-fsid", 0, 0, G_OPTION_ARG_NONE, &use_fsid,
 		"Use FSID with openconnect", NULL },
 	{ NULL }
