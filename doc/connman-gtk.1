@@ -1,0 +1,33 @@
+.\" connman-gtk(1) manual page
+.\"
+.\" Copyright (C) 2015 Intel Corporation
+.\"
+.TH CONNMAN-GTK "8" "2015-11-05"
+.SH NAME
+ConnMan-GTK \- GTK GUI for ConnMan
+.SH SYNOPSIS
+.B connman-gtk
+.RB [\| \-\-help \|]
+.PP
+.B connman-gtk
+.RB [\| \-\-tray \|]
+.RB [\| \-\-use\-fsid \|]
+.SH DESCRIPTION
+ConnMan-GTK is a GUI client for \fBconnman\fR(8). Not all of the options
+described here might be available, run \fBconnman-gtk --help\fR to see what
+options are usable.
+.P
+.SH OPTIONS
+The following options are supported:
+.TP
+.BR \-h ", " \-\-help
+Print ConnMan-GTK's available options and exit.
+.TP
+.B \-\-tray
+Launch to tray.
+.TP
+.BR \-\-use-fsid
+Use the private key's fsid (see \fBstat\fR(1)) as they passphrase for private
+keys when using \fBopenconnect\fR(8).
+.SH SEE ALSO
+.BR connmanctl (1), \ connman (8)

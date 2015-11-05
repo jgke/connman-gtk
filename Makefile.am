@@ -45,3 +45,5 @@ DISTCLEANFILES = intltool-extract \
 
 gsettings_SCHEMAS = net.connman.gtk.gschema.xml
 @GSETTINGS_RULES@
+
+man1_MANS = doc/connman-gtk.1
