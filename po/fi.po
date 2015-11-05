@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-05 14:48+0300\n"
+"POT-Creation-Date: 2015-11-05 12:20+0200\n"
 "PO-Revision-Date: 2015-06-11 15:15+0300\n"
 "Last-Translator: Jaakko Hannikainen <jaakko.hannikainen@intel.com>\n"
 "Language-Team: Finnish <translation-team-fi@lists.sourceforge.net>\n"
@@ -18,115 +18,171 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/agent.c:153
+#: src/agent.c:158
 msgid "Authentication required"
 msgstr "Tunnistautuminen vaadittu"
 
+#: src/config.c:62
+msgid "Use fsid with openconnect"
+msgstr "K‰yt‰ fsid:t‰ openconnectin kanssa"
+
+#: src/config.c:67
+msgid "Use status icon"
+msgstr "K‰yt‰ tilakuvaketta"
+
+#: src/config.c:70
+msgid "Launch to tray by default"
+msgstr "K‰ynnist‰ teht‰v‰palkkiin"
+
+#: src/config.c:74
+msgid "Settings"
+msgstr "Verkkoasetukset"
+
 #: src/connection.c:68
-msgid "W_ired"
+msgid "Wired"
 msgstr "_Kiinte‰"
 
 #: src/connection.c:70
-msgid "_Wireless"
+msgid "Wireless"
 msgstr "_Langaton"
 
 #: src/connection.c:72
-msgid "_Bluetooth"
+msgid "Bluetooth"
 msgstr "_Bluetooth"
 
 #: src/connection.c:74
-msgid "_Cellular"
+msgid "Cellular"
 msgstr "_Mobiili"
 
 #: src/connection.c:76
+msgid "P2P"
+msgstr "_P2P"
+
+#: src/connection.c:78 src/vpn.c:102 src/vpn.c:176
+msgid "VPN"
+msgstr "VPN"
+
+#: src/connection.c:80
+msgid "Unknown"
+msgstr "_Tuntematon"
+
+#: src/connection.c:91
+msgid "W_ired"
+msgstr "_Kiinte‰"
+
+#: src/connection.c:93
+msgid "_Wireless"
+msgstr "_Langaton"
+
+#: src/connection.c:95
+msgid "_Bluetooth"
+msgstr "_Bluetooth"
+
+#: src/connection.c:97
+msgid "_Cellular"
+msgstr "_Mobiili"
+
+#: src/connection.c:99
 msgid "_P2P"
 msgstr "_P2P"
 
-#: src/connection.c:78
+#: src/connection.c:101
 msgid "_VPN"
 msgstr "_VPN"
 
-#: src/connection.c:80
+#: src/connection.c:103
 msgid "_Unknown"
 msgstr "_Tuntematon"
 
-#: src/dialog.c:189 src/util.c:347
+#: src/dialog.c:192 src/dialog.c:287
 msgid "_OK"
 msgstr "_OK"
 
-#: src/dialog.c:190
+#: src/dialog.c:193
 msgid "_Cancel"
 msgstr "_Peruuta"
 
-#: src/main.c:380 src/vpn.c:149
+#: src/dialog.c:283
+msgid "Operation failed"
+msgstr "Toiminto ep‰onnistui"
+
+#: src/main.c:95
+msgid "_Settings"
+msgstr "_Asetukset"
+
+#: src/main.c:415 src/vpn.c:145
 msgid "Failed to connect to ConnMan."
 msgstr "ConnManiin yhdist‰minen ep‰onnistui."
 
-#: src/main.c:524
+#: src/main.c:573
 msgid "Failed to connect to system DBus."
 msgstr "J‰rjestelm‰n viestiv‰yl‰‰n yhdist‰minen ep‰onnistui"
 
-#: src/main.c:556 src/settings.c:538
+#: src/main.c:619 src/settings.c:689
 msgid "Network Settings"
 msgstr "Verkkoasetukset"
 
-#: src/service.c:299 src/settings.c:160 src/settings.c:380
+#: src/service.c:334 src/settings.c:160 src/settings.c:387
 msgid "IPv4 address"
 msgstr "IPv4-osoite"
 
-#: src/service.c:300
+#: src/service.c:335
 msgid "IPv4 gateway"
 msgstr "IPv4-yhdysk‰yt‰v‰"
 
-#: src/service.c:301 src/settings.c:161 src/settings.c:381
+#: src/service.c:336 src/settings.c:161 src/settings.c:388
 msgid "IPv6 address"
 msgstr "IPv6-osoite"
 
-#: src/service.c:302
+#: src/service.c:337
 msgid "IPv6 gateway"
 msgstr "IPv6-yhdysk‰yt‰v‰"
 
-#: src/service.c:304 src/settings.c:158
+#: src/service.c:339 src/settings.c:158
 msgid "MAC address"
 msgstr "MAC-osoite"
 
-#: src/service.c:380
+#: src/service.c:406
+msgid "IEEE8021x secured services have to be manually configured."
+msgstr "IEEE8021x-suojatut palvelut tulee olla manuaalisesti m‰‰riteltyj‰"
+
+#: src/service.c:410 src/service.c:442
 msgid "Failed to toggle connection state."
 msgstr "Yhteyden tilan muuttaminen ep‰onnistui."
 
-#: src/service.c:452
+#: src/service.c:517
 msgid "Hidden ieee8021x secured network"
 msgstr "Piilotettu ieee8021x-suojattu verkko"
 
-#: src/service.c:453
+#: src/service.c:518
 msgid "Hidden WPA secured network"
 msgstr "Piilotettu WPA-suojattu verkko"
 
-#: src/service.c:454
+#: src/service.c:519
 msgid "Hidden WPS secured network"
 msgstr "Piilotettu WPS-suojattu verkko"
 
-#: src/service.c:455
+#: src/service.c:520
 msgid "Hidden unsecured network"
 msgstr "Piilotettu suojaamaton verkko"
 
-#: src/service.c:479 src/settings.c:352
+#: src/service.c:544 src/settings.c:359
 msgid "Direct"
 msgstr "Suora"
 
-#: src/service.c:481 src/settings.c:242 src/settings.c:245 src/settings.c:354
+#: src/service.c:546 src/settings.c:242 src/settings.c:246 src/settings.c:361
 msgid "Automatic"
 msgstr "Automaattinen"
 
-#: src/service.c:483 src/settings.c:136 src/settings.c:239
+#: src/service.c:548 src/settings.c:136 src/settings.c:239
 msgid "None"
 msgstr "Ei mit‰‰n"
 
-#: src/service.c:495
+#: src/service.c:560
 msgid "On"
 msgstr "P‰‰ll‰"
 
-#: src/service.c:496
+#: src/service.c:561
 msgid "Off"
 msgstr "Pois p‰‰lt‰"
 
@@ -134,7 +190,7 @@ msgstr "Pois p‰‰lt‰"
 msgid "Security"
 msgstr "Salaus"
 
-#: src/settings.c:149 src/settings.c:373
+#: src/settings.c:149 src/settings.c:380
 msgid "_Info"
 msgstr "_Tiedot"
 
@@ -142,11 +198,11 @@ msgstr "_Tiedot"
 msgid "Autoconnect"
 msgstr "Automaattiyhdistys"
 
-#: src/settings.c:155 src/settings.c:376
+#: src/settings.c:155 src/settings.c:383
 msgid "Name"
 msgstr "Nimi"
 
-#: src/settings.c:156 src/settings.c:378
+#: src/settings.c:156 src/settings.c:385
 msgid "State"
 msgstr "Tila"
 
@@ -154,7 +210,7 @@ msgstr "Tila"
 msgid "Interface"
 msgstr "Liittym‰"
 
-#: src/settings.c:162 src/settings.c:298 src/settings.c:322 src/settings.c:382
+#: src/settings.c:162 src/settings.c:305 src/settings.c:329 src/settings.c:389
 msgid "Nameservers"
 msgstr "Nimipalvelimet"
 
@@ -166,12 +222,12 @@ msgstr "_Verkko-osoitetiedot"
 msgid "IPv4 method"
 msgstr "IPv4-menettelytapa"
 
-#: src/settings.c:189 src/settings.c:195 src/settings.c:253 src/settings.c:261
+#: src/settings.c:189 src/settings.c:195 src/settings.c:260 src/settings.c:268
 msgid "Address"
 msgstr "Osoite"
 
-#: src/settings.c:190 src/settings.c:196 src/settings.c:254 src/settings.c:264
-#: src/settings_content.c:638
+#: src/settings.c:190 src/settings.c:196 src/settings.c:261 src/settings.c:271
+#: src/settings_content.c:676
 msgid "Gateway"
 msgstr "Yhdysk‰yt‰v‰"
 
@@ -187,111 +243,103 @@ msgstr "IPv_4"
 msgid "IPv_6"
 msgstr "IPv_6"
 
-#: src/settings.c:236 src/settings.c:349
+#: src/settings.c:236 src/settings.c:356
 msgid "Method"
 msgstr "Menettelytapa"
 
-#: src/settings.c:247 src/settings.c:356
+#: src/settings.c:254 src/settings.c:363
 msgid "Manual"
 msgstr "Manuaalinen"
 
-#: src/settings.c:256 src/settings.c:268 src/settings_content.c:636
+#: src/settings.c:263 src/settings.c:275 src/settings_content.c:674
 msgid "Netmask"
 msgstr "Aliverkonpeite"
 
-#: src/settings.c:258 src/settings_content.c:637 src/settings_content.c:873
+#: src/settings.c:265 src/settings_content.c:675 src/settings_content.c:911
 msgid "Prefix length"
 msgstr "Etuliitteen pituus"
 
-#: src/settings.c:277
+#: src/settings.c:284
 msgid "Privacy"
 msgstr "Yksityisyys"
 
-#: src/settings.c:282 src/technology.c:138
+#: src/settings.c:289 src/technology.c:143
 msgid "Disabled"
 msgstr "Pois p‰‰lt‰"
 
-#: src/settings.c:284
+#: src/settings.c:291
 msgid "Enabled"
 msgstr "P‰‰ll‰"
 
-#: src/settings.c:286
+#: src/settings.c:293
 msgid "Prefered"
 msgstr "Ensisijainen"
 
-#: src/settings.c:296
+#: src/settings.c:303
 msgid "_Servers"
 msgstr "_Palvelimet"
 
-#: src/settings.c:299 src/settings.c:327
+#: src/settings.c:306 src/settings.c:334
 msgid "Timeservers"
 msgstr "Aikapalvelimet"
 
-#: src/settings.c:300 src/settings.c:335
+#: src/settings.c:307 src/settings.c:342
 msgid "Domains"
 msgstr "Verkko-osoitteet"
 
-#: src/settings.c:301
+#: src/settings.c:308
 msgid "Proxy method"
 msgstr "V‰lityspalvelimen menettelytapa"
 
-#: src/settings.c:305 src/settings.c:362
+#: src/settings.c:312 src/settings.c:369
 msgid "URL"
 msgstr "Verkko-osoite"
 
-#: src/settings.c:307 src/settings.c:365
+#: src/settings.c:314 src/settings.c:372
 msgid "Servers"
 msgstr "Palvelimet"
 
-#: src/settings.c:309 src/settings.c:367
+#: src/settings.c:316 src/settings.c:374
 msgid "Excludes"
 msgstr "Poissuljetut"
 
-#: src/settings.c:321
+#: src/settings.c:328
 msgid "_Nameservers"
 msgstr "_Nimipalvelimet"
 
-#: src/settings.c:326
+#: src/settings.c:333
 msgid "_Timeservers"
 msgstr "_Aikapalvelimet"
 
-#: src/settings.c:330
+#: src/settings.c:337
 msgid "Custom Timeservers"
 msgstr "Omat aikapalvelimet"
 
-#: src/settings.c:334
+#: src/settings.c:341
 msgid "_Domains"
 msgstr "V_erkko-osoitteet"
 
-#: src/settings.c:347
+#: src/settings.c:354
 msgid "_Proxy"
 msgstr "_V‰lityspalvelin"
 
-#: src/settings.c:377
+#: src/settings.c:384
 msgid "Type"
 msgstr "Tyyppi"
 
-#: src/settings.c:379
+#: src/settings.c:386
 msgid "Host"
 msgstr "Palvelin"
-
-#: src/settings.c:389
-msgid "_Server routes"
-msgstr "_Palvelimen reitit"
-
-#: src/settings.c:392
-msgid "_User routes"
-msgstr "_K‰ytt‰j‰n reitit"
 
 #: src/settings.c:401
 msgid "Server fingerprint"
 msgstr "Palvelimen sormenj‰lki"
 
-#: src/settings.c:403
+#: src/settings.c:403 src/settings.c:416
 msgid "Certificate Authority file"
 msgstr "Varmentajavarmenne"
 
-#: src/settings.c:405
+#: src/settings.c:405 src/settings.c:418
 msgid "Client certificate file"
 msgstr "K‰ytt‰j‰varmenne"
 
@@ -299,69 +347,327 @@ msgstr "K‰ytt‰j‰varmenne"
 msgid "VPN host"
 msgstr "VPN-palvelin"
 
+#: src/settings.c:420
+msgid "Client private key file"
+msgstr "K‰ytt‰j‰varmenne"
+
+#: src/settings.c:422
+msgid "Maximum transmission unit (MTU)"
+msgstr "Maksimil‰hetysyksikkˆ (MTU)"
+
+#: src/settings.c:424
+msgid "Peer certificate type"
+msgstr "Vertaisen varmenteen tyyppi"
+
 #: src/settings.c:426
+msgid "Protocol"
+msgstr "Protokolla"
+
+#: src/settings.c:427
+msgid "Port"
+msgstr "Portti"
+
+#: src/settings.c:428
+msgid "Authenticate using username/password"
+msgstr "Tunnistautuminen vaadittu"
+
+#: src/settings.c:430
+msgid "Private key password file"
+msgstr "Salausavaimen salasanatiedosto"
+
+#: src/settings.c:432
+msgid "Do not cache password"
+msgstr "ƒl‰ tallenna salasanaa v‰limuistiin"
+
+#: src/settings.c:434
+msgid "Cipher"
+msgstr ""
+
+#: src/settings.c:436
+msgid "Message digest algorithm for packet authentication"
+msgstr "Sanomatiivistealgoritmi viestien todentamiseen"
+
+#: src/settings.c:438
+msgid "Use fast LZO compression"
+msgstr "K‰yt‰ nopeaa LZO-pakkausta"
+
+#: src/settings.c:440
+msgid "External configuration file"
+msgstr "Ulkoinen asetustiedosto"
+
+#: src/settings.c:449
+msgid "Group username"
+msgstr "Ryhm‰n k‰ytt‰j‰nimi"
+
+#: src/settings.c:450 src/settings.c:473 src/settings.c:511
+msgid "Username"
+msgstr "K‰ytt‰j‰nimi"
+
+#: src/settings.c:451
+msgid "IKE Authentication mode"
+msgstr "IKE-tunnistautumistila"
+
+#: src/settings.c:453
+msgid "Diffie-Hellman group"
+msgstr "Diffie-Hellman -ryhm‰"
+
+#: src/settings.c:454
+msgid "Domain"
+msgstr "Verkko-osoite"
+
+#: src/settings.c:455
+msgid "Vendor"
+msgstr ""
+
+#: src/settings.c:456
+msgid "Local port"
+msgstr "Paikallinen portti"
+
+#: src/settings.c:457
+msgid "Cisco port"
+msgstr "Ciscon portti"
+
+#: src/settings.c:458
+msgid "Application version"
+msgstr "Ohjelman versio"
+
+#: src/settings.c:460
+msgid "NAT traversal method"
+msgstr "NAT-kulkumenetelm‰"
+
+#: src/settings.c:462
+msgid "DPD idle timeout"
+msgstr "DPD-odotuksen aikakatkaisu"
+
+#: src/settings.c:463
+msgid "Single DES encryption"
+msgstr "Single DES -salaus"
+
+#: src/settings.c:465
+msgid "No encryption"
+msgstr "Ei salausta"
+
+#: src/settings.c:474
+msgid "Maximum bandwidth (bps)"
+msgstr "Maksimikaistanleveys (bps)"
+
+#: src/settings.c:475
+msgid "Maximum transmit bandwidth (tx)"
+msgstr "Maksimil‰hetyskaistanleveys (tx)"
+
+#: src/settings.c:477
+msgid "Maximum receive bandwidth (rx)"
+msgstr "Maksimivastaanottokaistanleveys (rx)"
+
+#: src/settings.c:479
+msgid "Use length bit"
+msgstr "K‰yt‰ pituusbitti‰"
+
+#: src/settings.c:480
+msgid "Use challenge authentication"
+msgstr "K‰yt‰ haaste-todennusta"
+
+#: src/settings.c:482
+msgid "Default route"
+msgstr "Oletusreitti"
+
+#: src/settings.c:483
+msgid "Use seq numbers"
+msgstr "K‰yt‰ j‰rjestysnumeroita"
+
+#: src/settings.c:484
+msgid "Window size"
+msgstr "Ikkunakoko"
+
+#: src/settings.c:485
+msgid "Use only one control channel"
+msgstr "K‰yt‰ vain yht‰ hallintakanavaa"
+
+#: src/settings.c:487
+msgid "Redial if disconnected"
+msgstr "Uudelleenyhdist‰ jos yhteys katkeaa"
+
+#: src/settings.c:489
+msgid "Redial timeout"
+msgstr "Uudellenyhdistysaikakatkaisu"
+
+#: src/settings.c:491
+msgid "Maximum redial tries"
+msgstr "Maksimiuudelleenyhdistysyritysm‰‰r‰"
+
+#: src/settings.c:493
+msgid "Require PAP"
+msgstr "Vaadi PAP"
+
+#: src/settings.c:494
+msgid "Require CHAP"
+msgstr "Vaadi CHAP"
+
+#: src/settings.c:495
+msgid "Require authentication"
+msgstr "Vaadi todennusta"
+
+#: src/settings.c:497
+msgid "Accept only these peers"
+msgstr "Hyv‰ksy vain n‰m‰ vertaiset"
+
+#: src/settings.c:499
+msgid "Authentication file location"
+msgstr "Tunnistautumistiedoston sijainti"
+
+#: src/settings.c:501
+msgid "Listen address"
+msgstr "Kuunteluosoite"
+
+#: src/settings.c:502
+msgid "Use IPSec SA"
+msgstr "K‰yt‰ IPSec SA:ta"
+
+#: src/settings.c:503
+msgid "UDP Port"
+msgstr "UDP-portti"
+
+#: src/settings.c:519
+msgid "Dead peer check count"
+msgstr "Kuolleen vertaisen tarkistusm‰‰r‰"
+
+#: src/settings.c:521
+msgid "Dead peer check interval"
+msgstr "Kuolleen vertaisen tarkistuksen aikav‰li"
+
+#: src/settings.c:523
+msgid "Debug level"
+msgstr "Debug-taso"
+
+#: src/settings.c:524
+msgid "Refuse EAP authentication"
+msgstr "Hylk‰‰ EAP-todennus"
+
+#: src/settings.c:526
+msgid "Refuse PAP authentication"
+msgstr "Hylk‰‰ PAP-todennus"
+
+#: src/settings.c:528
+msgid "Refuse CHAP authentication"
+msgstr "Hylk‰‰ CHAP-todennus"
+
+#: src/settings.c:530
+msgid "Refuse MSCHAP authentication"
+msgstr "Hylk‰‰ MSCHAP-todennus"
+
+#: src/settings.c:532
+msgid "Refuse MSCHAPv2 authentication"
+msgstr "Hylk‰‰ MSCHAPv2-todennus"
+
+#: src/settings.c:534
+msgid "Disable BSD compression"
+msgstr "Poista BSD-pakkaus k‰ytˆst‰"
+
+#: src/settings.c:536
+msgid "Disable DEFLATE compression"
+msgstr "Poista DEFLATE-pakkaus k‰ytˆst‰"
+
+#: src/settings.c:538
+msgid "Require the use of MPPE"
+msgstr "Vaadi MPPE:n k‰yttˆ‰"
+
+#: src/settings.c:540
+msgid "Require the use of MPPE 40 bit"
+msgstr "Vaadi 40-bittisen MPPE:n k‰yttˆ‰"
+
+#: src/settings.c:542
+msgid "Require the use of MPPE 128 bit"
+msgstr "Vaadi 128-bittisen MPPE:n k‰yttˆ‰"
+
+#: src/settings.c:544
+msgid "Allow MPPE to use stateful mode"
+msgstr "Salli MPPE:n k‰ytt‰‰ tilallista tilaa"
+
+#: src/settings.c:546
+msgid "No Van Jacobson compression"
+msgstr "Ei Van Jacobson-pakkausta"
+
+#: src/settings.c:565
 msgid "_Clear settings"
 msgstr "_Tyhjenn‰ asetukset"
 
-#: src/settings.c:428
+#: src/settings.c:567
 msgid "_Reset"
 msgstr "_Tyhjenn‰"
 
-#: src/settings.c:429
+#: src/settings.c:568
 msgid "_Forget"
 msgstr "_Unohda"
 
-#: src/settings.c:430
+#: src/settings.c:569
 msgid "Set all properties to defaults."
 msgstr "Tyhjenn‰ t‰m‰n palvelun asetukset."
 
-#: src/settings.c:431
+#: src/settings.c:570
 msgid "Remove this service."
 msgstr "Poista t‰m‰ palvelu."
 
-#: src/settings.c:548
+#: src/settings.c:699
 msgid "_Apply"
 msgstr "_Toteuta"
 
-#: src/settings_content.c:632
+#: src/settings_content.c:670
 msgid "IP version"
 msgstr "Protokollan versio"
 
-#: src/settings_content.c:635
+#: src/settings_content.c:673
 msgid "Network"
 msgstr "Verkko"
 
-#: src/technology.c:112
-msgid "Tethering"
-msgstr "Jaetaan"
+#: src/status.c:87
+msgid "Open app"
+msgstr "Avaa"
 
-#: src/technology.c:119 src/vpn.c:182
+#: src/status.c:88
+msgid "Exit"
+msgstr "Poistu"
+
+#: src/technology.c:120 src/vpn.c:178
 msgid "Connected"
 msgstr "Yhdistetty"
 
-#: src/technology.c:133 src/vpn.c:186
+#: src/technology.c:135
+msgid "Tethering"
+msgstr "Jaetaan"
+
+#: src/technology.c:138 src/vpn.c:182
 msgid "Not connected"
 msgstr "Ei yhteytt‰"
 
-#: src/technology.c:215
+#: src/technology.c:220
 msgid "Disable _tethering"
 msgstr "ƒl‰ _k‰yt‰ yhteyspisteen‰"
 
-#: src/technology.c:217 src/technology.c:307
+#: src/technology.c:222 src/technology.c:312
 msgid "Enable _tethering"
 msgstr "_K‰yt‰ yhteyspisteen‰"
 
-#: src/technology.c:240 src/technology.c:302 src/technology.c:568
+#: src/technology.c:245 src/technology.c:307 src/technology.c:576
 msgid "_Connect"
 msgstr "_Yhdist‰"
 
-#: src/technology.c:242 src/technology.c:564
+#: src/technology.c:247 src/technology.c:572
 msgid "Re_connect"
 msgstr "Uudelleen_yhdist‰"
 
-#: src/technology.c:244 src/technology.c:566
+#: src/technology.c:249 src/technology.c:574
 msgid "Dis_connect"
 msgstr "Katkaise _yhteys"
+
+#: src/technology.c:619
+msgid "Failed to enable ethernet tethering."
+msgstr "Langallisen yhteyden jakaminen ep‰onnistui."
+
+#: src/technology.c:620
+msgid ""
+"Ethernet tethering has to be manually allowed in /etc/connman/main.conf."
+msgstr "Langallisen yhteyden jakaminen tulee olla sallittua tiedostossa "
+"/etc/connman/main.conf"
 
 #: src/util.c:119
 msgid "Idle"
@@ -423,53 +729,43 @@ msgstr "Tunnistautuminen ep‰onnistui"
 msgid "Invalid key"
 msgstr "V‰‰r‰ avain"
 
-#: src/util.c:338
-msgid "Details:"
-msgstr "Tarkemmat tiedot"
-
-#: src/util.c:343
-msgid "Operation failed"
-msgstr "Toiminto ep‰onnistui"
-
-#: src/vpn.c:101 src/vpn.c:180
-msgid "VPN"
-msgstr "VPN"
-
-#: src/vpn.c:184
+#: src/vpn.c:180
 msgid "Connecting"
 msgstr "Yhdistet‰‰n"
 
-#: src/wireless.c:130
+#: src/wireless.c:131
 msgid "Set Access Point SSID and passphrase"
 msgstr "Aseta yhteyspisteen nimi ja salalause"
 
-#: src/wireless.c:142
+#: src/wireless.c:143
 msgid "SSID"
 msgstr "Yhteyspisteen nimi"
 
-#: src/wireless.c:143
+#: src/wireless.c:144
 msgid "Passphrase"
 msgstr "Salalause"
 
-#: src/wireless.c:144
+#: src/wireless.c:145
 msgid "_Show passphrase"
 msgstr "_N‰yt‰ salalause"
 
-#: lib/openconnect_helper.c:158
-msgid "Username"
-msgstr "K‰ytt‰j‰nimi"
+#~ msgid "_Server routes"
+#~ msgstr "_Palvelimen reitit"
 
-#: lib/openconnect_helper.c:164
-msgid "Password"
-msgstr "Salasana"
+#~ msgid "_User routes"
+#~ msgstr "_K‰ytt‰j‰n reitit"
 
-#: lib/openconnect_helper.c:175
-msgid "Enter AnyConnect credentials"
-msgstr "Kirjoita AnyConnect-tunnistautumistiedot"
+#~ msgid "Details:"
+#~ msgstr "Tarkemmat tiedot"
 
-#: lib/openconnect_helper.c:249
-msgid "Connecting to VPN failed."
-msgstr "Yhdist‰minen ep‰onnistui."
+#~ msgid "Password"
+#~ msgstr "Salasana"
+
+#~ msgid "Enter AnyConnect credentials"
+#~ msgstr "Kirjoita AnyConnect-tunnistautumistiedot"
+
+#~ msgid "Connecting to VPN failed."
+#~ msgstr "Yhdist‰minen ep‰onnistui."
 
 #~ msgid "IPv4"
 #~ msgstr "IPv4"
