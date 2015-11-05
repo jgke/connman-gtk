@@ -614,10 +614,11 @@ static void startup(GtkApplication *app, gpointer user_data)
 	create_content();
 
 	gtk_widget_show_all(main_window);
+
+#ifdef USE_STATUS_ICON
 	if(launch_to_tray)
 		gtk_widget_hide(main_window);
 
-#ifdef USE_STATUS_ICON
 	if(status_icon_enabled) {
 		g_signal_connect(main_window, "delete-event",
 				 G_CALLBACK(gtk_widget_hide_on_delete),
@@ -629,9 +630,11 @@ static void startup(GtkApplication *app, gpointer user_data)
 
 static void activate(GtkApplication *app, gpointer user_data)
 {
+#ifdef USE_STATUS_ICON
 	if(!launch_to_tray)
 		gtk_widget_show(main_window);
 	launch_to_tray = FALSE;
+#endif
 }
 
 static const GOptionEntry options[] = {
