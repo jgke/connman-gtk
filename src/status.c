@@ -21,6 +21,7 @@
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 
+#include "config.h"
 #include "connection.h"
 #include "main.h"
 #include "status.h"
@@ -128,6 +129,9 @@ void status_update(void) {
 	int best_status = 0;
 	int index;
 
+	if(!status_icon_enabled)
+		return;
+
 	for(index = CONNECTION_TYPE_ETHERNET; index < CONNECTION_TYPE_COUNT; index++) {
 		struct technology *tech;
 		GHashTableIter iter;
@@ -181,6 +185,9 @@ void status_update(void) {
 
 void status_init(GtkApplication *app)
 {
+	if(!status_icon_enabled)
+		return;
+
 	icon = gtk_status_icon_new_from_icon_name("preferences-system-network");
 	g_signal_connect(icon, "activate", G_CALLBACK(status_activate), app);
 	g_signal_connect(icon, "popup-menu", G_CALLBACK(status_menu), app);
