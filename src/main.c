@@ -43,10 +43,7 @@ gboolean shutting_down = FALSE;
 
 const gchar *default_page;
 
-#ifdef USE_STATUS_ICON
 gboolean launch_to_tray;
-#endif
-
 gboolean use_fsid;
 
 /* sort smallest enum value first */
@@ -62,7 +59,10 @@ gint technology_list_sort_cb(GtkListBoxRow *row1, GtkListBoxRow *row2,
 
 static void create_content(void)
 {
-	GtkWidget *frame, *grid, *settings;
+	GtkWidget *frame, *grid;
+#ifdef HAVE_CONFIG_SETTINGS
+	GtkWidget *settings;
+#endif
 
 	grid = gtk_grid_new();
 	style_set_margin(grid, MARGIN_LARGE);
@@ -597,6 +597,15 @@ static gboolean delete_event(GtkApplication *app, GdkEvent *event,
 
 static void startup(GtkApplication *app, gpointer user_data)
 {
+#ifndef USE_STATUS_ICON
+	if(launch_to_tray)
+		g_warning("Invalid option --tray: Status icon support not included");
+#endif
+#ifndef USE_OPENCONNECT
+	if(use_fsid)
+		g_warning("Invalid option --use-fsid: Openconnect helper not included");
+#endif
+
 	g_bus_get(G_BUS_TYPE_SYSTEM, NULL, dbus_connected, NULL);
 
 	config_load(app);
@@ -637,14 +646,30 @@ static void activate(GtkApplication *app, gpointer user_data)
 #endif
 }
 
+/* Hide the options if support not compiled in and show a warning instead of
+ * not including the option so that 'invalid' options won't just shut it down */
+
+#ifdef USE_STATUS_ICON
+#define STATUS_ICON_HIDDEN 0
+#else
+#define STATUS_ICON_HIDDEN G_OPTION_FLAG_HIDDEN
+#endif
+
+#ifdef USE_OPENCONNECT
+#define FSID_HIDDEN 0
+#else
+#define FSID_HIDDEN G_OPTION_FLAG_HIDDEN
+#endif
+
 static const GOptionEntry options[] = {
 	{ "page", 0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_STRING, &default_page,
 		NULL, NULL },
-#ifdef USE_STATUS_ICON
-	{ "tray", 0, 0, G_OPTION_ARG_NONE, &launch_to_tray,
-		"Launch connman-gtk straight to tray", NULL },
-#endif
-	{ "use-fsid", 0, 0, G_OPTION_ARG_NONE, &use_fsid,
+	{ "tray", 0, STATUS_ICON_HIDDEN,
+		G_OPTION_ARG_NONE,
+		&launch_to_tray, "Launch connman-gtk straight to tray", NULL },
+	{ "use-fsid", 0, FSID_HIDDEN,
+		G_OPTION_ARG_NONE,
+		&use_fsid,
 		"Use FSID with openconnect", NULL },
 	{ NULL }
 };
