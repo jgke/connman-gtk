@@ -11,7 +11,7 @@ Dependencies
 
  * intltool
  * GLib
- * GTK >= 3.14
+ * GTK >= 3.10
 
 Installation
 ------------
@@ -27,7 +27,8 @@ configure options
 	--enable-status-icon=[yes,no]
 	--disable-status-icon
 
-Enable or disable the status icon.
+Enable or disable the status icon. Future GTK versions might remove the support
+for status icons, but as of 3.18 the support is still there, just deprecated.
 
 	--with-openconnect=[yes,no,check,dynamic]
 
