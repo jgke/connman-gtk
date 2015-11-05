@@ -18,9 +18,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CONNMAN_GTK_CONFIG_H
-#define _CONNMAN_GTK_CONFIG_H
-
 #include <glib.h>
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
@@ -33,6 +30,8 @@ gboolean launch_to_tray_by_default;
 gboolean openconnect_use_fsid_by_default;
 GHashTable *openconnect_fsid_table;
 GSettings *settings;
+
+#ifdef HAVE_CONFIG_SETTINGS
 
 void config_load(GtkApplication *app)
 {
@@ -51,7 +50,7 @@ void config_load(GtkApplication *app)
 					     "openconnect-use-fsid-by-default");
 }
 
-void config_window_open(gpointer *ignored, gpointer user_data)
+void config_window_open(GtkApplication *ignored, gpointer user_data)
 {
 	GPtrArray *entries;
 	struct token_element *element;
@@ -103,4 +102,9 @@ void config_window_open(gpointer *ignored, gpointer user_data)
 	g_settings_apply(settings);
 }
 
-#endif /* _CONNMAN_GTK_CONFIG_H */
+#else
+
+void config_load(GtkApplication *app) {}
+void config_window_open(gpointer *ignored, gpointer user_data) {}
+
+#endif /* HAVE_CONFIG_SETTINGS */
