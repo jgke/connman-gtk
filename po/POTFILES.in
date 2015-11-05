@@ -1,1 +1,16 @@
+connman-gtk.desktop.in
+lib/openconnect_helper.c
+src/agent.c
+src/config.c
+src/connection.c
+src/dialog.c
 src/main.c
+src/service.c
+src/settings.c
+src/settings_content.c
+src/status.c
+src/technology.c
+src/util.c
+src/vpn.c
+src/wireless.c
+

@@ -1,4 +1,5 @@
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
+MANUAL_PAGES = doc/connman-gtk.1
 
 desktopdir = $(datadir)/applications
 desktop_DATA = connman-gtk.desktop
@@ -12,12 +13,13 @@ connman_gtk_SOURCES = src/main.c src/agent.c src/style.c src/technology.c \
 connman_gtk_LDADD = @GTK_LIBS@ @GLib_LIBS@
 connman_gtk_CPPFLAGS = @GTK_CFLAGS@ @GLib_CFLAGS@ \
 		       -DCONNMAN_GTK_LOCALEDIR=\"${CONNMAN_GTK_LOCALEDIR}\" \
-		       -DCONNMAN_GTK_UIDIR=\""$(uidir)"\" -I$(builddir)/lib
+		       -DCONNMAN_GTK_UIDIR=\""$(uidir)"\" -I$(top_srcdir)/lib
 
 EXTRA_DIST = src/agent.h src/interfaces.h src/main.h src/technology.h \
 	     src/style.h src/service.h src/util.h src/settings.h src/status.h \
 	     src/settings_content.h src/connection.h src/vpn.h src/wireless.h \
-	     src/dialog.h src/config.h lib/openconnect_helper.h README.md
+	     src/dialog.h src/config.h lib/openconnect_helper.h README.md \
+	     net.connman.gtk.gschema.xml ${MANUAL_PAGES}
 
 if USE_OPENCONNECT
 connman_gtk_LDADD += @openconnect_LIBS@
@@ -46,4 +48,5 @@ DISTCLEANFILES = intltool-extract \
 gsettings_SCHEMAS = net.connman.gtk.gschema.xml
 @GSETTINGS_RULES@
 
-man1_MANS = doc/connman-gtk.1
+man_MANS = ${MANUAL_PAGES}
+notrans_man_MANS = ${MANUAL_PAGES}
