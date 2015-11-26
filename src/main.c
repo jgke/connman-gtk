@@ -625,10 +625,10 @@ static void startup(GtkApplication *app, gpointer user_data)
 	gtk_widget_show_all(main_window);
 
 #ifdef USE_STATUS_ICON
-	if(launch_to_tray)
-		gtk_widget_hide(main_window);
-
 	if(status_icon_enabled) {
+		if(launch_to_tray)
+			gtk_widget_hide(main_window);
+
 		g_signal_connect(main_window, "delete-event",
 				 G_CALLBACK(gtk_widget_hide_on_delete),
 				 main_window);
