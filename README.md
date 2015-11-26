@@ -13,6 +13,12 @@ Dependencies
  * GLib
  * GTK >= 3.10
 
+Optional dependencies
+---------------------
+
+ * openconnect
+    * Easier authentication to AnyConnect VPNs
+
 Usage
 -----
 
