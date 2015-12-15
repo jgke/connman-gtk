@@ -32,10 +32,10 @@
 extern gboolean status_icon_enabled;
 
 // Launch to tray
-extern gboolean launch_to_tray_by_default;
+extern gboolean launch_to_tray;
 
 // Use fsid with openconnect by default
-extern gboolean openconnect_use_fsid_by_default;
+extern gboolean use_fsid;
 
 // Service name in this hashset -> enable fsid
 extern GHashTable *openconnect_fsid_table;

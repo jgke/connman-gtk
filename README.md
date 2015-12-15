@@ -13,6 +13,33 @@ Dependencies
  * GLib
  * GTK >= 3.10
 
+Optional dependencies
+---------------------
+
+ * openconnect
+    * Easier authentication to AnyConnect VPNs
+
+Usage
+-----
+
+	connman-gtk [options]
+
+	--help
+
+Show help.
+
+	--no-icon
+
+Disable status icon.
+
+	--tray
+
+Launch to tray.
+
+	--use-fsid
+
+Use FSID when connecting to OpenConnect networks.
+
 Installation
 ------------
 

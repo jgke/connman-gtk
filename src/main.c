@@ -43,8 +43,7 @@ gboolean shutting_down = FALSE;
 
 const gchar *default_page;
 
-gboolean launch_to_tray;
-gboolean use_fsid;
+gboolean no_icon;
 
 /* sort smallest enum value first */
 gint technology_list_sort_cb(GtkListBoxRow *row1, GtkListBoxRow *row2,
@@ -597,21 +596,11 @@ static gboolean delete_event(GtkApplication *app, GdkEvent *event,
 
 static void startup(GtkApplication *app, gpointer user_data)
 {
-#ifndef USE_STATUS_ICON
-	if(launch_to_tray)
-		g_warning("Invalid option --tray: Status icon support not included");
-#endif
-#ifndef USE_OPENCONNECT
-	if(use_fsid)
-		g_warning("Invalid option --use-fsid: Openconnect helper not included");
-#endif
-
 	g_bus_get(G_BUS_TYPE_SYSTEM, NULL, dbus_connected, NULL);
 
 	config_load(app);
-#ifdef USE_STATUS_ICON
-	launch_to_tray = launch_to_tray || launch_to_tray_by_default;
-#endif
+	if(no_icon)
+		status_icon_enabled = FALSE;
 
 	main_window = gtk_application_window_new(app);
 	g_signal_connect(app, "window-removed",
@@ -625,10 +614,10 @@ static void startup(GtkApplication *app, gpointer user_data)
 	gtk_widget_show_all(main_window);
 
 #ifdef USE_STATUS_ICON
-	if(launch_to_tray)
-		gtk_widget_hide(main_window);
+	if(status_icon_enabled && !no_icon) {
+		if(launch_to_tray)
+			gtk_widget_hide(main_window);
 
-	if(status_icon_enabled) {
 		g_signal_connect(main_window, "delete-event",
 				 G_CALLBACK(gtk_widget_hide_on_delete),
 				 main_window);
@@ -664,6 +653,9 @@ static void activate(GtkApplication *app, gpointer user_data)
 static const GOptionEntry options[] = {
 	{ "page", 0, G_OPTION_FLAG_HIDDEN, G_OPTION_ARG_STRING, &default_page,
 		NULL, NULL },
+	{ "no-icon", 0, STATUS_ICON_HIDDEN,
+		G_OPTION_ARG_NONE,
+		&no_icon, "Disable status icon", NULL },
 	{ "tray", 0, STATUS_ICON_HIDDEN,
 		G_OPTION_ARG_NONE,
 		&launch_to_tray, "Launch connman-gtk straight to tray", NULL },

@@ -26,8 +26,11 @@
 #include "dialog.h"
 
 gboolean status_icon_enabled;
-gboolean launch_to_tray_by_default;
-gboolean openconnect_use_fsid_by_default;
+gboolean launch_to_tray;
+gboolean use_fsid;
+static gboolean status_icon_enabled_by_default;
+static gboolean launch_to_tray_by_default;
+static gboolean use_fsid_by_default;
 GHashTable *openconnect_fsid_table;
 GSettings *settings;
 
@@ -40,14 +43,17 @@ void config_load(GtkApplication *app)
 	openconnect_fsid_table = g_hash_table_new_full(g_str_hash, g_str_equal,
 						       g_free, NULL);
 
-	status_icon_enabled = g_settings_get_boolean(settings,
+	status_icon_enabled_by_default = g_settings_get_boolean(settings,
 						     "status-icon-enabled");
+	status_icon_enabled = status_icon_enabled_by_default;
 
 	launch_to_tray_by_default = g_settings_get_boolean(settings,
 							   "launch-to-tray");
+	launch_to_tray = launch_to_tray_by_default;
 
-	openconnect_use_fsid_by_default = g_settings_get_boolean(settings,
+	use_fsid_by_default = g_settings_get_boolean(settings,
 					     "openconnect-use-fsid-by-default");
+	use_fsid = use_fsid_by_default;
 }
 
 void config_window_open(GtkApplication *ignored, gpointer user_data)
@@ -60,12 +66,12 @@ void config_window_open(GtkApplication *ignored, gpointer user_data)
 #ifdef USE_OPENCONNECT
 	g_ptr_array_add(entries,
 			token_new_checkbox(_("Use fsid with openconnect"),
-					   openconnect_use_fsid_by_default));
+					   use_fsid_by_default));
 #endif
 #ifdef USE_STATUS_ICON
 	g_ptr_array_add(entries,
 			token_new_checkbox(_("Use status icon"),
-					   status_icon_enabled));
+					   status_icon_enabled_by_default));
 	g_ptr_array_add(entries,
 			token_new_checkbox(_("Launch to tray by default"),
 					   launch_to_tray_by_default));
@@ -78,17 +84,17 @@ void config_window_open(GtkApplication *ignored, gpointer user_data)
 
 #ifdef USE_OPENCONNECT
 	element = entries->pdata[index];
-	openconnect_use_fsid_by_default = !!element->value;
+	use_fsid_by_default = !!element->value;
 	index++;
 	g_settings_set_boolean(settings, "openconnect-use-fsid-by-default",
-			       openconnect_use_fsid_by_default);
+			       use_fsid_by_default);
 #endif
 #ifdef USE_STATUS_ICON
 	element = entries->pdata[index];
-	status_icon_enabled = !!element->value;
+	status_icon_enabled_by_default = !!element->value;
 	index++;
 	g_settings_set_boolean(settings, "status-icon-enabled",
-			       status_icon_enabled);
+			       status_icon_enabled_by_default);
 
 	element = entries->pdata[index];
 	launch_to_tray_by_default = !!element->value;

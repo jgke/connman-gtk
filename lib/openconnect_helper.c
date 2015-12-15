@@ -435,7 +435,7 @@ static GVariantDict *get_tokens(GHashTable *info)
 	if(cert)
 		set_cafile(vpninfo, cert);
 
-	if(use_fsid || openconnect_use_fsid_by_default)
+	if(use_fsid)
 		passphrase_from_fsid(vpninfo);
 
 	parse_url(vpninfo, host);

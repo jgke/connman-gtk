@@ -99,6 +99,7 @@ static void status_menu(GtkStatusIcon *icon, guint button, guint activate_time,
 		gpointer key, service;
 		GtkMenuItem *item;
 		GtkMenu *submenu;
+		gboolean has_items = FALSE;
 
 		tech = technologies[index];
 		if(!tech)
@@ -113,10 +114,13 @@ static void status_menu(GtkStatusIcon *icon, guint button, guint activate_time,
 		while(g_hash_table_iter_next(&iter, &key, &service)) {
 			GtkWidget *item = create_service_item(service);
 			gtk_container_add(GTK_CONTAINER(submenu), item);
+			has_items = TRUE;
 		}
 
 		gtk_menu_item_set_submenu(item, GTK_WIDGET(submenu));
 		gtk_container_add(GTK_CONTAINER(menu), GTK_WIDGET(item));
+		gtk_widget_set_sensitive(item, has_items);
+
 	}
 
 	gtk_container_add(GTK_CONTAINER(menu), gtk_separator_menu_item_new());
