@@ -67,7 +67,6 @@ readmes = [
 
 install_data(readmes, install_dir : join_paths(get_option('datadir'), meson.project_name(), 'doc'))
 subdir('po')
-subdir('lib')
 subdir('src')
 subdir('data')
 
