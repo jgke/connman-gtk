@@ -22,7 +22,7 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
-#include "config.h"
+#include "configurator.h"
 #include "dialog.h"
 
 gboolean status_icon_enabled;

@@ -22,6 +22,7 @@
 #ifndef _CONNMAN_GTK_CONFIG_H
 #define _CONNMAN_GTK_CONFIG_H
 
+#include "config.h"
 #include <gtk/gtk.h>
 
 #if defined(USE_OPENCONNECT) || defined(USE_STATUS_ICON)

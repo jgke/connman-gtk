@@ -20,6 +20,7 @@
 
 #include <glib.h>
 #include <gio/gio.h>
+#include "config.h"
 
 #ifdef USE_OPENCONNECT
 
@@ -30,7 +31,7 @@
 #include <string.h>
 
 #include "openconnect_helper.h"
-#include "../src/config.h"
+#include "../src/configurator.h"
 #include "../src/main.h"
 #include "../src/util.h"
 #include "../src/dialog.h"

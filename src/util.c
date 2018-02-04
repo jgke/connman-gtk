@@ -24,6 +24,7 @@
 #include <gtk/gtk.h>
 #include <string.h>
 
+#include "config.h"
 #include "main.h"
 #include "style.h"
 #include "util.h"
