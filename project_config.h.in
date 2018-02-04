@@ -1,0 +1,9 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#mesondefine USE_OPENCONNECT
+#mesondefine USE_OPENCONNECT_DYNAMIC
+#mesondefine USE_STATUS_ICON
+
+
+#endif
