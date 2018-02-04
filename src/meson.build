@@ -17,7 +17,7 @@ connman_gtk_sources = [
 ]
 
 if (not openconnect.found())
-	openconnect = true
+	openconnect = declare_dependency()
 endif
 
 executable(meson.project_name(),
