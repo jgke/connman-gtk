@@ -43,12 +43,12 @@ Use FSID when connecting to OpenConnect networks.
 Installation
 ------------
 
-	meson <builddir>
+	meson [configuration options] <builddir>
 	cd <builddir>
 	ninja
 	ninja install *as root*
 
-configure options (use it when running meson <builddir>
+configure options
 -----------------
 
 	-Duse_status_icon=[true,false]
