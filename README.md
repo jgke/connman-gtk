@@ -43,21 +43,20 @@ Use FSID when connecting to OpenConnect networks.
 Installation
 ------------
 
-	./autogen.sh
-	./configure
-	make
-	make install
+	meson <builddir>
+	cd <builddir>
+	ninja
+	ninja install *as root*
 
-configure options
+configure options (use it when running meson <builddir>
 -----------------
 
-	--enable-status-icon=[yes,no]
-	--disable-status-icon
+	-Duse_status_icon=[true,false]
 
 Enable or disable the status icon. Future GTK versions might remove the support
 for status icons, but as of 3.18 the support is still there, just deprecated.
 
-	--with-openconnect=[yes,no,check,dynamic]
+	-Duse_openconnect=[yes,no,check,dynamic]
 
 Enables use of [openconnect](http://infradead.org/openconnect/) for easier
 authentication for AnyConnect VPNs. Using 'dynamic' will load the library at
@@ -67,4 +66,4 @@ at configure time.
 License
 -------
 
-GPLv2, see COPYING
+GPLv2, see LICENSE
