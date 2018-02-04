@@ -1,0 +1,750 @@
+# Russian translations for connman-gtk package.
+# Copyright (C) 2018 THE connman-gtk'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the connman-gtk package.
+# Konstantin <ria.freelander@gmail.com>, 2018.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-11-05 12:20+0200\n"
+"PO-Revision-Date: 2018-02-05 02:02+0300\n"
+"Last-Translator: Konstantin <ria.freelander@gmail.com>\n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 2.0.6\n"
+
+#: src/agent.c:158
+msgid "Authentication required"
+msgstr "Требуется аутентфикация"
+
+#: src/config.c:62
+msgid "Use fsid with openconnect"
+msgstr "Использовать fsid для openconnect"
+
+#: src/config.c:67
+msgid "Use status icon"
+msgstr "Использовать значок в трее"
+
+#: src/config.c:70
+msgid "Launch to tray by default"
+msgstr "Запускать в трей по умолчанию"
+
+#: src/config.c:74
+msgid "Settings"
+msgstr "Настройка"
+
+#: src/connection.c:68
+msgid "Wired"
+msgstr "Проводное"
+
+#: src/connection.c:70
+msgid "Wireless"
+msgstr "Беспроводное"
+
+#: src/connection.c:72
+msgid "Bluetooth"
+msgstr "Bluetooth"
+
+#: src/connection.c:74
+msgid "Cellular"
+msgstr "Модемное"
+
+#: src/connection.c:76
+msgid "P2P"
+msgstr "P2P"
+
+#: src/connection.c:78 src/vpn.c:102 src/vpn.c:176
+msgid "VPN"
+msgstr "VPN"
+
+#: src/connection.c:80
+msgid "Unknown"
+msgstr "Неизвестное"
+
+#: src/connection.c:91
+msgid "W_ired"
+msgstr "_Проводное"
+
+#: src/connection.c:93
+msgid "_Wireless"
+msgstr "_Беспроводное"
+
+#: src/connection.c:95
+msgid "_Bluetooth"
+msgstr "_Bluetooth"
+
+#: src/connection.c:97
+msgid "_Cellular"
+msgstr "_Модемное"
+
+#: src/connection.c:99
+msgid "_P2P"
+msgstr "_P2P"
+
+#: src/connection.c:101
+msgid "_VPN"
+msgstr "_VPN"
+
+#: src/connection.c:103
+msgid "_Unknown"
+msgstr "_Неизвестное"
+
+#: src/dialog.c:192 src/dialog.c:287
+msgid "_OK"
+msgstr "_OK"
+
+#: src/dialog.c:193
+msgid "_Cancel"
+msgstr "_Отмена"
+
+#: src/dialog.c:283
+msgid "Operation failed"
+msgstr "Сбой выполнения операции"
+
+#: src/main.c:95
+msgid "_Settings"
+msgstr "Н_астройки"
+
+#: src/main.c:415 src/vpn.c:145
+msgid "Failed to connect to ConnMan."
+msgstr "Не удалось подключиться к интерфейсу ConnMan."
+
+#: src/main.c:573
+msgid "Failed to connect to system DBus."
+msgstr "Не удалось подключиться к системной шине DBus."
+
+#: src/main.c:619 src/settings.c:689
+msgid "Network Settings"
+msgstr "Настройки сети"
+
+#: src/service.c:334 src/settings.c:160 src/settings.c:387
+msgid "IPv4 address"
+msgstr "Адрес IPv4"
+
+#: src/service.c:335
+msgid "IPv4 gateway"
+msgstr "Шлюз IPv4"
+
+#: src/service.c:336 src/settings.c:161 src/settings.c:388
+msgid "IPv6 address"
+msgstr "Адрес IPv6"
+
+#: src/service.c:337
+msgid "IPv6 gateway"
+msgstr "Шлюз IPv6"
+
+#: src/service.c:339 src/settings.c:158
+msgid "MAC address"
+msgstr "Адрес MAC"
+
+#: src/service.c:406
+msgid "IEEE8021x secured services have to be manually configured."
+msgstr "Защищенные службы IEEE8021x должны быть настроены вручную."
+
+#: src/service.c:410 src/service.c:442
+msgid "Failed to toggle connection state."
+msgstr "Невозможно изменить состояние соединения."
+
+#: src/service.c:517
+msgid "Hidden ieee8021x secured network"
+msgstr "Скрытая защищенная сеть ieee8021x"
+
+#: src/service.c:518
+msgid "Hidden WPA secured network"
+msgstr "Скрытая защищенная сеть WPA"
+
+#: src/service.c:519
+msgid "Hidden WPS secured network"
+msgstr "Скрытая защищенная сеть WPS"
+
+#: src/service.c:520
+msgid "Hidden unsecured network"
+msgstr "Скрытая незащищенная сеть"
+
+#: src/service.c:544 src/settings.c:359
+msgid "Direct"
+msgstr "Прямое"
+
+#: src/service.c:546 src/settings.c:242 src/settings.c:246 src/settings.c:361
+msgid "Automatic"
+msgstr "Автоматическое"
+
+#: src/service.c:548 src/settings.c:136 src/settings.c:239
+msgid "None"
+msgstr "Нет"
+
+#: src/service.c:560
+msgid "On"
+msgstr "Включено"
+
+#: src/service.c:561
+msgid "Off"
+msgstr "Выключено"
+
+#: src/settings.c:136 src/settings.c:140
+msgid "Security"
+msgstr "Безопасность"
+
+#: src/settings.c:149 src/settings.c:380
+msgid "_Info"
+msgstr "_Информация"
+
+#: src/settings.c:152
+msgid "Autoconnect"
+msgstr "Автоматическое подключение"
+
+#: src/settings.c:155 src/settings.c:383
+msgid "Name"
+msgstr "Название"
+
+#: src/settings.c:156 src/settings.c:385
+msgid "State"
+msgstr "Состояние"
+
+#: src/settings.c:159
+msgid "Interface"
+msgstr "Интерфейс"
+
+#: src/settings.c:162 src/settings.c:305 src/settings.c:329 src/settings.c:389
+msgid "Nameservers"
+msgstr "Серверы имен"
+
+#: src/settings.c:187
+msgid "IP _details"
+msgstr "Детали протокола _IP"
+
+#: src/settings.c:188
+msgid "IPv4 method"
+msgstr "Метод IPv4"
+
+#: src/settings.c:189 src/settings.c:195 src/settings.c:260 src/settings.c:268
+msgid "Address"
+msgstr "Адрес"
+
+#: src/settings.c:190 src/settings.c:196 src/settings.c:261 src/settings.c:271
+#: src/settings_content.c:676
+msgid "Gateway"
+msgstr "Шлюз"
+
+#: src/settings.c:194
+msgid "IPv6 method"
+msgstr "Метод IPv6"
+
+#: src/settings.c:215
+msgid "IPv_4"
+msgstr "IPv_4"
+
+#: src/settings.c:220
+msgid "IPv_6"
+msgstr "IPv_6"
+
+#: src/settings.c:236 src/settings.c:356
+msgid "Method"
+msgstr "Метод"
+
+#: src/settings.c:254 src/settings.c:363
+msgid "Manual"
+msgstr "Вручную"
+
+#: src/settings.c:263 src/settings.c:275 src/settings_content.c:674
+msgid "Netmask"
+msgstr "Маска подсети"
+
+#: src/settings.c:265 src/settings_content.c:675 src/settings_content.c:911
+msgid "Prefix length"
+msgstr "Длина префикса"
+
+#: src/settings.c:284
+msgid "Privacy"
+msgstr "Конфиденциальность"
+
+#: src/settings.c:289 src/technology.c:143
+msgid "Disabled"
+msgstr "Отключено"
+
+#: src/settings.c:291
+msgid "Enabled"
+msgstr "Включено"
+
+#: src/settings.c:293
+msgid "Prefered"
+msgstr "По умолчанию"
+
+#: src/settings.c:303
+msgid "_Servers"
+msgstr "_Серверы"
+
+#: src/settings.c:306 src/settings.c:334
+msgid "Timeservers"
+msgstr "Серверы времени"
+
+#: src/settings.c:307 src/settings.c:342
+msgid "Domains"
+msgstr "Домены"
+
+#: src/settings.c:308
+msgid "Proxy method"
+msgstr "Способ использования прокси-сервера"
+
+#: src/settings.c:312 src/settings.c:369
+msgid "URL"
+msgstr "URL"
+
+#: src/settings.c:314 src/settings.c:372
+msgid "Servers"
+msgstr "Серверы"
+
+#: src/settings.c:316 src/settings.c:374
+msgid "Excludes"
+msgstr "Исключить"
+
+#: src/settings.c:328
+msgid "_Nameservers"
+msgstr "_Серверы имен"
+
+#: src/settings.c:333
+msgid "_Timeservers"
+msgstr "_Серверы времени"
+
+#: src/settings.c:337
+msgid "Custom Timeservers"
+msgstr "Пользовательские серверы времени"
+
+#: src/settings.c:341
+msgid "_Domains"
+msgstr "_Домены"
+
+#: src/settings.c:354
+msgid "_Proxy"
+msgstr "_Прокси"
+
+#: src/settings.c:384
+msgid "Type"
+msgstr "Тип"
+
+#: src/settings.c:386
+msgid "Host"
+msgstr "Рабочая станция"
+
+#: src/settings.c:401
+msgid "Server fingerprint"
+msgstr "Цифровой отпечаток сервера"
+
+#: src/settings.c:403 src/settings.c:416
+msgid "Certificate Authority file"
+msgstr "Файл CA"
+
+#: src/settings.c:405 src/settings.c:418
+msgid "Client certificate file"
+msgstr "Файл сертификата клиента"
+
+#: src/settings.c:407
+msgid "VPN host"
+msgstr "Рабочая станция VPN"
+
+#: src/settings.c:420
+msgid "Client private key file"
+msgstr "Файл закрытого ключа клиента"
+
+#: src/settings.c:422
+msgid "Maximum transmission unit (MTU)"
+msgstr "MTU"
+
+#: src/settings.c:424
+msgid "Peer certificate type"
+msgstr "Тип сертификата соединения"
+
+#: src/settings.c:426
+msgid "Protocol"
+msgstr "Протокол"
+
+#: src/settings.c:427
+msgid "Port"
+msgstr "Порт"
+
+#: src/settings.c:428
+msgid "Authenticate using username/password"
+msgstr "Аутентификация с использованием пользователя/пароля"
+
+#: src/settings.c:430
+msgid "Private key password file"
+msgstr "Файл пароля закрытого ключа"
+
+#: src/settings.c:432
+msgid "Do not cache password"
+msgstr "Не кэшировать пароль"
+
+#: src/settings.c:434
+msgid "Cipher"
+msgstr "Шифр"
+
+#: src/settings.c:436
+msgid "Message digest algorithm for packet authentication"
+msgstr "Алгоритм хэширования для аутентификации пакетов"
+
+#: src/settings.c:438
+msgid "Use fast LZO compression"
+msgstr "Использовать быстрое сжатие LZO"
+
+#: src/settings.c:440
+msgid "External configuration file"
+msgstr "Внешний файл конфигурации"
+
+#: src/settings.c:449
+msgid "Group username"
+msgstr "Название группы"
+
+#: src/settings.c:450 src/settings.c:473 src/settings.c:511
+msgid "Username"
+msgstr "Пользователь"
+
+#: src/settings.c:451
+msgid "IKE Authentication mode"
+msgstr "Режим аутентификации IKE"
+
+#: src/settings.c:453
+msgid "Diffie-Hellman group"
+msgstr "Группа Диффи-Хэлмана"
+
+#: src/settings.c:454
+msgid "Domain"
+msgstr "Домен"
+
+#: src/settings.c:455
+msgid "Vendor"
+msgstr "Производитель"
+
+#: src/settings.c:456
+msgid "Local port"
+msgstr "Локальный порт"
+
+#: src/settings.c:457
+msgid "Cisco port"
+msgstr "Порт Cisco"
+
+#: src/settings.c:458
+msgid "Application version"
+msgstr "Версия приложения"
+
+#: src/settings.c:460
+msgid "NAT traversal method"
+msgstr "Метод обхода NAT"
+
+#: src/settings.c:462
+msgid "DPD idle timeout"
+msgstr "Таймаут покоя DPD"
+
+#: src/settings.c:463
+msgid "Single DES encryption"
+msgstr "Шифрование одинарным DES"
+
+#: src/settings.c:465
+msgid "No encryption"
+msgstr "Без шифрования"
+
+#: src/settings.c:474
+msgid "Maximum bandwidth (bps)"
+msgstr "Максимальная пропускная способность (bps)"
+
+#: src/settings.c:475
+msgid "Maximum transmit bandwidth (tx)"
+msgstr "Максимальная пропускная способность передачи (TX)"
+
+#: src/settings.c:477
+msgid "Maximum receive bandwidth (rx)"
+msgstr "Максимальная пропускная способность приема (rx)"
+
+#: src/settings.c:479
+msgid "Use length bit"
+msgstr "Использовать бит длины"
+
+#: src/settings.c:480
+msgid "Use challenge authentication"
+msgstr "Использовать аутентификацию PPP"
+
+#: src/settings.c:482
+msgid "Default route"
+msgstr "Маршрут по умолчанию"
+
+#: src/settings.c:483
+msgid "Use seq numbers"
+msgstr "Использовать номера последовательностей"
+
+#: src/settings.c:484
+msgid "Window size"
+msgstr "Размер сетевого окна"
+
+#: src/settings.c:485
+msgid "Use only one control channel"
+msgstr "Использовать только один контрольный канал"
+
+#: src/settings.c:487
+msgid "Redial if disconnected"
+msgstr "Перезвонить при разрыве"
+
+#: src/settings.c:489
+msgid "Redial timeout"
+msgstr "Таймаут звонков"
+
+#: src/settings.c:491
+msgid "Maximum redial tries"
+msgstr "Максимальное число попыток"
+
+#: src/settings.c:493
+msgid "Require PAP"
+msgstr "Требовать PAP"
+
+#: src/settings.c:494
+msgid "Require CHAP"
+msgstr "Требовать CHAP"
+
+#: src/settings.c:495
+msgid "Require authentication"
+msgstr "Требовать аутентификацию"
+
+#: src/settings.c:497
+msgid "Accept only these peers"
+msgstr "Соединяться только с данным адресами"
+
+#: src/settings.c:499
+msgid "Authentication file location"
+msgstr "Местонахождение файла аутентификации"
+
+#: src/settings.c:501
+msgid "Listen address"
+msgstr "Слушать адрес"
+
+#: src/settings.c:502
+msgid "Use IPSec SA"
+msgstr "Использовать IPSec SA"
+
+#: src/settings.c:503
+msgid "UDP Port"
+msgstr "Порт UDP"
+
+#: src/settings.c:519
+msgid "Dead peer check count"
+msgstr "Счетчик проверки DPD"
+
+#: src/settings.c:521
+msgid "Dead peer check interval"
+msgstr "Интервал проверки DPD"
+
+#: src/settings.c:523
+msgid "Debug level"
+msgstr "Уровень отладки"
+
+#: src/settings.c:524
+msgid "Refuse EAP authentication"
+msgstr "Отклонять аутентификацию EAP"
+
+#: src/settings.c:526
+msgid "Refuse PAP authentication"
+msgstr "Отклонять аутентификацию PAP"
+
+#: src/settings.c:528
+msgid "Refuse CHAP authentication"
+msgstr "Отклонять аутентификацию CHAP"
+
+#: src/settings.c:530
+msgid "Refuse MSCHAP authentication"
+msgstr "Отклонять аутентификацию MSCHAP"
+
+#: src/settings.c:532
+msgid "Refuse MSCHAPv2 authentication"
+msgstr "Отклонять аутентификацию MSCHAPv2"
+
+#: src/settings.c:534
+msgid "Disable BSD compression"
+msgstr "Отключить сжатие BSD"
+
+#: src/settings.c:536
+msgid "Disable DEFLATE compression"
+msgstr "Отключить сжатие DEFLATE"
+
+#: src/settings.c:538
+msgid "Require the use of MPPE"
+msgstr "Требовать использования MPPE"
+
+#: src/settings.c:540
+msgid "Require the use of MPPE 40 bit"
+msgstr "Требовать использования MPPE длиной 40 бит"
+
+#: src/settings.c:542
+msgid "Require the use of MPPE 128 bit"
+msgstr "Требовать использования MPPE длиной 128 бит"
+
+#: src/settings.c:544
+msgid "Allow MPPE to use stateful mode"
+msgstr "Разрешить MPPE использовать состояния"
+
+#: src/settings.c:546
+msgid "No Van Jacobson compression"
+msgstr "Сжатие Ван Якобсона отсутствует"
+
+#: src/settings.c:565
+msgid "_Clear settings"
+msgstr "_Очистить"
+
+#: src/settings.c:567
+msgid "_Reset"
+msgstr "_Сбросить"
+
+#: src/settings.c:568
+msgid "_Forget"
+msgstr "_Забыть"
+
+#: src/settings.c:569
+msgid "Set all properties to defaults."
+msgstr "Вернуть свойства по умолчанию."
+
+#: src/settings.c:570
+msgid "Remove this service."
+msgstr "Удалить данную службу."
+
+#: src/settings.c:699
+msgid "_Apply"
+msgstr "_Применить"
+
+#: src/settings_content.c:670
+msgid "IP version"
+msgstr "Версия IP"
+
+#: src/settings_content.c:673
+msgid "Network"
+msgstr "Сеть"
+
+#: src/status.c:87
+msgid "Open app"
+msgstr "Открыть приложение"
+
+#: src/status.c:88
+msgid "Exit"
+msgstr "Выход"
+
+#: src/technology.c:120 src/vpn.c:178
+msgid "Connected"
+msgstr "Подключено"
+
+#: src/technology.c:135
+msgid "Tethering"
+msgstr "Раздача"
+
+#: src/technology.c:138 src/vpn.c:182
+msgid "Not connected"
+msgstr "Не подключено"
+
+#: src/technology.c:220
+msgid "Disable _tethering"
+msgstr "Выключить _раздачу"
+
+#: src/technology.c:222 src/technology.c:312
+msgid "Enable _tethering"
+msgstr "Включить _раздачу"
+
+#: src/technology.c:245 src/technology.c:307 src/technology.c:576
+msgid "_Connect"
+msgstr "_Подключиться"
+
+#: src/technology.c:247 src/technology.c:572
+msgid "Re_connect"
+msgstr "Перепо_дключиться"
+
+#: src/technology.c:249 src/technology.c:574
+msgid "Dis_connect"
+msgstr "От_ключиться"
+
+#: src/technology.c:619
+msgid "Failed to enable ethernet tethering."
+msgstr "Ошибка включения раздачи по Ethernet."
+
+#: src/technology.c:620
+msgid ""
+"Ethernet tethering has to be manually allowed in /etc/connman/main.conf."
+msgstr ""
+"Раздача по Ethernet должна быть включена вручную в /etc/connman/main.conf."
+
+#: src/util.c:119
+msgid "Idle"
+msgstr "Нет трафика"
+
+#: src/util.c:121
+msgid "Failure"
+msgstr "Сбой"
+
+#: src/util.c:123
+msgid "Association"
+msgstr "Ассоциация"
+
+#: src/util.c:125
+msgid "Configuration"
+msgstr "Конфигурация"
+
+#: src/util.c:127
+msgid "Ready"
+msgstr "Готово"
+
+#: src/util.c:129
+msgid "Disconnected"
+msgstr "Нет соединения"
+
+#: src/util.c:131
+msgid "Online"
+msgstr "В сети"
+
+#: src/util.c:133
+msgid "Error"
+msgstr "Ошибка"
+
+#: src/util.c:139
+msgid "Out of range"
+msgstr "Значение за границами"
+
+#: src/util.c:141
+msgid "PIN missing"
+msgstr "Отсутствует PIN"
+
+#: src/util.c:143
+msgid "DHCP failed"
+msgstr "DHCP не сработал"
+
+#: src/util.c:145
+msgid "Connecting failed"
+msgstr "Соединение не установлено"
+
+#: src/util.c:147
+msgid "Login failed"
+msgstr "Вход не произведен"
+
+#: src/util.c:149
+msgid "Authentication failed"
+msgstr "Аутентификация не произведена"
+
+#: src/util.c:151
+msgid "Invalid key"
+msgstr "Неверный ключ"
+
+#: src/vpn.c:180
+msgid "Connecting"
+msgstr "Соединение"
+
+#: src/wireless.c:131
+msgid "Set Access Point SSID and passphrase"
+msgstr "Установить SSID и пароль точки доступа"
+
+#: src/wireless.c:143
+msgid "SSID"
+msgstr "SSID"
+
+#: src/wireless.c:144
+msgid "Passphrase"
+msgstr "Пароль"
+
+#: src/wireless.c:145
+msgid "_Show passphrase"
+msgstr "_Показать пароль"

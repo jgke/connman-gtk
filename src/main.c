@@ -25,9 +25,10 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
+#include "config.h"
 #include "agent.h"
 #include "connection.h"
-#include "config.h"
+#include "configurator.h"
 #include "dialog.h"
 #include "technology.h"
 #include "interfaces.h"

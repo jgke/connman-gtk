@@ -21,6 +21,7 @@
 #include <glib.h>
 #include <glib/gi18n.h>
 
+#include "config.h"
 #include "dialog.h"
 #include "interfaces.h"
 #include "main.h"

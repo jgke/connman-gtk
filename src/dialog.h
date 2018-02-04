@@ -24,6 +24,8 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include "config.h"
+
 enum token_element_type {
 	TOKEN_ELEMENT_INVALID,
 	TOKEN_ELEMENT_TEXT,
