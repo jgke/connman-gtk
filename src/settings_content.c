@@ -23,6 +23,7 @@
 #include <gtk/gtk.h>
 #include <string.h>
 
+#include "config.h"
 #include "settings.h"
 #include "settings_content.h"
 #include "style.h"

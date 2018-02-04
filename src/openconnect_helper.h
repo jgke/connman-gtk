@@ -1,4 +1,3 @@
-
 /*
  * ConnMan GTK GUI
  *
@@ -19,28 +18,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CONNMAN_GTK_CONFIG_H
-#define _CONNMAN_GTK_CONFIG_H
+#ifndef _CONNMAN_GTK_OPENCONNECT_H
+#define _CONNMAN_GTK_OPENCONNECT_H
 
-#include <gtk/gtk.h>
+#include <glib.h>
+#include <gio/gio.h>
 
-#if defined(USE_OPENCONNECT) || defined(USE_STATUS_ICON)
-#define HAVE_CONFIG_SETTINGS 1
-#endif
+GVariantDict *openconnect_handle(GDBusMethodInvocation *invocation,
+				 GVariant *args);
+gboolean is_openconnect(GVariant *args);
 
-// Enable the status icon, or, minimize to tray on close
-extern gboolean status_icon_enabled;
-
-// Launch to tray
-extern gboolean launch_to_tray;
-
-// Use fsid with openconnect by default
-extern gboolean use_fsid;
-
-// Service name in this hashset -> enable fsid
-extern GHashTable *openconnect_fsid_table;
-
-void config_load(GtkApplication *app);
-void config_window_open(GtkApplication *app, gpointer user_data);
-
-#endif /* _CONNMAN_GTK_CONFIG_H */
+#endif /* _CONNMAN_GTK_OPENCONNECT_H */

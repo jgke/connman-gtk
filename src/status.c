@@ -22,6 +22,7 @@
 #include <glib/gi18n.h>
 
 #include "config.h"
+#include "configurator.h"
 #include "connection.h"
 #include "main.h"
 #include "status.h"

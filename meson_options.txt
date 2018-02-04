@@ -1,0 +1,2 @@
+option('use_status_icon', type : 'boolean', value : true)
+option('use_openconnect', type : 'combo', choices : ['yes', 'no', 'check', 'dynamic'], value : 'check')

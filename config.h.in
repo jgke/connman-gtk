@@ -4,6 +4,8 @@
 #mesondefine USE_OPENCONNECT
 #mesondefine USE_OPENCONNECT_DYNAMIC
 #mesondefine USE_STATUS_ICON
+#mesondefine CONNMAN_GTK_LOCALEDIR
+#mesondefine GETTEXT_PACKAGE
 
 
 #endif

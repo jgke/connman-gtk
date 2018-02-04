@@ -1,9 +1,8 @@
 [Desktop Entry]
 Type=Application
-Exec=@PACKAGE@
+Exec=connman-gtk
 Name=Connman Settings
-Name[fi_FI]=Connman-Asetukset
 Categories=GTK;GNOME;Settings;X-GNOME-Settings-Panel;X-Unity-Settings-Panel;HardwareSettings
-X-GNOME-Settings-Panel=@PACKAGE@
-X-Unity-Settings-Panel=@PACKAGE@
+X-GNOME-Settings-Panel=connman-gtk
+X-Unity-Settings-Panel=connman-gtk
 Icon=preferences-system-network
