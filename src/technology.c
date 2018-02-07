@@ -26,6 +26,7 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 
+#include "config.h"
 #include "connection.h"
 #include "dialog.h"
 #include "main.h"

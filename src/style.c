@@ -20,6 +20,7 @@
 
 #include <gtk/gtk.h>
 
+#include "config.h"
 #include "style.h"
 
 GtkCssProvider *css_provider;

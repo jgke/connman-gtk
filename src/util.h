@@ -23,6 +23,7 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
+#include "config.h"
 
 gchar *variant_str_array_to_str(GVariant *variant);
 gchar **variant_to_strv(GVariant *variant);
