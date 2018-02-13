@@ -1,4 +1,5 @@
 install_data('net.connman.gtk.gschema.xml',install_dir: join_paths(get_option('datadir'), 'glib-2.0', 'schemas'))
+meson.add_install_script('meson_post_install.py')
 install_man('connman-gtk.1')
 
 
