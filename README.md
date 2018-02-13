@@ -46,7 +46,7 @@ Installation
 	meson [configuration options] <builddir>
 	cd <builddir>
 	ninja
-	ninja install *as root*
+	ninja install # as root, if needed
 
 configure options
 -----------------
