@@ -35,6 +35,7 @@
 #include "status.h"
 #include "style.h"
 #include "vpn.h"
+#include "util.h"
 
 GtkWidget *list, *notebook, *main_window;
 GHashTable *technology_types, *services;
@@ -612,6 +613,7 @@ static void startup(GtkApplication *app, gpointer user_data)
 
 	create_content();
 
+	g_signal_connect(G_OBJECT(main_window), "key_press_event", G_CALLBACK(handle_keyboard_shortcut), NULL);
 	gtk_widget_show_all(main_window);
 
 #ifdef USE_STATUS_ICON

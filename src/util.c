@@ -23,6 +23,7 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 #include <string.h>
+#include <gdk/gdkkeysyms.h>
 
 #include "config.h"
 #include "main.h"
@@ -316,4 +317,17 @@ GVariant *dual_hash_table_to_variant(DualHashTable *dtable)
 	GVariant *out = g_variant_dict_end(dict);
 	g_variant_dict_unref(dict);
 	return out;
+}
+
+gboolean handle_keyboard_shortcut(GtkWidget *widget, GdkEventKey *event, gpointer data) {
+	int isCtrl = event->state & GDK_CONTROL_MASK;
+
+	switch (event->keyval) {
+		case GDK_KEY_w:
+			if (isCtrl)
+				gtk_widget_destroy(widget);
+			break;
+	}
+
+	return FALSE;
 }
