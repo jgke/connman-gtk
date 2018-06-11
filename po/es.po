@@ -1,0 +1,748 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-11-05 12:20+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/agent.c:158
+msgid "Authentication required"
+msgstr ""
+
+#: src/config.c:62
+msgid "Use fsid with openconnect"
+msgstr ""
+
+#: src/config.c:67
+msgid "Use status icon"
+msgstr ""
+
+#: src/config.c:70
+msgid "Launch to tray by default"
+msgstr ""
+
+#: src/config.c:74
+msgid "Settings"
+msgstr ""
+
+#: src/connection.c:68
+msgid "Wired"
+msgstr ""
+
+#: src/connection.c:70
+msgid "Wireless"
+msgstr ""
+
+#: src/connection.c:72
+msgid "Bluetooth"
+msgstr ""
+
+#: src/connection.c:74
+msgid "Cellular"
+msgstr ""
+
+#: src/connection.c:76
+msgid "P2P"
+msgstr ""
+
+#: src/connection.c:78 src/vpn.c:102 src/vpn.c:176
+msgid "VPN"
+msgstr ""
+
+#: src/connection.c:80
+msgid "Unknown"
+msgstr ""
+
+#: src/connection.c:91
+msgid "W_ired"
+msgstr ""
+
+#: src/connection.c:93
+msgid "_Wireless"
+msgstr ""
+
+#: src/connection.c:95
+msgid "_Bluetooth"
+msgstr ""
+
+#: src/connection.c:97
+msgid "_Cellular"
+msgstr ""
+
+#: src/connection.c:99
+msgid "_P2P"
+msgstr ""
+
+#: src/connection.c:101
+msgid "_VPN"
+msgstr ""
+
+#: src/connection.c:103
+msgid "_Unknown"
+msgstr ""
+
+#: src/dialog.c:192 src/dialog.c:287
+msgid "_OK"
+msgstr ""
+
+#: src/dialog.c:193
+msgid "_Cancel"
+msgstr ""
+
+#: src/dialog.c:283
+msgid "Operation failed"
+msgstr ""
+
+#: src/main.c:95
+msgid "_Settings"
+msgstr ""
+
+#: src/main.c:415 src/vpn.c:145
+msgid "Failed to connect to ConnMan."
+msgstr ""
+
+#: src/main.c:573
+msgid "Failed to connect to system DBus."
+msgstr ""
+
+#: src/main.c:619 src/settings.c:689
+msgid "Network Settings"
+msgstr ""
+
+#: src/service.c:334 src/settings.c:160 src/settings.c:387
+msgid "IPv4 address"
+msgstr ""
+
+#: src/service.c:335
+msgid "IPv4 gateway"
+msgstr ""
+
+#: src/service.c:336 src/settings.c:161 src/settings.c:388
+msgid "IPv6 address"
+msgstr ""
+
+#: src/service.c:337
+msgid "IPv6 gateway"
+msgstr ""
+
+#: src/service.c:339 src/settings.c:158
+msgid "MAC address"
+msgstr ""
+
+#: src/service.c:406
+msgid "IEEE8021x secured services have to be manually configured."
+msgstr ""
+
+#: src/service.c:410 src/service.c:442
+msgid "Failed to toggle connection state."
+msgstr ""
+
+#: src/service.c:517
+msgid "Hidden ieee8021x secured network"
+msgstr ""
+
+#: src/service.c:518
+msgid "Hidden WPA secured network"
+msgstr ""
+
+#: src/service.c:519
+msgid "Hidden WPS secured network"
+msgstr ""
+
+#: src/service.c:520
+msgid "Hidden unsecured network"
+msgstr ""
+
+#: src/service.c:544 src/settings.c:359
+msgid "Direct"
+msgstr ""
+
+#: src/service.c:546 src/settings.c:242 src/settings.c:246 src/settings.c:361
+msgid "Automatic"
+msgstr ""
+
+#: src/service.c:548 src/settings.c:136 src/settings.c:239
+msgid "None"
+msgstr ""
+
+#: src/service.c:560
+msgid "On"
+msgstr ""
+
+#: src/service.c:561
+msgid "Off"
+msgstr ""
+
+#: src/settings.c:136 src/settings.c:140
+msgid "Security"
+msgstr ""
+
+#: src/settings.c:149 src/settings.c:380
+msgid "_Info"
+msgstr ""
+
+#: src/settings.c:152
+msgid "Autoconnect"
+msgstr ""
+
+#: src/settings.c:155 src/settings.c:383
+msgid "Name"
+msgstr ""
+
+#: src/settings.c:156 src/settings.c:385
+msgid "State"
+msgstr ""
+
+#: src/settings.c:159
+msgid "Interface"
+msgstr ""
+
+#: src/settings.c:162 src/settings.c:305 src/settings.c:329 src/settings.c:389
+msgid "Nameservers"
+msgstr ""
+
+#: src/settings.c:187
+msgid "IP _details"
+msgstr ""
+
+#: src/settings.c:188
+msgid "IPv4 method"
+msgstr ""
+
+#: src/settings.c:189 src/settings.c:195 src/settings.c:260 src/settings.c:268
+msgid "Address"
+msgstr ""
+
+#: src/settings.c:190 src/settings.c:196 src/settings.c:261 src/settings.c:271
+#: src/settings_content.c:676
+msgid "Gateway"
+msgstr ""
+
+#: src/settings.c:194
+msgid "IPv6 method"
+msgstr ""
+
+#: src/settings.c:215
+msgid "IPv_4"
+msgstr ""
+
+#: src/settings.c:220
+msgid "IPv_6"
+msgstr ""
+
+#: src/settings.c:236 src/settings.c:356
+msgid "Method"
+msgstr ""
+
+#: src/settings.c:254 src/settings.c:363
+msgid "Manual"
+msgstr ""
+
+#: src/settings.c:263 src/settings.c:275 src/settings_content.c:674
+msgid "Netmask"
+msgstr ""
+
+#: src/settings.c:265 src/settings_content.c:675 src/settings_content.c:911
+msgid "Prefix length"
+msgstr ""
+
+#: src/settings.c:284
+msgid "Privacy"
+msgstr ""
+
+#: src/settings.c:289 src/technology.c:143
+msgid "Disabled"
+msgstr ""
+
+#: src/settings.c:291
+msgid "Enabled"
+msgstr ""
+
+#: src/settings.c:293
+msgid "Prefered"
+msgstr ""
+
+#: src/settings.c:303
+msgid "_Servers"
+msgstr ""
+
+#: src/settings.c:306 src/settings.c:334
+msgid "Timeservers"
+msgstr ""
+
+#: src/settings.c:307 src/settings.c:342
+msgid "Domains"
+msgstr ""
+
+#: src/settings.c:308
+msgid "Proxy method"
+msgstr ""
+
+#: src/settings.c:312 src/settings.c:369
+msgid "URL"
+msgstr ""
+
+#: src/settings.c:314 src/settings.c:372
+msgid "Servers"
+msgstr ""
+
+#: src/settings.c:316 src/settings.c:374
+msgid "Excludes"
+msgstr ""
+
+#: src/settings.c:328
+msgid "_Nameservers"
+msgstr ""
+
+#: src/settings.c:333
+msgid "_Timeservers"
+msgstr ""
+
+#: src/settings.c:337
+msgid "Custom Timeservers"
+msgstr ""
+
+#: src/settings.c:341
+msgid "_Domains"
+msgstr ""
+
+#: src/settings.c:354
+msgid "_Proxy"
+msgstr ""
+
+#: src/settings.c:384
+msgid "Type"
+msgstr ""
+
+#: src/settings.c:386
+msgid "Host"
+msgstr ""
+
+#: src/settings.c:401
+msgid "Server fingerprint"
+msgstr ""
+
+#: src/settings.c:403 src/settings.c:416
+msgid "Certificate Authority file"
+msgstr ""
+
+#: src/settings.c:405 src/settings.c:418
+msgid "Client certificate file"
+msgstr ""
+
+#: src/settings.c:407
+msgid "VPN host"
+msgstr ""
+
+#: src/settings.c:420
+msgid "Client private key file"
+msgstr ""
+
+#: src/settings.c:422
+msgid "Maximum transmission unit (MTU)"
+msgstr ""
+
+#: src/settings.c:424
+msgid "Peer certificate type"
+msgstr ""
+
+#: src/settings.c:426
+msgid "Protocol"
+msgstr ""
+
+#: src/settings.c:427
+msgid "Port"
+msgstr ""
+
+#: src/settings.c:428
+msgid "Authenticate using username/password"
+msgstr ""
+
+#: src/settings.c:430
+msgid "Private key password file"
+msgstr ""
+
+#: src/settings.c:432
+msgid "Do not cache password"
+msgstr ""
+
+#: src/settings.c:434
+msgid "Cipher"
+msgstr ""
+
+#: src/settings.c:436
+msgid "Message digest algorithm for packet authentication"
+msgstr ""
+
+#: src/settings.c:438
+msgid "Use fast LZO compression"
+msgstr ""
+
+#: src/settings.c:440
+msgid "External configuration file"
+msgstr ""
+
+#: src/settings.c:449
+msgid "Group username"
+msgstr ""
+
+#: src/settings.c:450 src/settings.c:473 src/settings.c:511
+msgid "Username"
+msgstr ""
+
+#: src/settings.c:451
+msgid "IKE Authentication mode"
+msgstr ""
+
+#: src/settings.c:453
+msgid "Diffie-Hellman group"
+msgstr ""
+
+#: src/settings.c:454
+msgid "Domain"
+msgstr ""
+
+#: src/settings.c:455
+msgid "Vendor"
+msgstr ""
+
+#: src/settings.c:456
+msgid "Local port"
+msgstr ""
+
+#: src/settings.c:457
+msgid "Cisco port"
+msgstr ""
+
+#: src/settings.c:458
+msgid "Application version"
+msgstr ""
+
+#: src/settings.c:460
+msgid "NAT traversal method"
+msgstr ""
+
+#: src/settings.c:462
+msgid "DPD idle timeout"
+msgstr ""
+
+#: src/settings.c:463
+msgid "Single DES encryption"
+msgstr ""
+
+#: src/settings.c:465
+msgid "No encryption"
+msgstr ""
+
+#: src/settings.c:474
+msgid "Maximum bandwidth (bps)"
+msgstr ""
+
+#: src/settings.c:475
+msgid "Maximum transmit bandwidth (tx)"
+msgstr ""
+
+#: src/settings.c:477
+msgid "Maximum receive bandwidth (rx)"
+msgstr ""
+
+#: src/settings.c:479
+msgid "Use length bit"
+msgstr ""
+
+#: src/settings.c:480
+msgid "Use challenge authentication"
+msgstr ""
+
+#: src/settings.c:482
+msgid "Default route"
+msgstr ""
+
+#: src/settings.c:483
+msgid "Use seq numbers"
+msgstr ""
+
+#: src/settings.c:484
+msgid "Window size"
+msgstr ""
+
+#: src/settings.c:485
+msgid "Use only one control channel"
+msgstr ""
+
+#: src/settings.c:487
+msgid "Redial if disconnected"
+msgstr ""
+
+#: src/settings.c:489
+msgid "Redial timeout"
+msgstr ""
+
+#: src/settings.c:491
+msgid "Maximum redial tries"
+msgstr ""
+
+#: src/settings.c:493
+msgid "Require PAP"
+msgstr ""
+
+#: src/settings.c:494
+msgid "Require CHAP"
+msgstr ""
+
+#: src/settings.c:495
+msgid "Require authentication"
+msgstr ""
+
+#: src/settings.c:497
+msgid "Accept only these peers"
+msgstr ""
+
+#: src/settings.c:499
+msgid "Authentication file location"
+msgstr ""
+
+#: src/settings.c:501
+msgid "Listen address"
+msgstr ""
+
+#: src/settings.c:502
+msgid "Use IPSec SA"
+msgstr ""
+
+#: src/settings.c:503
+msgid "UDP Port"
+msgstr ""
+
+#: src/settings.c:519
+msgid "Dead peer check count"
+msgstr ""
+
+#: src/settings.c:521
+msgid "Dead peer check interval"
+msgstr ""
+
+#: src/settings.c:523
+msgid "Debug level"
+msgstr ""
+
+#: src/settings.c:524
+msgid "Refuse EAP authentication"
+msgstr ""
+
+#: src/settings.c:526
+msgid "Refuse PAP authentication"
+msgstr ""
+
+#: src/settings.c:528
+msgid "Refuse CHAP authentication"
+msgstr ""
+
+#: src/settings.c:530
+msgid "Refuse MSCHAP authentication"
+msgstr ""
+
+#: src/settings.c:532
+msgid "Refuse MSCHAPv2 authentication"
+msgstr ""
+
+#: src/settings.c:534
+msgid "Disable BSD compression"
+msgstr ""
+
+#: src/settings.c:536
+msgid "Disable DEFLATE compression"
+msgstr ""
+
+#: src/settings.c:538
+msgid "Require the use of MPPE"
+msgstr ""
+
+#: src/settings.c:540
+msgid "Require the use of MPPE 40 bit"
+msgstr ""
+
+#: src/settings.c:542
+msgid "Require the use of MPPE 128 bit"
+msgstr ""
+
+#: src/settings.c:544
+msgid "Allow MPPE to use stateful mode"
+msgstr ""
+
+#: src/settings.c:546
+msgid "No Van Jacobson compression"
+msgstr ""
+
+#: src/settings.c:565
+msgid "_Clear settings"
+msgstr ""
+
+#: src/settings.c:567
+msgid "_Reset"
+msgstr ""
+
+#: src/settings.c:568
+msgid "_Forget"
+msgstr ""
+
+#: src/settings.c:569
+msgid "Set all properties to defaults."
+msgstr ""
+
+#: src/settings.c:570
+msgid "Remove this service."
+msgstr ""
+
+#: src/settings.c:699
+msgid "_Apply"
+msgstr ""
+
+#: src/settings_content.c:670
+msgid "IP version"
+msgstr ""
+
+#: src/settings_content.c:673
+msgid "Network"
+msgstr ""
+
+#: src/status.c:87
+msgid "Open app"
+msgstr ""
+
+#: src/status.c:88
+msgid "Exit"
+msgstr ""
+
+#: src/technology.c:120 src/vpn.c:178
+msgid "Connected"
+msgstr ""
+
+#: src/technology.c:135
+msgid "Tethering"
+msgstr ""
+
+#: src/technology.c:138 src/vpn.c:182
+msgid "Not connected"
+msgstr ""
+
+#: src/technology.c:220
+msgid "Disable _tethering"
+msgstr ""
+
+#: src/technology.c:222 src/technology.c:312
+msgid "Enable _tethering"
+msgstr ""
+
+#: src/technology.c:245 src/technology.c:307 src/technology.c:576
+msgid "_Connect"
+msgstr ""
+
+#: src/technology.c:247 src/technology.c:572
+msgid "Re_connect"
+msgstr ""
+
+#: src/technology.c:249 src/technology.c:574
+msgid "Dis_connect"
+msgstr ""
+
+#: src/technology.c:619
+msgid "Failed to enable ethernet tethering."
+msgstr ""
+
+#: src/technology.c:620
+msgid ""
+"Ethernet tethering has to be manually allowed in /etc/connman/main.conf."
+msgstr ""
+
+#: src/util.c:119
+msgid "Idle"
+msgstr ""
+
+#: src/util.c:121
+msgid "Failure"
+msgstr ""
+
+#: src/util.c:123
+msgid "Association"
+msgstr ""
+
+#: src/util.c:125
+msgid "Configuration"
+msgstr ""
+
+#: src/util.c:127
+msgid "Ready"
+msgstr ""
+
+#: src/util.c:129
+msgid "Disconnected"
+msgstr ""
+
+#: src/util.c:131
+msgid "Online"
+msgstr ""
+
+#: src/util.c:133
+msgid "Error"
+msgstr ""
+
+#: src/util.c:139
+msgid "Out of range"
+msgstr ""
+
+#: src/util.c:141
+msgid "PIN missing"
+msgstr ""
+
+#: src/util.c:143
+msgid "DHCP failed"
+msgstr ""
+
+#: src/util.c:145
+msgid "Connecting failed"
+msgstr ""
+
+#: src/util.c:147
+msgid "Login failed"
+msgstr ""
+
+#: src/util.c:149
+msgid "Authentication failed"
+msgstr ""
+
+#: src/util.c:151
+msgid "Invalid key"
+msgstr ""
+
+#: src/vpn.c:180
+msgid "Connecting"
+msgstr ""
+
+#: src/wireless.c:131
+msgid "Set Access Point SSID and passphrase"
+msgstr ""
+
+#: src/wireless.c:143
+msgid "SSID"
+msgstr ""
+
+#: src/wireless.c:144
+msgid "Passphrase"
+msgstr ""
+
+#: src/wireless.c:145
+msgid "_Show passphrase"
+msgstr ""
