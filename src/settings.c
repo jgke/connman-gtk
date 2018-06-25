@@ -710,6 +710,7 @@ static void init_settings(struct settings *sett)
 	                 G_CALLBACK(list_item_selected), sett->notebook);
 	g_signal_connect(sett->apply, "clicked",
 	                 G_CALLBACK(apply_cb), sett);
+	g_signal_connect(sett->window, "key_press_event", G_CALLBACK(handle_keyboard_shortcut), sett);
 
 	style_set_margin(GTK_WIDGET(grid), MARGIN_LARGE);
 	gtk_widget_set_margin_top(sett->apply, MARGIN_LARGE);
