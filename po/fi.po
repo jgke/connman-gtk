@@ -272,7 +272,7 @@ msgid "Enabled"
 msgstr "Päällä"
 
 #: src/settings.c:293
-msgid "Prefered"
+msgid "Preferred"
 msgstr "Ensisijainen"
 
 #: src/settings.c:303

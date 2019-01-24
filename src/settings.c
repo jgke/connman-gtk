@@ -290,8 +290,8 @@ static void add_ipv_page(struct settings *sett, int ipv)
 		                      _("Disabled"), TRUE);
 		add_page_to_combo_box(sett, ipv6_privacy, "enabled",
 		                      _("Enabled"), !strcmp("enabled", cur));
-		add_page_to_combo_box(sett, ipv6_privacy, "prefered",
-		                      _("Prefered"), !strcmp("prefered", cur));
+		add_page_to_combo_box(sett, ipv6_privacy, "preferred",
+		                      _("Preferred"), !strcmp("preferred", cur));
 		g_free(cur);
 	}
 }
