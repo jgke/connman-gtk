@@ -271,7 +271,7 @@ msgid "Enabled"
 msgstr ""
 
 #: src/settings.c:293
-msgid "Prefered"
+msgid "Preferred"
 msgstr ""
 
 #: src/settings.c:303
