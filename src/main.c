@@ -615,13 +615,9 @@ static void startup(GtkApplication *app, gpointer user_data)
 	create_content();
 
 	g_signal_connect(G_OBJECT(main_window), "key_press_event", G_CALLBACK(handle_keyboard_shortcut), NULL);
-	gtk_widget_show_all(main_window);
 
 #ifdef USE_STATUS_ICON
 	if(status_icon_enabled && !no_icon) {
-		if(launch_to_tray)
-			gtk_widget_hide(main_window);
-
 		g_signal_connect(main_window, "delete-event",
 				 G_CALLBACK(gtk_widget_hide_on_delete),
 				 main_window);
@@ -633,8 +629,15 @@ static void startup(GtkApplication *app, gpointer user_data)
 static void activate(GtkApplication *app, gpointer user_data)
 {
 #ifdef USE_STATUS_ICON
-	if(!launch_to_tray)
-		gtk_widget_show(main_window);
+	static gboolean window_has_shown = FALSE;
+	if(!launch_to_tray || !status_icon_enabled || no_icon) {
+		if(window_has_shown)
+			gtk_widget_show(main_window);
+		else
+			gtk_widget_show_all(main_window);
+
+		window_has_shown = TRUE;
+	}
 	launch_to_tray = FALSE;
 #endif
 }
