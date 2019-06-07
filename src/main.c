@@ -600,9 +600,10 @@ static void startup(GtkApplication *app, gpointer user_data)
 {
 	g_bus_get(G_BUS_TYPE_SYSTEM, NULL, dbus_connected, NULL);
 
-	config_load(app);
 	if(no_icon)
 		status_icon_enabled = FALSE;
+	else if(launch_to_tray)
+		status_icon_enabled = TRUE;
 
 	main_window = gtk_application_window_new(app);
 	g_signal_connect(app, "window-removed",
@@ -687,6 +688,7 @@ int main(int argc, char *argv[])
 					 (GDestroyNotify)remove_service_struct);
 
 	app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
+	config_load(app);
 	g_application_add_main_option_entries(G_APPLICATION(app), options);
 	g_signal_connect(app, "startup", G_CALLBACK(startup), NULL);
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
