@@ -1,10 +1,10 @@
 <schemalist>
 	<schema path="/net/connman/gtk/" id="net.connman.gtk">
 		<key name="status-icon-enabled" type="b">
-			<default>false</default>
+			<default>true</default>
 		</key>
 		<key name="launch-to-tray" type="b">
-			<default>false</default>
+			<default>true</default>
 		</key>
 		<key name="openconnect-use-fsid-by-default" type="b">
 			<default>false</default>
