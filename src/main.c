@@ -600,9 +600,10 @@ static void startup(GtkApplication *app, gpointer user_data)
 {
 	g_bus_get(G_BUS_TYPE_SYSTEM, NULL, dbus_connected, NULL);
 
-	config_load(app);
 	if(no_icon)
 		status_icon_enabled = FALSE;
+	else if(launch_to_tray)
+		status_icon_enabled = TRUE;
 
 	main_window = gtk_application_window_new(app);
 	g_signal_connect(app, "window-removed",
@@ -614,13 +615,9 @@ static void startup(GtkApplication *app, gpointer user_data)
 	create_content();
 
 	g_signal_connect(G_OBJECT(main_window), "key_press_event", G_CALLBACK(handle_keyboard_shortcut), NULL);
-	gtk_widget_show_all(main_window);
 
 #ifdef USE_STATUS_ICON
 	if(status_icon_enabled && !no_icon) {
-		if(launch_to_tray)
-			gtk_widget_hide(main_window);
-
 		g_signal_connect(main_window, "delete-event",
 				 G_CALLBACK(gtk_widget_hide_on_delete),
 				 main_window);
@@ -632,8 +629,15 @@ static void startup(GtkApplication *app, gpointer user_data)
 static void activate(GtkApplication *app, gpointer user_data)
 {
 #ifdef USE_STATUS_ICON
-	if(!launch_to_tray)
-		gtk_widget_show(main_window);
+	static gboolean window_has_shown = FALSE;
+	if(!launch_to_tray || !status_icon_enabled || no_icon) {
+		if(window_has_shown)
+			gtk_widget_show(main_window);
+		else
+			gtk_widget_show_all(main_window);
+
+		window_has_shown = TRUE;
+	}
 	launch_to_tray = FALSE;
 #endif
 }
@@ -687,6 +691,7 @@ int main(int argc, char *argv[])
 					 (GDestroyNotify)remove_service_struct);
 
 	app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
+	config_load(app);
 	g_application_add_main_option_entries(G_APPLICATION(app), options);
 	g_signal_connect(app, "startup", G_CALLBACK(startup), NULL);
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
