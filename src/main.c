@@ -602,6 +602,8 @@ static void startup(GtkApplication *app, gpointer user_data)
 
 	if(no_icon)
 		status_icon_enabled = FALSE;
+	if (launch_to_tray)
+		status_icon_enabled = TRUE;
 
 	main_window = gtk_application_window_new(app);
 	g_signal_connect(app, "window-removed",
