@@ -1,0 +1,15 @@
+[Desktop Entry]
+Categories=Application;Network;
+Exec=connman-gtk --tray
+GenericName=Network Manager
+Icon=preferences-system-network
+Icon[en_US]=preferences-system-network
+Name=Connman Network Manager Tray
+Name[en_US]=Connman Network Manager Tray
+Comment=Display network connection status in the system tray
+Comment[en_US]=Display network connection status in the system tray
+Terminal=false
+Type=Application
+Version=1.1.1
+X-GNOME-Autostart-enabled=true
+X-KDE-autostart-after=panel
