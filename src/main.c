@@ -602,9 +602,10 @@ static void startup(GtkApplication *app, gpointer user_data)
 
 	if(no_icon)
 		status_icon_enabled = FALSE;
-	if (launch_to_tray)
+	if (launch_to_tray) {
 		status_icon_enabled = TRUE;
-
+		no_icon = FALSE;
+	} 
 	main_window = gtk_application_window_new(app);
 	g_signal_connect(app, "window-removed",
 	                 G_CALLBACK(delete_event), NULL);
@@ -684,17 +685,17 @@ int main(int argc, char *argv[])
 	textdomain(GETTEXT_PACKAGE);
 
 	style_init();
-
 	technology_types = g_hash_table_new_full(g_str_hash, g_str_equal,
 	                   g_free, NULL);
 	services = g_hash_table_new_full(g_str_hash, g_str_equal, g_free,
 					 (GDestroyNotify)remove_service_struct);
 
 	app = gtk_application_new(NULL, G_APPLICATION_FLAGS_NONE);
-	config_load(app);
+	config_load(app);	
 	g_application_add_main_option_entries(G_APPLICATION(app), options);
 	g_signal_connect(app, "startup", G_CALLBACK(startup), NULL);
 	g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+	
 	status = g_application_run(G_APPLICATION(app), argc, argv);
 	g_object_unref(app);
 
