@@ -133,7 +133,7 @@ static void status_menu(GtkStatusIcon *icon, guint button, guint activate_time,
 void status_update(void) {
 	int best_status = 0;
 	int index;
-
+	
 	if(!status_icon_enabled)
 		return;
 
@@ -188,15 +188,35 @@ void status_update(void) {
 	}
 }
 
+gboolean update_speed (gpointer user_data) {
+	char line[128]; 
+	char buf[128];
+	float dlspeed;
+	float ulspeed;
+	        
+	FILE *file = popen("ifstat -b -i enp8s0 0.1 1", "r");
+	if (file) {
+		while (fgets(line, sizeof line, file)) {
+	        	if (sscanf(line, "%f %f", &dlspeed, &ulspeed) == 1) {
+				break;
+	        	}
+    		}
+		sprintf(buf,"DL/UL Speeds %.02f/%.02f Kbit/s", dlspeed, ulspeed);
+		gtk_status_icon_set_tooltip_text(icon, buf);
+		pclose(file);	
+	}
+	return TRUE;
+}
+
 void status_init(GtkApplication *app)
 {
 	if(!status_icon_enabled)
 		return;
-
+	
 	icon = gtk_status_icon_new_from_icon_name("preferences-system-network");
 	g_signal_connect(icon, "activate", G_CALLBACK(status_activate), app);
 	g_signal_connect(icon, "popup-menu", G_CALLBACK(status_menu), app);
-
+	g_timeout_add (2000, update_speed, NULL);
 	status_update();
 }
 #else
