@@ -203,9 +203,10 @@ gboolean update_speed (gpointer user_data) {
     		}
 		sprintf(buf,"DL/UL Speeds %.02f/%.02f Kbit/s", dlspeed, ulspeed);
 		gtk_status_icon_set_tooltip_text(icon, buf);
-		pclose(file);	
+		pclose(file);
+		return TRUE;	
 	}
-	return TRUE;
+	return FALSE;
 }
 
 void status_init(GtkApplication *app)
