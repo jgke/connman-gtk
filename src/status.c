@@ -194,7 +194,7 @@ gboolean update_speed (gpointer user_data) {
 	float dlspeed;
 	float ulspeed;
 	        
-	FILE *file = popen("ifstat 0.1 1", "r");
+	FILE *file = popen("ifstat -b 0.1 1", "r");
 	if (file) {
 		while (fgets(line, sizeof line, file)) {
 	        	if (sscanf(line, "%f %f", &dlspeed, &ulspeed) == 1) {
