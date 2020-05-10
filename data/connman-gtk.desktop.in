@@ -2,6 +2,11 @@
 Type=Application
 Exec=connman-gtk
 Name=Connman Settings
+Name[uk]=Налаштування Connman
+Name[ru]=Настройки Connman
+Name[fi]=Connman-asetukset
+Name[es]=Configuración de Connman
+Name[pt]=Configurações do Connman
 Categories=GTK;GNOME;Settings;X-GNOME-Settings-Panel;X-Unity-Settings-Panel;HardwareSettings
 X-GNOME-Settings-Panel=connman-gtk
 X-Unity-Settings-Panel=connman-gtk

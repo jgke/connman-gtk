@@ -1,0 +1,748 @@
+# Ukrainian translation for connman-gtk package.
+# Copyright (C) 2020 THE connman-gtk'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the connman-gtk package.
+# Кирило Тур <lytvyn349@ukr.net>, 2020.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-11-05 12:20+0200\n"
+"PO-Revision-Date: 2020-05-06 12:45+0300\n"
+"Language-Team: Ukrainian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.3\n"
+"Last-Translator: Кирило Тур <lytvyn349@ukr.net>\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"Language: uk_UA\n"
+
+#: src/agent.c:158
+msgid "Authentication required"
+msgstr "Потрібна автентифікація"
+
+#: src/config.c:62
+msgid "Use fsid with openconnect"
+msgstr "Використовувати fsid з openconnect"
+
+#: src/config.c:67
+msgid "Use status icon"
+msgstr "Значок стану"
+
+#: src/config.c:70
+msgid "Launch to tray by default"
+msgstr "Запускати в лотку за замовчуванням"
+
+#: src/config.c:74
+msgid "Settings"
+msgstr "Налаштування"
+
+#: src/connection.c:68
+msgid "Wired"
+msgstr "Дротове"
+
+#: src/connection.c:70
+msgid "Wireless"
+msgstr "Бездротове"
+
+#: src/connection.c:72
+msgid "Bluetooth"
+msgstr "Bluetooth"
+
+#: src/connection.c:74
+msgid "Cellular"
+msgstr "Стільникове"
+
+#: src/connection.c:76
+msgid "P2P"
+msgstr "P2P"
+
+#: src/connection.c:78 src/vpn.c:102 src/vpn.c:176
+msgid "VPN"
+msgstr "VPN"
+
+#: src/connection.c:80
+msgid "Unknown"
+msgstr "Невідоме"
+
+#: src/connection.c:91
+msgid "W_ired"
+msgstr "_Дротове"
+
+#: src/connection.c:93
+msgid "_Wireless"
+msgstr "_Бездротове"
+
+#: src/connection.c:95
+msgid "_Bluetooth"
+msgstr "_Bluetooth"
+
+#: src/connection.c:97
+msgid "_Cellular"
+msgstr "_Стільникове"
+
+#: src/connection.c:99
+msgid "_P2P"
+msgstr "_P2P"
+
+#: src/connection.c:101
+msgid "_VPN"
+msgstr "_VPN"
+
+#: src/connection.c:103
+msgid "_Unknown"
+msgstr "_Невідоме"
+
+#: src/dialog.c:192 src/dialog.c:287
+msgid "_OK"
+msgstr "_Гаразд"
+
+#: src/dialog.c:193
+msgid "_Cancel"
+msgstr "_Скасувати"
+
+#: src/dialog.c:283
+msgid "Operation failed"
+msgstr "Дія не вдалася"
+
+#: src/main.c:95
+msgid "_Settings"
+msgstr "_Налаштування"
+
+#: src/main.c:415 src/vpn.c:145
+msgid "Failed to connect to ConnMan."
+msgstr "Не вдалося підключитися до ConnMan."
+
+#: src/main.c:573
+msgid "Failed to connect to system DBus."
+msgstr "Не вдалося підключитися до DBus."
+
+#: src/main.c:619 src/settings.c:689
+msgid "Network Settings"
+msgstr "Налаштування мережі"
+
+#: src/service.c:334 src/settings.c:160 src/settings.c:387
+msgid "IPv4 address"
+msgstr "Адреса IPv4"
+
+#: src/service.c:335
+msgid "IPv4 gateway"
+msgstr "Шлюз IPv4"
+
+#: src/service.c:336 src/settings.c:161 src/settings.c:388
+msgid "IPv6 address"
+msgstr "Адреса IPv6"
+
+#: src/service.c:337
+msgid "IPv6 gateway"
+msgstr "Шлюз IPv6"
+
+#: src/service.c:339 src/settings.c:158
+msgid "MAC address"
+msgstr "MAC-адреса"
+
+#: src/service.c:406
+msgid "IEEE8021x secured services have to be manually configured."
+msgstr "Захищені служби IEEE8021x потрібно налаштувати власноруч."
+
+#: src/service.c:410 src/service.c:442
+msgid "Failed to toggle connection state."
+msgstr "Не вдалося переключити стан з'єднання."
+
+#: src/service.c:517
+msgid "Hidden ieee8021x secured network"
+msgstr "Прихована захищена мережа ieee8021x"
+
+#: src/service.c:518
+msgid "Hidden WPA secured network"
+msgstr "Прихована захищена мережа WPA"
+
+#: src/service.c:519
+msgid "Hidden WPS secured network"
+msgstr "Прихована захищена мережа WPS"
+
+#: src/service.c:520
+msgid "Hidden unsecured network"
+msgstr "Приховувати незахищені мережі"
+
+#: src/service.c:544 src/settings.c:359
+msgid "Direct"
+msgstr "Напряму"
+
+#: src/service.c:546 src/settings.c:242 src/settings.c:246 src/settings.c:361
+msgid "Automatic"
+msgstr "Автоматичний"
+
+#: src/service.c:548 src/settings.c:136 src/settings.c:239
+msgid "None"
+msgstr "Жоден"
+
+#: src/service.c:560
+msgid "On"
+msgstr "Увімкнено"
+
+#: src/service.c:561
+msgid "Off"
+msgstr "Вимкнено"
+
+#: src/settings.c:136 src/settings.c:140
+msgid "Security"
+msgstr "Безпека"
+
+#: src/settings.c:149 src/settings.c:380
+msgid "_Info"
+msgstr "_Інформація"
+
+#: src/settings.c:152
+msgid "Autoconnect"
+msgstr "Автоз’єднання"
+
+#: src/settings.c:155 src/settings.c:383
+msgid "Name"
+msgstr "Імʼя"
+
+#: src/settings.c:156 src/settings.c:385
+msgid "State"
+msgstr "Стан"
+
+#: src/settings.c:159
+msgid "Interface"
+msgstr "Інтерфейс"
+
+#: src/settings.c:162 src/settings.c:305 src/settings.c:329 src/settings.c:389
+msgid "Nameservers"
+msgstr "Сервери імен"
+
+#: src/settings.c:187
+msgid "IP _details"
+msgstr "_Деталі IP"
+
+#: src/settings.c:188
+msgid "IPv4 method"
+msgstr "Метод IPv4"
+
+#: src/settings.c:189 src/settings.c:195 src/settings.c:260 src/settings.c:268
+msgid "Address"
+msgstr "Адреса"
+
+#: src/settings.c:190 src/settings.c:196 src/settings.c:261 src/settings.c:271
+#: src/settings_content.c:676
+msgid "Gateway"
+msgstr "Шлюз"
+
+#: src/settings.c:194
+msgid "IPv6 method"
+msgstr "Метод IPv6"
+
+#: src/settings.c:215
+msgid "IPv_4"
+msgstr "IPv_4"
+
+#: src/settings.c:220
+msgid "IPv_6"
+msgstr "IPv_6"
+
+#: src/settings.c:236 src/settings.c:356
+msgid "Method"
+msgstr "Метод"
+
+#: src/settings.c:254 src/settings.c:363
+msgid "Manual"
+msgstr "Ручний"
+
+#: src/settings.c:263 src/settings.c:275 src/settings_content.c:674
+msgid "Netmask"
+msgstr "Мережева маска"
+
+#: src/settings.c:265 src/settings_content.c:675 src/settings_content.c:911
+msgid "Prefix length"
+msgstr "Довжина префікса"
+
+#: src/settings.c:284
+msgid "Privacy"
+msgstr "Конфіденційність"
+
+#: src/settings.c:289 src/technology.c:143
+msgid "Disabled"
+msgstr "Вимкнено"
+
+#: src/settings.c:291
+msgid "Enabled"
+msgstr "Ввімкнено"
+
+#: src/settings.c:293
+msgid "Prefered"
+msgstr "За замовчуванням"
+
+#: src/settings.c:303
+msgid "_Servers"
+msgstr "_Сервери"
+
+#: src/settings.c:306 src/settings.c:334
+msgid "Timeservers"
+msgstr "Сервери часу"
+
+#: src/settings.c:307 src/settings.c:342
+msgid "Domains"
+msgstr "Домени"
+
+#: src/settings.c:308
+msgid "Proxy method"
+msgstr "Методи проксі"
+
+#: src/settings.c:312 src/settings.c:369
+msgid "URL"
+msgstr "URL-адреса"
+
+#: src/settings.c:314 src/settings.c:372
+msgid "Servers"
+msgstr "Сервери"
+
+#: src/settings.c:316 src/settings.c:374
+msgid "Excludes"
+msgstr "Виключає"
+
+#: src/settings.c:328
+msgid "_Nameservers"
+msgstr "_Сервери імен"
+
+#: src/settings.c:333
+msgid "_Timeservers"
+msgstr "_Сервери часу"
+
+#: src/settings.c:337
+msgid "Custom Timeservers"
+msgstr "Користувацькі сервери часу"
+
+#: src/settings.c:341
+msgid "_Domains"
+msgstr "_Домени"
+
+#: src/settings.c:354
+msgid "_Proxy"
+msgstr "_Проксі"
+
+#: src/settings.c:384
+msgid "Type"
+msgstr "Тип"
+
+#: src/settings.c:386
+msgid "Host"
+msgstr "Хост"
+
+#: src/settings.c:401
+msgid "Server fingerprint"
+msgstr "Відбиток сервера"
+
+#: src/settings.c:403 src/settings.c:416
+msgid "Certificate Authority file"
+msgstr "Файл органу сертифікації"
+
+#: src/settings.c:405 src/settings.c:418
+msgid "Client certificate file"
+msgstr "Файл сертифіката клієнта"
+
+#: src/settings.c:407
+msgid "VPN host"
+msgstr "Хост VPN"
+
+#: src/settings.c:420
+msgid "Client private key file"
+msgstr "Файл приватного ключа клієнта"
+
+#: src/settings.c:422
+msgid "Maximum transmission unit (MTU)"
+msgstr "Максимальна одиниця передачі (MTU)"
+
+#: src/settings.c:424
+msgid "Peer certificate type"
+msgstr "Тип сертифікату піра"
+
+#: src/settings.c:426
+msgid "Protocol"
+msgstr "Протокол"
+
+#: src/settings.c:427
+msgid "Port"
+msgstr "Порт"
+
+#: src/settings.c:428
+msgid "Authenticate using username/password"
+msgstr "Авторизуватися, використовуючи ім'я користувача/пароль"
+
+#: src/settings.c:430
+msgid "Private key password file"
+msgstr "Файл пароля приватного ключа"
+
+#: src/settings.c:432
+msgid "Do not cache password"
+msgstr "Не зберігати пароль"
+
+#: src/settings.c:434
+msgid "Cipher"
+msgstr "Шифр"
+
+#: src/settings.c:436
+msgid "Message digest algorithm for packet authentication"
+msgstr "Алгоритм дайджесту повідомлень для аутентифікації пакетів"
+
+#: src/settings.c:438
+msgid "Use fast LZO compression"
+msgstr "Використовуйте швидке стиснення LZO"
+
+#: src/settings.c:440
+msgid "External configuration file"
+msgstr "Зовнішній файл нашалтуваннь"
+
+#: src/settings.c:449
+msgid "Group username"
+msgstr "Імʼя користувача групи"
+
+#: src/settings.c:450 src/settings.c:473 src/settings.c:511
+msgid "Username"
+msgstr "Імʼя користувача"
+
+#: src/settings.c:451
+msgid "IKE Authentication mode"
+msgstr "Режим автентифікації IKE"
+
+#: src/settings.c:453
+msgid "Diffie-Hellman group"
+msgstr "Група Діффі-Гелмана"
+
+#: src/settings.c:454
+msgid "Domain"
+msgstr "Домен"
+
+#: src/settings.c:455
+msgid "Vendor"
+msgstr "Вендор"
+
+#: src/settings.c:456
+msgid "Local port"
+msgstr "Локальний порт"
+
+#: src/settings.c:457
+msgid "Cisco port"
+msgstr "Порт Cisco"
+
+#: src/settings.c:458
+msgid "Application version"
+msgstr "Версія програми"
+
+#: src/settings.c:460
+msgid "NAT traversal method"
+msgstr "Метод обходу NAT"
+
+#: src/settings.c:462
+msgid "DPD idle timeout"
+msgstr "Час очікування DPD"
+
+#: src/settings.c:463
+msgid "Single DES encryption"
+msgstr "Єдине шифрування DES"
+
+#: src/settings.c:465
+msgid "No encryption"
+msgstr "Немає шифрування"
+
+#: src/settings.c:474
+msgid "Maximum bandwidth (bps)"
+msgstr "Максимальна пропускна здатність (bps)"
+
+#: src/settings.c:475
+msgid "Maximum transmit bandwidth (tx)"
+msgstr "Максимальна пропускна здатність передачі (tx)"
+
+#: src/settings.c:477
+msgid "Maximum receive bandwidth (rx)"
+msgstr "Максимальна пропускна здатність прийому (rx)"
+
+#: src/settings.c:479
+msgid "Use length bit"
+msgstr "Використовувати біт довжини"
+
+#: src/settings.c:480
+msgid "Use challenge authentication"
+msgstr "Використовувати перевірку справжності за запитом"
+
+#: src/settings.c:482
+msgid "Default route"
+msgstr "Маршрут за замовчуванням"
+
+#: src/settings.c:483
+msgid "Use seq numbers"
+msgstr "Використовувати послідовні номери"
+
+#: src/settings.c:484
+msgid "Window size"
+msgstr "Розмір вікна"
+
+#: src/settings.c:485
+msgid "Use only one control channel"
+msgstr "Використовувати лише один канал управління"
+
+#: src/settings.c:487
+msgid "Redial if disconnected"
+msgstr "Повторний набір, якщо відключено"
+
+#: src/settings.c:489
+msgid "Redial timeout"
+msgstr "Час очікування повторного набору"
+
+#: src/settings.c:491
+msgid "Maximum redial tries"
+msgstr "Максимальна кількість спроб повторного набору"
+
+#: src/settings.c:493
+msgid "Require PAP"
+msgstr "Потрібно PAP"
+
+#: src/settings.c:494
+msgid "Require CHAP"
+msgstr "Потрібно CHAP"
+
+#: src/settings.c:495
+msgid "Require authentication"
+msgstr "Вимагати автентифікацію"
+
+#: src/settings.c:497
+msgid "Accept only these peers"
+msgstr "Приймати лише ці піри"
+
+#: src/settings.c:499
+msgid "Authentication file location"
+msgstr "Розташування файлу для автентифікації"
+
+#: src/settings.c:501
+msgid "Listen address"
+msgstr "Адреса для прослуховування"
+
+#: src/settings.c:502
+msgid "Use IPSec SA"
+msgstr "Використовувати IPSec SA"
+
+#: src/settings.c:503
+msgid "UDP Port"
+msgstr "Порт UDP"
+
+#: src/settings.c:519
+msgid "Dead peer check count"
+msgstr "Лічильник перевірки DPD"
+
+#: src/settings.c:521
+msgid "Dead peer check interval"
+msgstr "Інтервал перевірки DPD"
+
+#: src/settings.c:523
+msgid "Debug level"
+msgstr "Рівень налагодження"
+
+#: src/settings.c:524
+msgid "Refuse EAP authentication"
+msgstr "Відмовитися EAP автентифікації"
+
+#: src/settings.c:526
+msgid "Refuse PAP authentication"
+msgstr "Відмовитися PAP автентифікації"
+
+#: src/settings.c:528
+msgid "Refuse CHAP authentication"
+msgstr "Відмовитися CHAP автентифікації"
+
+#: src/settings.c:530
+msgid "Refuse MSCHAP authentication"
+msgstr "Відмовитися MSCHAP автентифікації"
+
+#: src/settings.c:532
+msgid "Refuse MSCHAPv2 authentication"
+msgstr "Відмовитися MSCHAPv2 автентифікації"
+
+#: src/settings.c:534
+msgid "Disable BSD compression"
+msgstr "Вимкнути стиснення BSD"
+
+#: src/settings.c:536
+msgid "Disable DEFLATE compression"
+msgstr "Вимкнути стиснення DEFLATE"
+
+#: src/settings.c:538
+msgid "Require the use of MPPE"
+msgstr "Вимагати використання MPPE"
+
+#: src/settings.c:540
+msgid "Require the use of MPPE 40 bit"
+msgstr "Вимагати використання MPPE 40 bit"
+
+#: src/settings.c:542
+msgid "Require the use of MPPE 128 bit"
+msgstr "Вимагати використання MPPE 128 bit"
+
+#: src/settings.c:544
+msgid "Allow MPPE to use stateful mode"
+msgstr "Дозволити MPPE використовувати режим стану"
+
+#: src/settings.c:546
+msgid "No Van Jacobson compression"
+msgstr "Без компресії Ван Якобсона"
+
+#: src/settings.c:565
+msgid "_Clear settings"
+msgstr "Очистити нала_штування"
+
+#: src/settings.c:567
+msgid "_Reset"
+msgstr "_Скинути"
+
+#: src/settings.c:568
+msgid "_Forget"
+msgstr "_Забути"
+
+#: src/settings.c:569
+msgid "Set all properties to defaults."
+msgstr "Скинути всі налаштування."
+
+#: src/settings.c:570
+msgid "Remove this service."
+msgstr "Забути цей сервіс."
+
+#: src/settings.c:699
+msgid "_Apply"
+msgstr "_Застосувати"
+
+#: src/settings_content.c:670
+msgid "IP version"
+msgstr "Версія IP"
+
+#: src/settings_content.c:673
+msgid "Network"
+msgstr "Мережа"
+
+#: src/status.c:87
+msgid "Open app"
+msgstr "Відкрити застосунок"
+
+#: src/status.c:88
+msgid "Exit"
+msgstr "Вийти"
+
+#: src/technology.c:120 src/vpn.c:178
+msgid "Connected"
+msgstr "Зʼєднано"
+
+#: src/technology.c:135
+msgid "Tethering"
+msgstr "Роздача"
+
+#: src/technology.c:138 src/vpn.c:182
+msgid "Not connected"
+msgstr "Не підʼєднано"
+
+#: src/technology.c:220
+msgid "Disable _tethering"
+msgstr "Вимкнути роздач_у"
+
+#: src/technology.c:222 src/technology.c:312
+msgid "Enable _tethering"
+msgstr "Увімкнути розда_чу"
+
+#: src/technology.c:245 src/technology.c:307 src/technology.c:576
+msgid "_Connect"
+msgstr "_Зʼєднатися"
+
+#: src/technology.c:247 src/technology.c:572
+msgid "Re_connect"
+msgstr "Перепідключитися"
+
+#: src/technology.c:249 src/technology.c:574
+msgid "Dis_connect"
+msgstr "Відʼ_єднатися"
+
+#: src/technology.c:619
+msgid "Failed to enable ethernet tethering."
+msgstr "Не вдалося ввімкнути привʼязку до Ethernet."
+
+#: src/technology.c:620
+msgid "Ethernet tethering has to be manually allowed in /etc/connman/main.conf."
+msgstr "Роздача Ethernet має бути власноруч дозволена у файлі /etc/connman/main.conf."
+
+#: src/util.c:119
+msgid "Idle"
+msgstr "Трафік відсутній"
+
+#: src/util.c:121
+msgid "Failure"
+msgstr "Провал"
+
+#: src/util.c:123
+msgid "Association"
+msgstr "Асоціація"
+
+#: src/util.c:125
+msgid "Configuration"
+msgstr "Налаштування"
+
+#: src/util.c:127
+msgid "Ready"
+msgstr "Готовий"
+
+#: src/util.c:129
+msgid "Disconnected"
+msgstr "Відʼєднаний"
+
+#: src/util.c:131
+msgid "Online"
+msgstr "Активний"
+
+#: src/util.c:133
+msgid "Error"
+msgstr "Помилка"
+
+#: src/util.c:139
+msgid "Out of range"
+msgstr "Поза зоною досяжності"
+
+#: src/util.c:141
+msgid "PIN missing"
+msgstr "PIN-код відсутній"
+
+#: src/util.c:143
+msgid "DHCP failed"
+msgstr "Збій DHCP"
+
+#: src/util.c:145
+msgid "Connecting failed"
+msgstr "Помилка підключення"
+
+#: src/util.c:147
+msgid "Login failed"
+msgstr "Помилка входу"
+
+#: src/util.c:149
+msgid "Authentication failed"
+msgstr "Помилка автентифікації"
+
+#: src/util.c:151
+msgid "Invalid key"
+msgstr "Недійсний ключ"
+
+#: src/vpn.c:180
+msgid "Connecting"
+msgstr "Зʼєднання"
+
+#: src/wireless.c:131
+msgid "Set Access Point SSID and passphrase"
+msgstr "Встановити SSID та пароль для точки доступу"
+
+#: src/wireless.c:143
+msgid "SSID"
+msgstr "SSID"
+
+#: src/wireless.c:144
+msgid "Passphrase"
+msgstr "Пароль"
+
+#: src/wireless.c:145
+msgid "_Show passphrase"
+msgstr "Показати п_ароль"
